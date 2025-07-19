@@ -14,6 +14,10 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                    <flux:navlist.item icon="musical-note" :href="route('chords.index')" :current="request()->routeIs('chords.*')" wire:navigate>{{ __('Piano Chords') }}</flux:navlist.item>
+                    @auth
+                        <flux:navlist.item icon="folder" :href="route('chords.my-sets')" :current="request()->routeIs('chords.my-sets')" wire:navigate>{{ __('My Chord Sets') }}</flux:navlist.item>
+                    @endauth
                 </flux:navlist.group>
             </flux:navlist>
 
