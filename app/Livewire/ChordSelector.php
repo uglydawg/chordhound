@@ -35,6 +35,40 @@ class ChordSelector extends Component
         // Load existing chords if editing
         if ($this->chordSetId) {
             $this->loadChords();
+        } else {
+            // Default the first four chords to G, Em, C, D
+            $this->chords[1] = [
+                'position' => 1,
+                'tone' => 'G',
+                'semitone' => 'major',
+                'inversion' => 'first', // G starts in first inversion
+                'is_blue_note' => false,
+            ];
+            $this->chords[2] = [
+                'position' => 2,
+                'tone' => 'E',
+                'semitone' => 'minor',
+                'inversion' => 'root',
+                'is_blue_note' => false,
+            ];
+            $this->chords[3] = [
+                'position' => 3,
+                'tone' => 'C',
+                'semitone' => 'major',
+                'inversion' => 'root',
+                'is_blue_note' => false,
+            ];
+            $this->chords[4] = [
+                'position' => 4,
+                'tone' => 'D',
+                'semitone' => 'major',
+                'inversion' => 'root',
+                'is_blue_note' => false,
+            ];
+            
+            // Calculate blue notes for default chords
+            $this->calculateBlueNotes();
+            $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
         }
     }
 

@@ -1,6 +1,6 @@
 <div class="space-y-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        @foreach($chords as $position => $chord)
+        @foreach(array_slice($chords, 0, 4, true) as $position => $chord)
             <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-sm p-4 {{ $chord['is_blue_note'] ? 'ring-2 ring-blue-500' : '' }}">
                 <div class="space-y-3">
                     <div class="flex justify-between items-center">

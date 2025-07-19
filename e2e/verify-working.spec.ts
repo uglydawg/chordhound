@@ -11,7 +11,7 @@ test.describe('Application Status Check', () => {
     const bodyText = await page.locator('body').textContent();
     expect(bodyText).toContain('Piano Chord Generator');
     expect(bodyText).toContain('Chord 1');
-    expect(bodyText).toContain('Chord 8');
+    expect(bodyText).toContain('Chord 4');
     expect(bodyText).toContain('Piano Keyboard');
     
     console.log('✅ Chord generator page loads successfully');

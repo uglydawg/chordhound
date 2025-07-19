@@ -10,7 +10,7 @@ test.describe('Piano Chord Application', () => {
     
     // Check chord selectors are present
     await expect(page.locator('h3').filter({ hasText: 'Chord 1' })).toBeVisible();
-    await expect(page.locator('h3').filter({ hasText: 'Chord 8' })).toBeVisible();
+    await expect(page.locator('h3').filter({ hasText: 'Chord 4' })).toBeVisible();
     
     // Check piano keyboard is present
     await expect(page.locator('h2').filter({ hasText: 'Piano Keyboard' })).toBeVisible();
