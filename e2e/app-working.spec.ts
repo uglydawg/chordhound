@@ -6,14 +6,14 @@ test.describe('Piano Chord Application', () => {
     
     // Check page title and header
     await expect(page).toHaveTitle(/Piano Chords|Laravel/);
-    await expect(page.locator('h1:has-text("Piano Chord Generator")')).toBeVisible();
+    await expect(page.locator('h1').filter({ hasText: 'Piano Chord Generator' })).toBeVisible();
     
     // Check chord selectors are present
-    await expect(page.locator('h3:has-text("Chord 1")')).toBeVisible();
-    await expect(page.locator('h3:has-text("Chord 8")')).toBeVisible();
+    await expect(page.locator('h3').filter({ hasText: 'Chord 1' })).toBeVisible();
+    await expect(page.locator('h3').filter({ hasText: 'Chord 8' })).toBeVisible();
     
     // Check piano keyboard is present
-    await expect(page.locator('h2:has-text("Piano Keyboard")')).toBeVisible();
+    await expect(page.locator('h2').filter({ hasText: 'Piano Keyboard' })).toBeVisible();
     await expect(page.locator('svg')).toBeVisible();
   });
 
@@ -36,11 +36,11 @@ test.describe('Piano Chord Application', () => {
     await page.goto('/');
     
     // Check navigation links
-    await expect(page.locator('a:has-text("Chords")')).toBeVisible();
-    await expect(page.locator('a:has-text("Login")')).toBeVisible();
+    await expect(page.locator('a').filter({ hasText: 'Chords' })).toBeVisible();
+    await expect(page.locator('a').filter({ hasText: 'Login' })).toBeVisible();
     
     // Click on Chords link
-    await page.click('a:has-text("Chords")');
+    await page.click('a[href*="/chords"]');
     await expect(page).toHaveURL(/\/chords/);
   });
 
@@ -48,7 +48,7 @@ test.describe('Piano Chord Application', () => {
     await page.goto('/');
     
     // Check print button
-    const printButton = page.locator('button:has-text("Print Chord Sheet")');
+    const printButton = page.locator('button').filter({ hasText: 'Print Chord Sheet' });
     await expect(printButton).toBeVisible();
   });
 
@@ -69,7 +69,7 @@ test.describe('Piano Chord Application', () => {
     await page.goto('/');
     
     // Click login link
-    await page.click('a:has-text("Login")');
+    await page.click('a[href*="/login"]');
     
     // Should redirect to login page
     await expect(page).toHaveURL(/\/login/);

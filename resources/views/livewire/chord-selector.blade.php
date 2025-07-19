@@ -53,6 +53,8 @@
                             </select>
                         </div>
 
+                        <livewire:chord-piano :chord="$chord" :position="$position" :key="'chord-piano-' . $position . '-' . json_encode($chord)" />
+
                         <button 
                             wire:click="clearChord({{ $position }})" 
                             type="button"
