@@ -23,6 +23,7 @@ class Register extends Component
     public string $password_confirmation = '';
     public bool $robot_verification = false;
     public string $step = 'email'; // email, details, verification
+    public array $usernameSuggestions = [];
 
     /**
      * Validate email and proceed to details step
@@ -33,6 +34,11 @@ class Register extends Component
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
         ]);
 
+        // Auto-suggest username based on email
+        if (empty($this->username)) {
+            $this->username = User::generateUsername($this->email);
+        }
+
         $this->step = 'details';
     }
 
@@ -41,9 +47,11 @@ class Register extends Component
      */
     public function validateDetails(): void
     {
+        $usernameRules = $this->username ? User::getUsernameValidationRules() : ['nullable'];
+        
         $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['nullable', 'string', 'max:255', 'unique:users,username', 'regex:/^[a-zA-Z0-9_]+$/'],
+            'username' => $usernameRules,
             'display_name' => ['nullable', 'string', 'max:255'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -69,15 +77,22 @@ class Register extends Component
      */
     public function register(): void
     {
+        $usernameRules = $this->username ? User::getUsernameValidationRules() : ['nullable'];
+        
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['nullable', 'string', 'max:255', 'unique:users,username', 'regex:/^[a-zA-Z0-9_]+$/'],
+            'username' => $usernameRules,
             'display_name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+
+        // Generate username if not provided
+        if (empty($validated['username'])) {
+            $validated['username'] = User::generateUsername($validated['email']);
+        }
 
         event(new Registered(($user = User::create($validated))));
 
@@ -94,5 +109,33 @@ class Register extends Component
         } elseif ($this->step === 'verification') {
             $this->step = 'details';
         }
+    }
+
+    /**
+     * Check username availability and suggest alternatives
+     */
+    public function checkUsername(): void
+    {
+        if (empty($this->username)) {
+            return;
+        }
+
+        if (!User::isUsernameAvailable($this->username)) {
+            $this->usernameSuggestions = User::suggestUsernames($this->username);
+            $this->addError('username', 'This username is already taken. Try one of the suggestions below.');
+        } else {
+            $this->usernameSuggestions = [];
+            $this->resetErrorBag('username');
+        }
+    }
+
+    /**
+     * Select a suggested username
+     */
+    public function selectUsername(string $username): void
+    {
+        $this->username = $username;
+        $this->usernameSuggestions = [];
+        $this->resetErrorBag('username');
     }
 }

@@ -41,14 +41,34 @@
             />
 
             <!-- Username -->
-            <flux:input
-                wire:model="username"
-                :label="__('Username (optional)')"
-                type="text"
-                autocomplete="username"
-                :placeholder="__('johndoe')"
-                description="Letters, numbers, and underscores only"
-            />
+            <div>
+                <flux:input
+                    wire:model.blur="username"
+                    wire:blur="checkUsername"
+                    :label="__('Username (optional)')"
+                    type="text"
+                    autocomplete="username"
+                    :placeholder="__('johndoe')"
+                    description="Start with letter/number, then letters, numbers, underscore, dash, or dot (max 48 chars)"
+                />
+                
+                @if(!empty($usernameSuggestions))
+                    <div class="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <p class="text-sm text-yellow-800 mb-2">Suggested usernames:</p>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($usernameSuggestions as $suggestion)
+                                <button
+                                    type="button"
+                                    wire:click="selectUsername('{{ $suggestion }}')"
+                                    class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors"
+                                >
+                                    {{ $suggestion }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
 
             <!-- Display Name -->
             <flux:input
@@ -126,6 +146,7 @@
         </form>
     @endif
 
+    @if (false) {{-- Google OAuth temporarily hidden --}}
     <!-- Google OAuth -->
     <div class="relative">
         <div class="absolute inset-0 flex items-center">
@@ -146,6 +167,7 @@
         </svg>
         Continue with Google
     </a>
+    @endif
 
     <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
         <span>{{ __('Already have an account?') }}</span>

@@ -54,6 +54,7 @@ class AuthCodeLogin extends Component
                 ['email' => $this->email],
                 [
                     'name' => explode('@', $this->email)[0],
+                    'username' => User::generateUsername($this->email),
                     'password' => Hash::make(Str::random(24)),
                     'email_verified_at' => now(),
                 ]
@@ -92,6 +93,7 @@ class AuthCodeLogin extends Component
             ['email' => $this->email],
             [
                 'name' => explode('@', $this->email)[0],
+                'username' => User::generateUsername($this->email),
                 'password' => Hash::make(Str::random(24)),
                 'email_verified_at' => now(),
             ]
