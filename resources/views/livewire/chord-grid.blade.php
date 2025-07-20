@@ -1,9 +1,76 @@
 <div class="space-y-6">
     {{-- Chord Timeline/Grid --}}
     <div class="timeline-grid p-6">
+        {{-- Key and Progression Selectors --}}
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800">
+            <div class="flex items-center space-x-4">
+                <label class="text-sm font-medium text-secondary">Key:</label>
+                <select 
+                    wire:model.live="selectedKey"
+                    class="bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                    @foreach($availableKeys as $key)
+                        <option value="{{ $key }}">{{ $key }}</option>
+                    @endforeach
+                </select>
+                
+                <select
+                    wire:model.live="selectedKeyType"
+                    class="bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                    <option value="major">Major</option>
+                    <option value="minor">Minor</option>
+                </select>
+                
+                <div class="h-6 w-px bg-zinc-700"></div>
+                
+                <label class="text-sm font-medium text-secondary">Progression:</label>
+                <select
+                    wire:model.live="selectedProgression"
+                    class="bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]"
+                >
+                    <option value="">Custom</option>
+                    @foreach($progressions as $romanNumerals => $progression)
+                        <option value="{{ $romanNumerals }}">
+                            {{ $romanNumerals }}
+                            @if(isset($progressionDescriptions[$romanNumerals]))
+                                - {{ $progressionDescriptions[$romanNumerals] }}
+                            @endif
+                        </option>
+                    @endforeach
+                </select>
+                
+                @if($selectedProgression)
+                    @php
+                        $transposedChords = app(\App\Services\ChordService::class)->transposeProgression($selectedKey, $selectedKeyType, $progressions[$selectedProgression]);
+                    @endphp
+                    <div class="text-sm text-blue-400">
+                        = {{ collect($transposedChords)->map(fn($c) => $c['tone'] . ($c['semitone'] === 'minor' ? 'm' : ($c['semitone'] === 'diminished' ? 'dim' : '')))->join(' - ') }}
+                    </div>
+                @endif
+            </div>
+        </div>
+        
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-primary">Chord Progression</h2>
+            <div class="flex items-center space-x-4">
+                <h2 class="text-lg font-semibold text-primary">Chord Progression</h2>
+                @if($showRomanNumerals && count(array_filter($romanNumerals)) > 0)
+                    <div class="text-sm text-blue-400 font-medium">
+                        {{ collect($romanNumerals)->filter()->join('-') }}
+                    </div>
+                @endif
+            </div>
             <div class="flex items-center space-x-3">
+                <button
+                    wire:click="toggleRomanNumerals"
+                    class="text-sm {{ $showRomanNumerals ? 'text-blue-500' : 'text-secondary' }} hover:text-primary transition-colors flex items-center space-x-2"
+                    title="Show roman numeral analysis"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    <span>Analysis</span>
+                </button>
                 <button
                     wire:click="optimizeVoiceLeading"
                     class="text-sm text-secondary hover:text-primary transition-colors flex items-center space-x-2"
@@ -14,17 +81,23 @@
                     </svg>
                     <span>Optimize</span>
                 </button>
-                <button
-                    wire:click="toggleSuggestions"
-                    class="text-sm text-secondary hover:text-primary transition-colors flex items-center space-x-2"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                    <span>Progressions</span>
-                </button>
             </div>
         </div>
+        
+        {{-- Roman Numeral Analysis --}}
+        @if($showRomanNumerals)
+            <div class="grid grid-cols-4 gap-4 mb-4">
+                @foreach($chords as $position => $chord)
+                    <div class="text-center">
+                        <div class="bg-zinc-800 rounded-lg px-3 py-2 border border-zinc-700">
+                            <span class="text-sm font-medium {{ $chord['tone'] ? 'text-blue-400' : 'text-tertiary' }}">
+                                {{ $romanNumerals[$position] ?? '' }}
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
         
         {{-- Chord Blocks --}}
         <div class="grid grid-cols-4 gap-4">
@@ -128,34 +201,6 @@
         </div>
     </div>
     
-    {{-- Progressions Dropdown --}}
-    @if($showSuggestions)
-        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 space-y-2">
-            <div class="flex items-center justify-between mb-3">
-                <h4 class="text-sm font-medium text-secondary">Common Progressions</h4>
-                <label class="flex items-center space-x-2 text-xs">
-                    <input type="checkbox" id="auto-inversion" class="rounded bg-zinc-700 border-zinc-600 text-blue-500 focus:ring-blue-500">
-                    <span class="text-secondary">Auto voice leading</span>
-                </label>
-            </div>
-            @foreach($chordSuggestions as $name => $progression)
-                <button
-                    wire:click="applySuggestion('{{ $name }}', document.getElementById('auto-inversion').checked)"
-                    class="w-full text-left px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors group"
-                >
-                    <div class="flex items-center justify-between">
-                        <span class="text-primary font-medium">{{ $name }}</span>
-                        <span class="text-secondary text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                            Click to apply
-                        </span>
-                    </div>
-                    <span class="text-secondary text-sm">
-                        {{ collect($progression)->map(fn($c) => $c['tone'] . ($c['semitone'] === 'minor' ? 'm' : ''))->join(' - ') }}
-                    </span>
-                </button>
-            @endforeach
-        </div>
-    @endif
     
     {{-- Piano Display for Active Chord --}}
     <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4">

@@ -15,45 +15,32 @@ class ChordGrid extends Component
     public ?int $chordSetId = null;
     public int $activePosition = 1;
     public bool $showSuggestions = false;
+    public string $selectedKey = 'G';
+    public string $selectedKeyType = 'major';
+    public bool $showRomanNumerals = false;
+    public array $romanNumerals = [];
+    public string $selectedProgression = '';
     
     private ChordService $chordService;
     
-    // Common chord progressions for suggestions (based on web search results)
-    private array $chordSuggestions = [
-        'I-V-vi-IV (Pop)' => [
-            ['tone' => 'C', 'semitone' => 'major'],
-            ['tone' => 'G', 'semitone' => 'major'],
-            ['tone' => 'A', 'semitone' => 'minor'],
-            ['tone' => 'F', 'semitone' => 'major']
-        ],
-        'I-vi-IV-V (50s)' => [
-            ['tone' => 'C', 'semitone' => 'major'],
-            ['tone' => 'A', 'semitone' => 'minor'],
-            ['tone' => 'F', 'semitone' => 'major'],
-            ['tone' => 'G', 'semitone' => 'major']
-        ],
-        'ii-V-I (Jazz)' => [
-            ['tone' => 'D', 'semitone' => 'minor'],
-            ['tone' => 'G', 'semitone' => 'major'],
-            ['tone' => 'C', 'semitone' => 'major']
-        ],
-        'I-IV-V (Blues)' => [
-            ['tone' => 'C', 'semitone' => 'major'],
-            ['tone' => 'F', 'semitone' => 'major'],
-            ['tone' => 'G', 'semitone' => 'major']
-        ],
-        'vi-IV-I-V' => [
-            ['tone' => 'A', 'semitone' => 'minor'],
-            ['tone' => 'F', 'semitone' => 'major'],
-            ['tone' => 'C', 'semitone' => 'major'],
-            ['tone' => 'G', 'semitone' => 'major']
-        ],
-        'I-vi-ii-V' => [
-            ['tone' => 'C', 'semitone' => 'major'],
-            ['tone' => 'A', 'semitone' => 'minor'],
-            ['tone' => 'D', 'semitone' => 'minor'],
-            ['tone' => 'G', 'semitone' => 'major']
-        ]
+    // Common chord progressions as roman numerals (based on image and popular progressions)
+    private array $chordProgressions = [
+        'I-IV-V' => ['I', 'IV', 'V'],
+        'I-V-vi-IV' => ['I', 'V', 'vi', 'IV'],
+        'I-vi-IV-V' => ['I', 'vi', 'IV', 'V'],
+        'vi-IV-I-V' => ['vi', 'IV', 'I', 'V'],
+        'I-vi-ii-V' => ['I', 'vi', 'ii', 'V'],
+        'ii-V-I' => ['ii', 'V', 'I'],
+    ];
+    
+    // Progression descriptions
+    private array $progressionDescriptions = [
+        'I-IV-V' => 'Classic Rock/Blues',
+        'I-V-vi-IV' => 'Pop Progression',
+        'I-vi-IV-V' => '50s Doo-Wop',
+        'vi-IV-I-V' => 'Alternative Pop',
+        'I-vi-ii-V' => 'Jazz Standard',
+        'ii-V-I' => 'Jazz Cadence',
     ];
 
     public function mount(?int $chordSetId = null)
@@ -75,35 +62,9 @@ class ChordGrid extends Component
         if ($this->chordSetId) {
             $this->loadChords();
         } else {
-            // Default the first four chords to G, Em, C, D
-            $this->chords[1] = [
-                'position' => 1,
-                'tone' => 'G',
-                'semitone' => 'major',
-                'inversion' => 'first',
-                'is_blue_note' => false,
-            ];
-            $this->chords[2] = [
-                'position' => 2,
-                'tone' => 'E',
-                'semitone' => 'minor',
-                'inversion' => 'root',
-                'is_blue_note' => false,
-            ];
-            $this->chords[3] = [
-                'position' => 3,
-                'tone' => 'C',
-                'semitone' => 'major',
-                'inversion' => 'root',
-                'is_blue_note' => false,
-            ];
-            $this->chords[4] = [
-                'position' => 4,
-                'tone' => 'D',
-                'semitone' => 'major',
-                'inversion' => 'root',
-                'is_blue_note' => false,
-            ];
+            // Set default progression to I-V-vi-IV
+            $this->selectedProgression = 'I-V-vi-IV';
+            $this->applySelectedProgression();
             
             $this->calculateBlueNotes();
             $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
@@ -149,6 +110,9 @@ class ChordGrid extends Component
         ];
         
         $this->calculateBlueNotes();
+        if ($this->showRomanNumerals) {
+            $this->updateRomanNumerals();
+        }
         $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
     }
     
@@ -171,6 +135,9 @@ class ChordGrid extends Component
         ];
         
         $this->calculateBlueNotes();
+        if ($this->showRomanNumerals) {
+            $this->updateRomanNumerals();
+        }
         $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
     }
 
@@ -179,10 +146,48 @@ class ChordGrid extends Component
         $this->showSuggestions = !$this->showSuggestions;
     }
 
-    public function applySuggestion($progressionKey, $autoInversion = false)
+    public function setKey($key)
     {
-        if (isset($this->chordSuggestions[$progressionKey])) {
-            $progression = $this->chordSuggestions[$progressionKey];
+        $this->selectedKey = $key;
+        if ($this->selectedProgression) {
+            $this->applySelectedProgression();
+        }
+        if ($this->showRomanNumerals) {
+            $this->updateRomanNumerals();
+        }
+    }
+    
+    public function setKeyType($keyType)
+    {
+        $this->selectedKeyType = $keyType;
+        if ($this->selectedProgression) {
+            $this->applySelectedProgression();
+        }
+        if ($this->showRomanNumerals) {
+            $this->updateRomanNumerals();
+        }
+    }
+    
+    public function setProgression($progressionKey)
+    {
+        $this->selectedProgression = $progressionKey;
+        if ($progressionKey) {
+            $this->applySelectedProgression();
+        }
+    }
+    
+    private function applySelectedProgression()
+    {
+        if (isset($this->chordProgressions[$this->selectedProgression])) {
+            $this->applyProgression($this->selectedProgression, false);
+        }
+    }
+    
+    public function applyProgression($progressionKey, $autoInversion = false)
+    {
+        if (isset($this->chordProgressions[$progressionKey])) {
+            $romanNumerals = $this->chordProgressions[$progressionKey];
+            $progression = $this->chordService->transposeProgression($this->selectedKey, $this->selectedKeyType, $romanNumerals);
             
             foreach ($progression as $index => $chord) {
                 if ($index < 4) {
@@ -228,6 +233,9 @@ class ChordGrid extends Component
         }
         
         $this->calculateBlueNotes();
+        if ($this->showRomanNumerals) {
+            $this->updateRomanNumerals();
+        }
         $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
     }
 
@@ -239,14 +247,34 @@ class ChordGrid extends Component
             $chord['is_blue_note'] = isset($this->blueNotes[$position]);
         }
     }
+    
+    public function toggleRomanNumerals()
+    {
+        $this->showRomanNumerals = !$this->showRomanNumerals;
+        if ($this->showRomanNumerals) {
+            $this->updateRomanNumerals();
+        }
+    }
+    
+    private function updateRomanNumerals()
+    {
+        $this->romanNumerals = $this->chordService->analyzeProgression(
+            $this->chords,
+            $this->selectedKey,
+            $this->selectedKeyType
+        );
+    }
 
     public function render()
     {
         $tones = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        $availableKeys = $this->chordService->getAvailableKeys();
         
         return view('livewire.chord-grid', [
             'tones' => $tones,
-            'chordSuggestions' => $this->chordSuggestions,
+            'availableKeys' => $availableKeys,
+            'progressions' => $this->chordProgressions,
+            'progressionDescriptions' => $this->progressionDescriptions,
         ]);
     }
 }

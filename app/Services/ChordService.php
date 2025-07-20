@@ -19,6 +19,24 @@ class ChordService
         'augmented' => [0, 4, 8],
     ];
 
+    // Scale intervals for major and minor keys
+    private array $scaleIntervals = [
+        'major' => [0, 2, 4, 5, 7, 9, 11], // I, ii, iii, IV, V, vi, vii°
+        'minor' => [0, 2, 3, 5, 7, 8, 10], // i, ii°, III, iv, v, VI, VII
+    ];
+
+    // Roman numeral analysis for chord qualities in major key
+    private array $majorKeyQualities = [
+        'I' => 'major', 'ii' => 'minor', 'iii' => 'minor',
+        'IV' => 'major', 'V' => 'major', 'vi' => 'minor', 'vii' => 'diminished'
+    ];
+
+    // Roman numeral analysis for chord qualities in minor key
+    private array $minorKeyQualities = [
+        'i' => 'minor', 'ii' => 'diminished', 'III' => 'major',
+        'iv' => 'minor', 'v' => 'minor', 'VI' => 'major', 'VII' => 'major'
+    ];
+
     public function getChordNotes(string $rootNote, ?string $chordType = 'major', ?string $inversion = 'root'): array
     {
         $chordType = $chordType ?? 'major';
@@ -263,5 +281,167 @@ class ChordService
     public function isBlackKey(string $note): bool
     {
         return strpos($note, '#') !== false;
+    }
+
+    /**
+     * Transpose a chord progression from roman numerals to a specific key
+     * @param string $key The target key (e.g., 'G', 'C', 'A')
+     * @param string $keyType The key type ('major' or 'minor')
+     * @param array $progression Array of roman numerals (e.g., ['I', 'IV', 'V'])
+     * @return array Array of chords with tone and semitone
+     */
+    public function transposeProgression(string $key, string $keyType, array $progression): array
+    {
+        if (!isset($this->noteToMidi[$key])) {
+            throw new \InvalidArgumentException("Invalid key: $key");
+        }
+
+        $qualities = $keyType === 'major' ? $this->majorKeyQualities : $this->minorKeyQualities;
+        $scaleIntervals = $this->scaleIntervals[$keyType];
+        $rootMidi = $this->noteToMidi[$key];
+        $result = [];
+
+        foreach ($progression as $roman) {
+            $romanUpper = strtoupper($roman);
+            $scalePosition = $this->romanToScalePosition($romanUpper);
+            
+            if ($scalePosition === null) {
+                continue;
+            }
+
+            // Calculate the root note
+            $interval = $scaleIntervals[$scalePosition - 1];
+            $noteMidi = ($rootMidi + $interval) % 12;
+            $note = $this->midiToNote($noteMidi);
+
+            // Determine the chord quality
+            $quality = $qualities[$roman] ?? 'major';
+
+            $result[] = [
+                'tone' => $note,
+                'semitone' => $quality
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Convert roman numeral to scale position (1-7)
+     */
+    private function romanToScalePosition(string $roman): ?int
+    {
+        $romanMap = [
+            'I' => 1, 'II' => 2, 'III' => 3, 'IV' => 4,
+            'V' => 5, 'VI' => 6, 'VII' => 7
+        ];
+
+        // Remove any modifiers and get base roman numeral
+        $baseRoman = preg_replace('/[^IVX]/', '', strtoupper($roman));
+        
+        return $romanMap[$baseRoman] ?? null;
+    }
+
+    /**
+     * Get available keys for selection
+     */
+    public function getAvailableKeys(): array
+    {
+        return array_keys($this->noteToMidi);
+    }
+
+    /**
+     * Analyze a chord and return its roman numeral in the given key
+     * @param string $chordTone The chord root note (e.g., 'G', 'C#')
+     * @param string $chordQuality The chord quality ('major', 'minor', 'diminished', 'augmented')
+     * @param string $key The key to analyze in (e.g., 'G', 'C')
+     * @param string $keyType The key type ('major' or 'minor')
+     * @return string|null The roman numeral or null if not in key
+     */
+    public function analyzeChordInKey(string $chordTone, string $chordQuality, string $key, string $keyType): ?string
+    {
+        if (!isset($this->noteToMidi[$chordTone]) || !isset($this->noteToMidi[$key])) {
+            return null;
+        }
+
+        $keyRoot = $this->noteToMidi[$key];
+        $chordRoot = $this->noteToMidi[$chordTone];
+        
+        // Calculate the interval from the key root
+        $interval = ($chordRoot - $keyRoot + 12) % 12;
+        
+        // Find which scale degree this interval corresponds to
+        $scaleIntervals = $this->scaleIntervals[$keyType];
+        $scaleDegree = array_search($interval, $scaleIntervals);
+        
+        if ($scaleDegree === false) {
+            // Chord is not diatonic to the key
+            return null;
+        }
+        
+        // Convert scale degree to roman numeral
+        $romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+        $roman = $romanNumerals[$scaleDegree];
+        
+        // Determine expected quality for this scale degree
+        $qualities = $keyType === 'major' ? $this->majorKeyQualities : $this->minorKeyQualities;
+        $expectedQualities = array_values($qualities);
+        $expectedQuality = $expectedQualities[$scaleDegree] ?? 'major';
+        
+        // Make lowercase for minor chords in major keys, or adjust for minor keys
+        if ($keyType === 'major' && $chordQuality === 'minor') {
+            $roman = strtolower($roman);
+        } elseif ($keyType === 'minor') {
+            // In minor keys, use the conventional notation
+            $minorNotation = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'];
+            $roman = $minorNotation[$scaleDegree];
+            
+            // Adjust if the actual quality differs from expected
+            if ($chordQuality === 'major' && in_array($scaleDegree, [0, 3, 4])) {
+                $roman = strtoupper($roman);
+            }
+        }
+        
+        // Add diminished symbol if needed
+        if ($chordQuality === 'diminished' && strpos($roman, '°') === false) {
+            $roman .= '°';
+        }
+        
+        // Add augmented symbol if needed
+        if ($chordQuality === 'augmented') {
+            $roman .= '+';
+        }
+        
+        return $roman;
+    }
+
+    /**
+     * Analyze a progression of chords and return roman numerals
+     * @param array $chords Array of chords with 'tone' and 'semitone' keys
+     * @param string $key The key to analyze in
+     * @param string $keyType The key type ('major' or 'minor')
+     * @return array Array of roman numerals
+     */
+    public function analyzeProgression(array $chords, string $key, string $keyType): array
+    {
+        $romanNumerals = [];
+        
+        foreach ($chords as $chord) {
+            if (empty($chord['tone'])) {
+                $romanNumerals[] = '';
+                continue;
+            }
+            
+            $roman = $this->analyzeChordInKey(
+                $chord['tone'],
+                $chord['semitone'] ?? 'major',
+                $key,
+                $keyType
+            );
+            
+            $romanNumerals[] = $roman ?? '?';
+        }
+        
+        return $romanNumerals;
     }
 }
