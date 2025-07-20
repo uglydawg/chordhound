@@ -73,7 +73,14 @@ class ChordPiano extends Component
         $whiteKeyWidth = 20;
         $blackKeyWidth = 14;
         $whiteKeyOffsets = ['C' => 0, 'D' => 1, 'E' => 2, 'F' => 3, 'G' => 4, 'A' => 5, 'B' => 6];
-        $blackKeyPositions = ['C#' => 0.7, 'D#' => 1.7, 'F#' => 3.7, 'G#' => 4.7, 'A#' => 5.7];
+        // Black keys positioned between white keys (no black key between E-F and B-C)
+        $blackKeyPositions = [
+            'C#' => 0.65,  // Between C and D
+            'D#' => 1.35,  // Between D and E
+            'F#' => 3.65,  // Between F and G
+            'G#' => 4.35,  // Between G and A
+            'A#' => 5.35,  // Between A and B
+        ];
         
         $x = 0;
         for ($octave = 4; $octave <= 5; $octave++) {
@@ -104,7 +111,7 @@ class ChordPiano extends Component
                     'type' => 'black',
                     'note' => $note,
                     'octave' => $octave,
-                    'x' => $x + ($offset * $whiteKeyWidth) - ($blackKeyWidth / 2),
+                    'x' => $x + ($offset * $whiteKeyWidth),
                     'width' => $blackKeyWidth,
                     'isActive' => $isActive,
                     'isBlueNote' => $this->chord['is_blue_note'] ?? false,

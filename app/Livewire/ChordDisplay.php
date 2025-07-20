@@ -129,42 +129,36 @@ class ChordDisplay extends Component
         }
         
         // Add black keys on top
+        // Black keys are positioned relative to each octave's starting C
         $blackKeyOffsets = [
-            'C#' => 0.65,
-            'D#' => 1.35,
-            'F#' => 3.65,
-            'G#' => 4.35,
-            'A#' => 5.35,
+            'C#' => 0.65,  // Between C and D
+            'D#' => 1.35,  // Between D and E
+            'F#' => 3.65,  // Between F and G
+            'G#' => 4.35,  // Between G and A
+            'A#' => 5.35,  // Between A and B
         ];
         
-        $whiteKeyCount = 0;
+        // Calculate black key positions for each octave
         for ($octave = $this->startOctave; $octave < $this->startOctave + $this->octaveCount; $octave++) {
-            foreach (['C', 'D', 'E', 'F', 'G', 'A', 'B'] as $whiteNote) {
-                if ($whiteNote === 'C') {
-                    $baseX = $whiteKeyCount * $whiteKeyWidth;
-                    
-                    foreach ($blackKeyOffsets as $blackNote => $offset) {
-                        $fullNote = substr($blackNote, 0, -1); // Remove #
-                        $keyPosition = $this->chordService->getPianoKeyPosition($blackNote, $octave);
-                        $activeNote = collect($this->activeNotes)->firstWhere('position', $keyPosition);
-                        
-                        $keys[] = [
-                            'type' => 'black',
-                            'note' => $blackNote,
-                            'octave' => $octave,
-                            'position' => $keyPosition,
-                            'x' => $baseX + ($offset * $whiteKeyWidth) - ($blackKeyWidth / 2),
-                            'width' => $blackKeyWidth,
-                            'isActive' => $activeNote !== null,
-                            'isBlueNote' => $activeNote['isBlueNote'] ?? false,
-                            'chordPosition' => $activeNote['chordPosition'] ?? null,
-                        ];
-                    }
-                }
+            // Find the starting position of C in this octave
+            $octaveOffset = ($octave - $this->startOctave) * 7; // 7 white keys per octave
+            $baseX = $octaveOffset * $whiteKeyWidth;
+            
+            foreach ($blackKeyOffsets as $blackNote => $offset) {
+                $keyPosition = $this->chordService->getPianoKeyPosition($blackNote, $octave);
+                $activeNote = collect($this->activeNotes)->firstWhere('position', $keyPosition);
                 
-                if (in_array($whiteNote, ['C', 'D', 'E', 'F', 'G', 'A', 'B'])) {
-                    $whiteKeyCount++;
-                }
+                $keys[] = [
+                    'type' => 'black',
+                    'note' => $blackNote,
+                    'octave' => $octave,
+                    'position' => $keyPosition,
+                    'x' => $baseX + ($offset * $whiteKeyWidth),
+                    'width' => $blackKeyWidth,
+                    'isActive' => $activeNote !== null,
+                    'isBlueNote' => $activeNote['isBlueNote'] ?? false,
+                    'chordPosition' => $activeNote['chordPosition'] ?? null,
+                ];
             }
         }
         
