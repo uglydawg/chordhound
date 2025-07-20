@@ -14,6 +14,7 @@ class ChordPiano extends Component
     public array $chord = [];
     
     public int $position = 0;
+    public bool $showLabels = false;
     
     private ChordService $chordService;
     

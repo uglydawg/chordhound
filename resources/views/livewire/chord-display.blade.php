@@ -1,129 +1,99 @@
-<div class="w-full overflow-x-auto dark-scrollbar">
-    <div>
-        <h2 class="text-lg font-semibold text-primary mb-4">Piano Keyboard</h2>
-        
-        <div class="bg-zinc-950 rounded-lg p-4 shadow-inner">
-            <div class="relative" style="width: {{ $totalWidth }}px; height: 200px;">
-                <svg viewBox="0 0 {{ $totalWidth }} 200" style="width: {{ $totalWidth }}px; height: 200px;">
-                    {{-- Piano background --}}
-                    <rect x="0" y="0" width="{{ $totalWidth }}" height="200" fill="#0a0a0a" />
-                    
-                    {{-- Draw white keys first --}}
-                    @foreach($pianoKeys as $key)
-                        @if($key['type'] === 'white')
-                            <g>
-                                <rect 
-                                    x="{{ $key['x'] }}" 
-                                    y="0" 
-                                    width="{{ $key['width'] - 1 }}" 
-                                    height="175"
-                                    fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#60A5FA' : '#34D399') : '#FAFAFA' }}"
-                                    stroke="#333333"
-                                    stroke-width="0.5"
-                                    rx="3"
-                                    class="cursor-pointer transition-all hover:opacity-90"
-                                />
-                                {{-- Key shadow/3D effect --}}
-                                <rect 
-                                    x="{{ $key['x'] }}" 
-                                    y="170" 
-                                    width="{{ $key['width'] - 1 }}" 
-                                    height="5"
-                                    fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#3B82F6' : '#10B981') : '#E5E5E5' }}"
-                                    rx="1"
-                                />
-                                @if($key['isActive'])
-                                    <circle
-                                        cx="{{ $key['x'] + $key['width'] / 2 }}"
-                                        cy="140"
-                                        r="8"
-                                        fill="{{ $key['isBlueNote'] ? '#1E40AF' : '#047857' }}"
-                                    />
-                                    <text 
-                                        x="{{ $key['x'] + $key['width'] / 2 }}" 
-                                        y="145" 
-                                        text-anchor="middle"
-                                        font-size="11"
-                                        font-weight="bold"
-                                        fill="#FFFFFF"
-                                    >
-                                        {{ $key['chordPosition'] }}
-                                    </text>
+<div class="w-full">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-primary">Chords</h2>
+        <div class="flex items-center space-x-2">
+            <button 
+                wire:click="selectAllChords"
+                class="text-xs text-secondary hover:text-primary transition-colors"
+            >
+                Select All
+            </button>
+            <span class="text-tertiary">|</span>
+            <button 
+                wire:click="deselectAllChords"
+                class="text-xs text-secondary hover:text-primary transition-colors"
+            >
+                Deselect All
+            </button>
+        </div>
+    </div>
+    
+    {{-- Individual chord displays --}}
+    <div class="grid grid-cols-4 gap-4">
+        @foreach($chords as $position => $chord)
+            <div 
+                data-chord-position="{{ $position }}"
+                class="bg-zinc-950 rounded-lg p-3 border border-zinc-800 {{ in_array($position, $selectedChords) ? 'ring-2 ring-blue-500' : '' }} chord-item"
+            >
+                {{-- Chord header with checkbox --}}
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2">
+                        <input 
+                            type="checkbox" 
+                            wire:click="toggleChordSelection({{ $position }})"
+                            {{ in_array($position, $selectedChords) ? 'checked' : '' }}
+                            class="rounded border-zinc-600 text-blue-600 focus:ring-blue-500 bg-zinc-800"
+                        />
+                        <label class="text-sm font-medium text-primary">
+                            @if($chord['tone'])
+                                {{ $chord['tone'] }}{{ $chord['semitone'] === 'minor' ? 'm' : ($chord['semitone'] === 'diminished' ? 'dim' : '') }}
+                                @if($chord['inversion'] !== 'root')
+                                    <span class="text-xs text-secondary">({{ ucfirst($chord['inversion']) }})</span>
                                 @endif
-                                <text 
-                                    x="{{ $key['x'] + $key['width'] / 2 }}" 
-                                    y="195" 
-                                    text-anchor="middle"
-                                    font-size="9"
-                                    fill="#737373"
-                                    font-weight="500"
-                                >
-                                    {{ $key['note'] }}{{ $key['octave'] }}
-                                </text>
-                            </g>
-                        @endif
-                    @endforeach
-                
-                {{-- Draw black keys on top --}}
-                @foreach($pianoKeys as $key)
-                    @if($key['type'] === 'black')
-                        <g>
-                            <rect 
-                                x="{{ $key['x'] }}" 
-                                y="0" 
-                                width="{{ $key['width'] }}" 
-                                height="110"
-                                fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#2563EB' : '#059669') : '#171717' }}"
-                                stroke="#000000"
-                                stroke-width="1"
-                                rx="2"
-                                class="cursor-pointer transition-all hover:opacity-90"
-                            />
-                            {{-- Black key highlight for 3D effect --}}
-                            <rect 
-                                x="{{ $key['x'] + 2 }}" 
-                                y="2" 
-                                width="{{ $key['width'] - 4 }}" 
-                                height="15"
-                                fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#3B82F6' : '#10B981') : '#262626' }}"
-                                rx="1"
-                                opacity="0.5"
-                            />
-                            @if($key['isActive'])
-                                <circle
-                                    cx="{{ $key['x'] + $key['width'] / 2 }}"
-                                    cy="80"
-                                    r="7"
-                                    fill="{{ $key['isBlueNote'] ? '#1E40AF' : '#047857' }}"
-                                />
-                                <text 
-                                    x="{{ $key['x'] + $key['width'] / 2 }}" 
-                                    y="84" 
-                                    text-anchor="middle"
-                                    font-size="10"
-                                    font-weight="bold"
-                                    fill="#FFFFFF"
-                                >
-                                    {{ $key['chordPosition'] }}
-                                </text>
+                            @else
+                                <span class="text-tertiary">Empty</span>
                             @endif
-                        </g>
-                    @endif
-                @endforeach
-            </svg>
-        </div>
-        
-        <div class="mt-4 flex items-center space-x-6 text-sm">
-            <div class="flex items-center space-x-2">
-                <div class="w-4 h-4 bg-green-500 rounded"></div>
-                <span class="text-secondary">Active Notes</span>
+                        </label>
+                    </div>
+                    <div class="text-xs text-tertiary">
+                        Chord {{ $position }}
+                    </div>
+                </div>
+                
+                {{-- Mini piano for this chord --}}
+                @if($chord['tone'])
+                    <div class="bg-zinc-900 rounded p-2">
+                        <livewire:chord-piano 
+                            :chord="$chord" 
+                            :position="$position" 
+                            :wire:key="'display-piano-' . $position"
+                            :showLabels="true"
+                        />
+                    </div>
+                    
+                    {{-- Note information --}}
+                    <div class="mt-2 text-xs text-secondary">
+                        @php
+                            $notes = app(\App\Services\ChordService::class)->getChordNotes(
+                                $chord['tone'],
+                                $chord['semitone'] ?? 'major',
+                                $chord['inversion'] ?? 'root'
+                            );
+                        @endphp
+                        Notes: {{ implode(' - ', array_slice($notes, 0, 3)) }}
+                    </div>
+                @else
+                    <div class="h-24 flex items-center justify-center text-tertiary text-sm">
+                        No chord selected
+                    </div>
+                @endif
             </div>
-            <div class="flex items-center space-x-2">
-                <div class="w-4 h-4 bg-blue-500 rounded"></div>
-                <span class="text-secondary">Blue Notes</span>
-            </div>
+        @endforeach
+    </div>
+    
+    {{-- Legend --}}
+    <div class="mt-4 flex items-center space-x-6 text-sm">
+        <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 bg-green-500 rounded"></div>
+            <span class="text-secondary">Active Notes</span>
         </div>
+        <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 bg-blue-500 rounded"></div>
+            <span class="text-secondary">Blue Notes</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 border-2 border-blue-500 rounded"></div>
+            <span class="text-secondary">Selected for Print</span>
         </div>
     </div>
 </div>
-

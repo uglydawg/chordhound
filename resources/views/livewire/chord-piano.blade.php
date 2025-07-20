@@ -72,6 +72,24 @@
                         />
                     @endif
                 @endforeach
+                
+                {{-- Note labels if enabled --}}
+                @if($showLabels)
+                    @foreach($pianoKeys as $key)
+                        @if($key['isActive'])
+                            <text 
+                                x="{{ $key['x'] + $key['width'] / 2 }}" 
+                                y="{{ $key['type'] === 'white' ? 88 : 50 }}" 
+                                text-anchor="middle"
+                                font-size="8"
+                                font-weight="bold"
+                                fill="{{ $key['type'] === 'white' ? '#666666' : '#FFFFFF' }}"
+                            >
+                                {{ $key['note'] }}{{ $key['octave'] }}
+                            </text>
+                        @endif
+                    @endforeach
+                @endif
             </svg>
         </div>
     @else

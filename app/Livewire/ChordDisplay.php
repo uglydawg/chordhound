@@ -15,6 +15,7 @@ class ChordDisplay extends Component
     public array $activeNotes = [];
     public int $startOctave = 3;
     public int $octaveCount = 3;
+    public array $selectedChords = [1, 2, 3, 4]; // All selected by default
     
     private ChordService $chordService;
 
@@ -36,6 +37,31 @@ class ChordDisplay extends Component
         $this->chords = $chords;
         $this->blueNotes = $blueNotes;
         $this->calculateActiveNotes();
+    }
+
+    public function toggleChordSelection($position)
+    {
+        if (in_array($position, $this->selectedChords)) {
+            $this->selectedChords = array_values(array_diff($this->selectedChords, [$position]));
+        } else {
+            $this->selectedChords[] = $position;
+            sort($this->selectedChords);
+        }
+        
+        // Dispatch event for print functionality
+        $this->dispatch('selected-chords-updated', selectedChords: $this->selectedChords);
+    }
+    
+    public function selectAllChords()
+    {
+        $this->selectedChords = [1, 2, 3, 4];
+        $this->dispatch('selected-chords-updated', selectedChords: $this->selectedChords);
+    }
+    
+    public function deselectAllChords()
+    {
+        $this->selectedChords = [];
+        $this->dispatch('selected-chords-updated', selectedChords: $this->selectedChords);
     }
 
     private function calculateActiveNotes()

@@ -136,22 +136,22 @@
             {{-- First row: all four chords with voice leading animations below each --}}
             <div class="grid grid-cols-4 gap-4">
                 @foreach($chords as $pos => $ch)
-                    <div class="space-y-2">
+                    <div class="space-y-2" data-chord-position="{{ $pos }}">
                         {{-- Chord Button --}}
                         <div 
                             wire:click="selectChord({{ $pos }})"
                             class="chord-block {{ $activePosition === $pos ? 'chord-block-active' : '' }} {{ $ch['is_blue_note'] ? 'ring-2 ring-purple-500' : '' }} relative group"
                         >
-                            <div>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
                                 @if($ch['tone'])
-                                    <div class="text-lg font-bold text-center">
+                                    <div class="text-5xl lg:text-6xl font-bold text-center leading-none">
                                         {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
                                     </div>
                                     @if($ch['inversion'] !== 'root')
-                                        <div class="text-xs text-secondary text-center">{{ substr(ucfirst($ch['inversion']), 0, 3) }}</div>
+                                        <div class="text-sm lg:text-base text-secondary text-center mt-1">{{ substr(ucfirst($ch['inversion']), 0, 3) }}</div>
                                     @endif
                                 @else
-                                    <div class="text-lg text-tertiary text-center">+</div>
+                                    <div class="text-5xl lg:text-6xl text-tertiary text-center">+</div>
                                 @endif
                             </div>
                             
@@ -191,13 +191,15 @@
                             @endphp
                             
                             @if($ch['tone'] && $nextChord)
-                                <livewire:voice-leading-animation 
-                                    :fromChord="$ch" 
-                                    :toChord="$nextChord" 
-                                    :position="$pos"
-                                    :nextPosition="$nextPosition"
-                                    :wire:key="'voice-below-' . $pos . '-to-' . $nextPosition" 
-                                />
+                                <div data-voice-position="{{ $pos }}">
+                                    <livewire:voice-leading-animation 
+                                        :fromChord="$ch" 
+                                        :toChord="$nextChord" 
+                                        :position="$pos"
+                                        :nextPosition="$nextPosition"
+                                        :wire:key="'voice-below-' . $pos . '-to-' . $nextPosition" 
+                                    />
+                                </div>
                             @else
                                 {{-- Empty space to maintain layout --}}
                                 <div class="h-16"></div>

@@ -18,12 +18,7 @@
                 </div>
 
             <div class="flex justify-end space-x-4 print:hidden">
-                <button onclick="window.print()" class="inline-flex items-center px-4 py-2 border border-zinc-700 rounded-md shadow-sm text-sm font-medium text-secondary hover:text-primary bg-zinc-800 hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                    </svg>
-                    Print Chord Sheet
-                </button>
+                <livewire:print-chord-sheet />
             </div>
         </div>
     </div>
@@ -85,4 +80,44 @@
             });
         });
     </script>
+    
+    {{-- Print styles --}}
+    <style>
+    @media print {
+        /* Hide navigation and unnecessary elements */
+        nav, .print\\:hidden, .bg-zinc-900.border-b.border-zinc-800 {
+            display: none !important;
+        }
+        
+        /* Reset background colors for print */
+        body, .bg-zinc-950, .bg-zinc-900, .bg-zinc-800 {
+            background-color: white !important;
+        }
+        
+        /* Make text more print-friendly */
+        .text-primary, .text-secondary, .text-tertiary {
+            color: black !important;
+        }
+        
+        /* Add border to chord items for better visibility */
+        .chord-item {
+            border: 1px solid #000 !important;
+            page-break-inside: avoid;
+        }
+        
+        /* Hide unselected chord sections */
+        .chord-item.print-hide {
+            display: none !important;
+        }
+        
+        /* Optimize layout for print */
+        .p-6 {
+            padding: 0.5rem !important;
+        }
+        
+        .max-w-7xl {
+            max-width: 100% !important;
+        }
+    }
+    </style>
 </x-app-layout>
