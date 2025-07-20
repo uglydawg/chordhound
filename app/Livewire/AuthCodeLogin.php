@@ -47,6 +47,22 @@ class AuthCodeLogin extends Component
         $this->validate();
         $this->error = '';
 
+        // Check for fixed development login code
+        if (config('app.auth_fixed_login_code_enabled', false) && $this->code === '555121') {
+            // Create or find user with fixed code
+            $user = User::firstOrCreate(
+                ['email' => $this->email],
+                [
+                    'name' => explode('@', $this->email)[0],
+                    'password' => Hash::make(Str::random(24)),
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            Auth::login($user, true);
+            return redirect()->intended(route('dashboard'));
+        }
+
         $authCode = AuthCode::where('email', $this->email)
             ->where('code', $this->code)
             ->first();

@@ -1,12 +1,11 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <flux:heading size="xl">Edit: {{ $chordSet->name }}</flux:heading>
-            <flux:button href="{{ route('chords.my-sets') }}" variant="ghost">
-                Back to My Sets
-            </flux:button>
-        </div>
-    </x-slot>
+<x-layouts.app :title="'Edit: ' . $chordSet->name">
+    <flux:header>
+        <flux:heading size="xl">Edit: {{ $chordSet->name }}</flux:heading>
+        <flux:spacer />
+        <flux:button href="{{ route('chords.my-sets') }}" variant="ghost">
+            Back to My Sets
+        </flux:button>
+    </flux:header>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
@@ -71,4 +70,4 @@
             });
         });
     </script>
-</x-app-layout>
+</x-layouts.app>

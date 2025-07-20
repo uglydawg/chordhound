@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.app :title="__('Piano Chords')">
     <div class="min-h-screen">
         {{-- MIDI Player Bar --}}
         <div class="bg-zinc-900 border-b border-zinc-800 px-6 py-4">
@@ -191,4 +191,4 @@
         }
     }
     </style>
-</x-app-layout>
+</x-layouts.app>

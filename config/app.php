@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Development Authentication Features
+    |--------------------------------------------------------------------------
+    |
+    | These options control development-specific authentication features.
+    | The fixed login code allows bypassing normal auth code generation
+    | for testing purposes. Should be disabled in production.
+    |
+    */
+
+    'auth_fixed_login_code_enabled' => env('AUTH_FIXED_LOGIN_CODE_ENABLED', false),
+
 ];
