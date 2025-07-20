@@ -15,6 +15,7 @@ class ChordPiano extends Component
     
     public int $position = 0;
     public bool $showLabels = false;
+    public bool $larger = false;
     
     private ChordService $chordService;
     
@@ -71,8 +72,8 @@ class ChordPiano extends Component
         }
         
         // Create a mini piano (2 octaves centered around middle C)
-        $whiteKeyWidth = 20;
-        $blackKeyWidth = 12;  // Narrower black keys
+        $whiteKeyWidth = $this->larger ? 30 : 20;
+        $blackKeyWidth = $this->larger ? 18 : 12;  // Narrower black keys
         $whiteKeyOffsets = ['C' => 0, 'D' => 1, 'E' => 2, 'F' => 3, 'G' => 4, 'A' => 5, 'B' => 6];
         // Black keys positioned between white keys (no black key between E-F and B-C)
         $blackKeyPositions = [

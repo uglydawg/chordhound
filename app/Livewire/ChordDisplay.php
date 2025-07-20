@@ -15,15 +15,26 @@ class ChordDisplay extends Component
     public array $activeNotes = [];
     public int $startOctave = 3;
     public int $octaveCount = 3;
-    public array $selectedChords = [1, 2, 3, 4]; // All selected by default
+    // Removed selectedChords as we no longer need selection
     
     private ChordService $chordService;
 
     public function mount()
     {
-        // Initialize with empty chords
-        $this->chords = [];
+        // Initialize with 4 empty chord slots
+        for ($i = 1; $i <= 4; $i++) {
+            $this->chords[$i] = [
+                'position' => $i,
+                'tone' => '',
+                'semitone' => 'major',
+                'inversion' => 'root',
+                'is_blue_note' => false,
+            ];
+        }
         $this->activeNotes = [];
+        
+        // Request initial chord state after mount
+        $this->dispatch('request-chord-state');
     }
 
     public function boot()
@@ -32,37 +43,32 @@ class ChordDisplay extends Component
     }
 
     #[On('chordsUpdated')]
-    public function updateChords($chords, $blueNotes)
+    public function updateChords($event)
     {
-        $this->chords = $chords;
-        $this->blueNotes = $blueNotes;
-        $this->calculateActiveNotes();
+        // Extract chords and blueNotes from the event data
+        if (isset($event['chords']) && is_array($event['chords'])) {
+            $this->chords = $event['chords'];
+            $this->blueNotes = $event['blueNotes'] ?? [];
+            $this->calculateActiveNotes();
+        }
     }
-
-    public function toggleChordSelection($position)
+    
+    public function rendered()
     {
-        if (in_array($position, $this->selectedChords)) {
-            $this->selectedChords = array_values(array_diff($this->selectedChords, [$position]));
-        } else {
-            $this->selectedChords[] = $position;
-            sort($this->selectedChords);
+        // After component is rendered, request chord state if we don't have any chords
+        $hasChords = false;
+        foreach ($this->chords as $chord) {
+            if (!empty($chord['tone'])) {
+                $hasChords = true;
+                break;
+            }
         }
         
-        // Dispatch event for print functionality
-        $this->dispatch('selected-chords-updated', selectedChords: $this->selectedChords);
+        if (!$hasChords) {
+            $this->dispatch('request-chord-state');
+        }
     }
-    
-    public function selectAllChords()
-    {
-        $this->selectedChords = [1, 2, 3, 4];
-        $this->dispatch('selected-chords-updated', selectedChords: $this->selectedChords);
-    }
-    
-    public function deselectAllChords()
-    {
-        $this->selectedChords = [];
-        $this->dispatch('selected-chords-updated', selectedChords: $this->selectedChords);
-    }
+
 
     private function calculateActiveNotes()
     {
@@ -191,6 +197,7 @@ class ChordDisplay extends Component
         return $keys;
     }
 
+    
     public function render()
     {
         $pianoKeys = $this->generatePianoKeys();

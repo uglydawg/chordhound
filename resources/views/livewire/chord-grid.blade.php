@@ -268,11 +268,4 @@
             @endforeach
         </div>
     </div>
-    
-    
-    {{-- Piano Display for Active Chord --}}
-    <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-        <h3 class="text-sm font-medium text-secondary mb-3">Chord Piano</h3>
-        <livewire:chord-piano :chord="$chords[$activePosition]" :position="$activePosition" wire:key="active-chord-piano-{{ $activePosition }}" />
-    </div>
 </div>

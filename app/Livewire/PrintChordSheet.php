@@ -9,19 +9,14 @@ use Livewire\Component;
 
 class PrintChordSheet extends Component
 {
-    public array $selectedChords = [1, 2, 3, 4];
     public array $chords = [];
     
-    #[On('selected-chords-updated')]
-    public function updateSelectedChords($selectedChords)
-    {
-        $this->selectedChords = $selectedChords;
-    }
-    
     #[On('chordsUpdated')]
-    public function updateChords($chords)
+    public function updateChords($event)
     {
-        $this->chords = $chords;
+        if (isset($event['chords'])) {
+            $this->chords = $event['chords'];
+        }
     }
     
     public function printSheet()

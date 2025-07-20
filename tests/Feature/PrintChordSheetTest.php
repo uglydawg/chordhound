@@ -25,7 +25,7 @@ it('updates chords when chordsUpdated event is dispatched', function () {
     ];
     
     Livewire::test(PrintChordSheet::class)
-        ->dispatch('chordsUpdated', chords: $chords)
+        ->dispatch('chordsUpdated', ['chords' => $chords])
         ->assertSet('chords', $chords);
 });
 

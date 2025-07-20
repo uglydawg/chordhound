@@ -80,13 +80,19 @@ class ChordGrid extends Component
                 $this->updateRomanNumerals();
             }
             
-            $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
+            $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
         }
     }
 
     public function boot()
     {
         $this->chordService = app(ChordService::class);
+    }
+    
+    #[On('request-chord-state')]
+    public function sendChordState()
+    {
+        $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
     }
 
     private function loadChords()
@@ -126,14 +132,14 @@ class ChordGrid extends Component
         if ($this->showRomanNumerals) {
             $this->updateRomanNumerals();
         }
-        $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
+        $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
     }
     
     public function setInversion($inversion)
     {
         if (isset($this->chords[$this->activePosition]) && $this->chords[$this->activePosition]['tone']) {
             $this->chords[$this->activePosition]['inversion'] = $inversion;
-            $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
+            $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
         }
     }
 
@@ -151,7 +157,7 @@ class ChordGrid extends Component
         if ($this->showRomanNumerals) {
             $this->updateRomanNumerals();
         }
-        $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
+        $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
     }
 
     public function toggleSuggestions()
@@ -233,7 +239,7 @@ class ChordGrid extends Component
             }
             
             $this->calculateBlueNotes();
-            $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
+            $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
             $this->showSuggestions = false;
         }
     }
@@ -255,7 +261,7 @@ class ChordGrid extends Component
         if ($this->showRomanNumerals) {
             $this->updateRomanNumerals();
         }
-        $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
+        $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
     }
 
     private function calculateBlueNotes()

@@ -10,38 +10,9 @@
     </button>
     
     <script>
-        window.selectedChordsForPrint = @json($selectedChords);
-        
         function printChordSheet() {
-            // Apply print-specific classes to hide unselected chords
-            document.querySelectorAll('[data-chord-position]').forEach(el => {
-                const position = parseInt(el.dataset.chordPosition);
-                if (!window.selectedChordsForPrint.includes(position)) {
-                    el.classList.add('print-hide');
-                } else {
-                    el.classList.remove('print-hide');
-                }
-            });
-            
-            // Hide voice leading animations for unselected chords
-            document.querySelectorAll('[data-voice-position]').forEach(el => {
-                const position = parseInt(el.dataset.voicePosition);
-                if (!window.selectedChordsForPrint.includes(position)) {
-                    el.classList.add('print-hide');
-                } else {
-                    el.classList.remove('print-hide');
-                }
-            });
-            
-            // Trigger print
+            // Simply trigger print - all chords will be printed
             window.print();
         }
-        
-        // Update selected chords when changed
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.on('selected-chords-updated', (event) => {
-                window.selectedChordsForPrint = event.selectedChords;
-            });
-        });
     </script>
 </div>

@@ -12,9 +12,9 @@
                 {{-- Chord Grid Editor --}}
                 <livewire:chord-grid />
                 
-                {{-- Full Piano Display --}}
-                <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-                    <livewire:chord-display />
+                {{-- Chords Display (2x2 Grid) --}}
+                <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 chords-section">
+                    <livewire:chord-display wire:key="chord-display-main" />
                 </div>
 
             <div class="flex justify-end space-x-4 print:hidden">
@@ -78,15 +78,44 @@
             Livewire.on('chord-set-saved', () => {
                 document.getElementById('save-chord-set-modal').classList.add('hidden');
             });
+            
+            // Request chord state after all components are loaded
+            setTimeout(() => {
+                Livewire.dispatch('request-chord-state');
+            }, 100);
         });
     </script>
     
     {{-- Print styles --}}
     <style>
     @media print {
-        /* Hide navigation and unnecessary elements */
-        nav, .print\\:hidden, .bg-zinc-900.border-b.border-zinc-800 {
+        /* Hide everything except the Chords section */
+        body > *:not(.min-h-screen),
+        .min-h-screen > *:not(.p-6),
+        .p-6 > *:not(.max-w-7xl),
+        .max-w-7xl > *:not(.chords-section),
+        nav, 
+        .print\\:hidden,
+        .timeline-grid,
+        .midi-player,
+        #save-chord-set-modal {
             display: none !important;
+        }
+        
+        /* Show page structure for chords section */
+        body, .min-h-screen, .p-6, .max-w-7xl {
+            display: block !important;
+            background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* Only show the Chords section */
+        .chords-section {
+            display: block !important;
+            border: none !important;
+            padding: 1rem !important;
+            background: white !important;
         }
         
         /* Reset background colors for print */
@@ -103,6 +132,7 @@
         .chord-item {
             border: 1px solid #000 !important;
             page-break-inside: avoid;
+            background: white !important;
         }
         
         /* Hide unselected chord sections */
@@ -110,13 +140,28 @@
             display: none !important;
         }
         
+        /* Hide checkboxes and buttons in print */
+        input[type="checkbox"],
+        button {
+            display: none !important;
+        }
+        
         /* Optimize layout for print */
         .p-6 {
+            padding: 0 !important;
+        }
+        
+        .p-4 {
             padding: 0.5rem !important;
         }
         
         .max-w-7xl {
             max-width: 100% !important;
+        }
+        
+        /* Make the 2x2 grid fill the page */
+        .grid.grid-cols-2 {
+            gap: 1rem !important;
         }
     }
     </style>
