@@ -132,12 +132,20 @@ class ChordGrid extends Component
             'position' => $this->activePosition,
             'tone' => $tone,
             'semitone' => $semitone,
-            'inversion' => 'root',
+            'inversion' => $this->chords[$this->activePosition]['inversion'] ?? 'root',
             'is_blue_note' => false,
         ];
         
         $this->calculateBlueNotes();
         $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
+    }
+    
+    public function setInversion($inversion)
+    {
+        if (isset($this->chords[$this->activePosition]) && $this->chords[$this->activePosition]['tone']) {
+            $this->chords[$this->activePosition]['inversion'] = $inversion;
+            $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
+        }
     }
 
     public function clearChord($position)

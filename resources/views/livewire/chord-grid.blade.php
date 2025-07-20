@@ -17,39 +17,47 @@
         {{-- Chord Blocks --}}
         <div class="grid grid-cols-4 gap-4">
             @foreach($chords as $position => $chord)
-                <div 
-                    wire:click="selectChord({{ $position }})"
-                    class="chord-block {{ $activePosition === $position ? 'chord-block-active' : '' }} {{ $chord['is_blue_note'] ? 'ring-2 ring-purple-500' : '' }} relative group"
-                >
-                    <div>
-                        @if($chord['tone'])
-                            <div class="text-2xl font-bold text-center">
-                                {{ $chord['tone'] }}{{ $chord['semitone'] === 'minor' ? 'm' : ($chord['semitone'] === 'diminished' ? 'dim' : '') }}
-                            </div>
-                            @if($chord['inversion'] !== 'root')
-                                <div class="text-xs text-secondary text-center mt-1">{{ ucfirst($chord['inversion']) }}</div>
+                <div class="space-y-2">
+                    {{-- Chord Button --}}
+                    <div 
+                        wire:click="selectChord({{ $position }})"
+                        class="chord-block {{ $activePosition === $position ? 'chord-block-active' : '' }} {{ $chord['is_blue_note'] ? 'ring-2 ring-purple-500' : '' }} relative group"
+                    >
+                        <div>
+                            @if($chord['tone'])
+                                <div class="text-lg font-bold text-center">
+                                    {{ $chord['tone'] }}{{ $chord['semitone'] === 'minor' ? 'm' : ($chord['semitone'] === 'diminished' ? 'dim' : '') }}
+                                </div>
+                                @if($chord['inversion'] !== 'root')
+                                    <div class="text-xs text-secondary text-center">{{ substr(ucfirst($chord['inversion']), 0, 3) }}</div>
+                                @endif
+                            @else
+                                <div class="text-lg text-tertiary text-center">+</div>
                             @endif
-                        @else
-                            <div class="text-2xl text-tertiary text-center">+</div>
+                        </div>
+                        
+                        {{-- Clear button --}}
+                        @if($chord['tone'])
+                            <button
+                                wire:click.stop="clearChord({{ $position }})"
+                                class="absolute -top-2 -right-2 w-6 h-6 bg-zinc-700 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
                         @endif
                     </div>
                     
-                    {{-- Beat indicator --}}
-                    <div class="absolute -bottom-6 left-0 right-0 text-center text-xs text-tertiary">
-                        {{ ($position - 1) * 2 + 1 }}-{{ ($position - 1) * 2 + 2 }}
+                    {{-- Mini Piano Display --}}
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-2">
+                        <livewire:chord-piano :chord="$chord" :position="$position" :wire:key="'grid-piano-' . $position" />
                     </div>
                     
-                    {{-- Clear button --}}
-                    @if($chord['tone'])
-                        <button
-                            wire:click.stop="clearChord({{ $position }})"
-                            class="absolute -top-2 -right-2 w-6 h-6 bg-zinc-700 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    @endif
+                    {{-- Beat indicator --}}
+                    <div class="text-center text-xs text-tertiary">
+                        Beat {{ ($position - 1) * 2 + 1 }}-{{ ($position - 1) * 2 + 2 }}
+                    </div>
                 </div>
             @endforeach
         </div>
@@ -57,14 +65,24 @@
     
     {{-- Chord Palette --}}
     <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-        <h3 class="text-sm font-medium text-secondary mb-4">Chord Palette</h3>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-secondary">Chord Palette</h3>
+            @if($chords[$activePosition]['tone'])
+                <div class="text-lg font-bold text-primary">
+                    Selected: {{ $chords[$activePosition]['tone'] }}{{ $chords[$activePosition]['semitone'] === 'minor' ? 'm' : ($chords[$activePosition]['semitone'] === 'diminished' ? 'dim' : '') }}
+                    @if($chords[$activePosition]['inversion'] !== 'root')
+                        <span class="text-sm text-secondary ml-1">({{ ucfirst($chords[$activePosition]['inversion']) }})</span>
+                    @endif
+                </div>
+            @endif
+        </div>
         
         {{-- Root Notes --}}
         <div class="grid grid-cols-12 gap-2 mb-4">
             @foreach($tones as $tone)
                 <button
                     wire:click="setChord('{{ $tone }}')"
-                    class="chord-suggestion text-center"
+                    class="chord-suggestion text-center {{ $chords[$activePosition]['tone'] === $tone ? 'bg-blue-600 text-white border-blue-500' : '' }}"
                 >
                     {{ $tone }}
                 </button>
@@ -73,13 +91,26 @@
         
         {{-- Chord Types --}}
         <div class="flex space-x-2 mb-4">
-            <span class="text-xs text-tertiary">Quick add:</span>
+            <span class="text-xs text-tertiary">Type:</span>
             @foreach(['major' => '', 'minor' => 'm', 'diminished' => 'dim', 'augmented' => 'aug'] as $type => $suffix)
                 <button
                     wire:click="setChord('{{ $chords[$activePosition]['tone'] ?? 'C' }}', '{{ $type }}')"
-                    class="text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-secondary hover:text-primary transition-colors"
+                    class="text-xs px-3 py-1 rounded transition-colors {{ $chords[$activePosition]['semitone'] === $type ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-secondary hover:text-primary' }}"
                 >
                     {{ ucfirst($type) }}
+                </button>
+            @endforeach
+        </div>
+        
+        {{-- Inversion Controls --}}
+        <div class="flex space-x-2">
+            <span class="text-xs text-tertiary">Inversion:</span>
+            @foreach(['root' => 'Root', 'first' => 'First', 'second' => 'Second'] as $inv => $label)
+                <button
+                    wire:click="setInversion('{{ $inv }}')"
+                    class="text-xs px-3 py-1 rounded transition-colors {{ $chords[$activePosition]['inversion'] === $inv ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-secondary hover:text-primary' }}"
+                >
+                    {{ $label }}
                 </button>
             @endforeach
         </div>

@@ -55,12 +55,18 @@
         <span class="text-lg font-bold text-primary">{{ $tempo }}</span>
     </div>
     
-    {{-- Key Signature --}}
+    {{-- Piano Sound Selector --}}
     <div class="flex items-center space-x-2">
-        <span class="text-sm text-secondary">Key</span>
-        <div class="bg-zinc-800 border border-zinc-700 rounded px-3 py-1">
-            <span class="text-primary font-medium">C Major</span>
-        </div>
+        <span class="text-sm text-secondary">Sound</span>
+        <select 
+            wire:model.live="selectedSound"
+            wire:change="updateSound($event.target.value)"
+            class="bg-zinc-800 border border-zinc-700 rounded px-3 py-1 text-sm text-primary focus:border-blue-500 focus:outline-none"
+        >
+            @foreach($availableSounds as $value => $label)
+                <option value="{{ $value }}">{{ $label }}</option>
+            @endforeach
+        </select>
     </div>
 </div>
 
@@ -69,19 +75,36 @@
 document.addEventListener('livewire:initialized', () => {
     let synth = null;
     let sequence = null;
+    let currentSound = 'piano';
     
-    // Initialize Tone.js
+    // Sound presets for different piano types
+    const soundPresets = {
+        piano: {
+            oscillator: { type: 'triangle' },
+            envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
+        },
+        electric: {
+            oscillator: { type: 'sine' },
+            envelope: { attack: 0.01, decay: 0.3, sustain: 0.4, release: 0.8 }
+        },
+        synth: {
+            oscillator: { type: 'sawtooth' },
+            envelope: { attack: 0.02, decay: 0.2, sustain: 0.5, release: 0.5 }
+        },
+        rhodes: {
+            oscillator: { type: 'sine' },
+            envelope: { attack: 0.02, decay: 0.5, sustain: 0.2, release: 1.5 }
+        },
+        organ: {
+            oscillator: { type: 'square' },
+            envelope: { attack: 0.01, decay: 0.01, sustain: 0.9, release: 0.01 }
+        }
+    };
+    
+    // Initialize Tone.js with default piano sound
     if (typeof Tone !== 'undefined') {
         synth = new Tone.PolySynth(Tone.Synth).toDestination();
-        synth.set({
-            oscillator: { type: 'triangle' },
-            envelope: {
-                attack: 0.005,
-                decay: 0.1,
-                sustain: 0.3,
-                release: 1
-            }
-        });
+        synth.set(soundPresets.piano);
     }
     
     // Listen for playback events
@@ -102,6 +125,13 @@ document.addEventListener('livewire:initialized', () => {
     Livewire.on('tempo-changed', ({ tempo }) => {
         if (Tone.Transport.state === 'started') {
             Tone.Transport.bpm.value = tempo;
+        }
+    });
+    
+    Livewire.on('sound-changed', ({ sound }) => {
+        currentSound = sound;
+        if (synth && soundPresets[sound]) {
+            synth.set(soundPresets[sound]);
         }
     });
     

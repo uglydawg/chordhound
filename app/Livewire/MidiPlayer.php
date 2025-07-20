@@ -14,6 +14,16 @@ class MidiPlayer extends Component
     public float $currentTime = 0;
     public float $duration = 8; // 8 beats for 4 chords (2 beats each)
     public array $chords = [];
+    public string $selectedSound = 'piano'; // Default piano sound
+    
+    // Available piano sounds
+    public array $availableSounds = [
+        'piano' => 'Grand Piano',
+        'electric' => 'Electric Piano',
+        'synth' => 'Synth Piano',
+        'rhodes' => 'Rhodes',
+        'organ' => 'Organ',
+    ];
     
     #[On('chordsUpdated')]
     public function updateChords($chords)
@@ -38,6 +48,14 @@ class MidiPlayer extends Component
     {
         $this->tempo = (int) $tempo;
         $this->dispatch('tempo-changed', tempo: $this->tempo);
+    }
+    
+    public function updateSound($sound)
+    {
+        if (isset($this->availableSounds[$sound])) {
+            $this->selectedSound = $sound;
+            $this->dispatch('sound-changed', sound: $this->selectedSound);
+        }
     }
     
     public function render()
