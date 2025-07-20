@@ -47,6 +47,12 @@ class ChordGrid extends Component
     {
         $this->chordSetId = $chordSetId;
         
+        // Restore saved preferences from session
+        $this->selectedKey = session('chord_grid.selected_key', 'G');
+        $this->selectedKeyType = session('chord_grid.selected_key_type', 'major');
+        $this->selectedProgression = session('chord_grid.selected_progression', 'I-V-vi-IV');
+        $this->showRomanNumerals = session('chord_grid.show_roman_numerals', false);
+        
         // Initialize with 4 chord slots
         for ($i = 1; $i <= 4; $i++) {
             $this->chords[$i] = [
@@ -62,11 +68,16 @@ class ChordGrid extends Component
         if ($this->chordSetId) {
             $this->loadChords();
         } else {
-            // Set default progression to I-V-vi-IV
-            $this->selectedProgression = 'I-V-vi-IV';
+            // Apply the saved or default progression
             $this->applySelectedProgression();
             
             $this->calculateBlueNotes();
+            
+            // Update roman numerals if enabled
+            if ($this->showRomanNumerals) {
+                $this->updateRomanNumerals();
+            }
+            
             $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
         }
     }
@@ -149,6 +160,8 @@ class ChordGrid extends Component
     public function setKey($key)
     {
         $this->selectedKey = $key;
+        session(['chord_grid.selected_key' => $key]);
+        
         if ($this->selectedProgression) {
             $this->applySelectedProgression();
         }
@@ -160,6 +173,8 @@ class ChordGrid extends Component
     public function setKeyType($keyType)
     {
         $this->selectedKeyType = $keyType;
+        session(['chord_grid.selected_key_type' => $keyType]);
+        
         if ($this->selectedProgression) {
             $this->applySelectedProgression();
         }
@@ -171,6 +186,8 @@ class ChordGrid extends Component
     public function setProgression($progressionKey)
     {
         $this->selectedProgression = $progressionKey;
+        session(['chord_grid.selected_progression' => $progressionKey]);
+        
         if ($progressionKey) {
             $this->applySelectedProgression();
         }
@@ -251,6 +268,8 @@ class ChordGrid extends Component
     public function toggleRomanNumerals()
     {
         $this->showRomanNumerals = !$this->showRomanNumerals;
+        session(['chord_grid.show_roman_numerals' => $this->showRomanNumerals]);
+        
         if ($this->showRomanNumerals) {
             $this->updateRomanNumerals();
         }

@@ -76,7 +76,7 @@
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center space-x-4">
                 <h2 class="text-lg font-semibold text-primary">Chord Progression</h2>
-                @if($showRomanNumerals && count(array_filter($romanNumerals)) > 0)
+                @if($showRomanNumerals && is_array($romanNumerals) && count(array_filter($romanNumerals)) > 0)
                     <div class="text-sm text-blue-400 font-medium">
                         {{ collect($romanNumerals)->filter()->join('-') }}
                     </div>
