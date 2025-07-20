@@ -50,19 +50,29 @@ class ChordDisplay extends Component
                     $chord['inversion'] ?? 'root'
                 );
                 
-                foreach ($notes as $note) {
-                    // Add notes for multiple octaves
-                    for ($octave = $this->startOctave; $octave < $this->startOctave + $this->octaveCount; $octave++) {
-                        $keyPosition = $this->chordService->getPianoKeyPosition($note, $octave);
-                        if ($keyPosition >= 0 && $keyPosition <= 87) {
-                            $this->activeNotes[] = [
-                                'note' => $note,
-                                'octave' => $octave,
-                                'position' => $keyPosition,
-                                'isBlueNote' => $chord['is_blue_note'] ?? false,
-                                'chordPosition' => $position,
-                            ];
-                        }
+                // Only take the first 3 notes for triads
+                $notesToDisplay = array_slice($notes, 0, 3);
+                
+                foreach ($notesToDisplay as $index => $note) {
+                    // Display chord in middle octave (4) for clarity
+                    $octave = 4;
+                    if ($index === 2 && $chord['inversion'] === 'first') {
+                        // For first inversion, raise the last note an octave
+                        $octave = 5;
+                    } elseif ($index >= 1 && $chord['inversion'] === 'second') {
+                        // For second inversion, raise the last two notes an octave
+                        $octave = 5;
+                    }
+                    
+                    $keyPosition = $this->chordService->getPianoKeyPosition($note, $octave);
+                    if ($keyPosition >= 0 && $keyPosition <= 87) {
+                        $this->activeNotes[] = [
+                            'note' => $note,
+                            'octave' => $octave,
+                            'position' => $keyPosition,
+                            'isBlueNote' => $chord['is_blue_note'] ?? false,
+                            'chordPosition' => $position,
+                        ];
                     }
                 }
             }

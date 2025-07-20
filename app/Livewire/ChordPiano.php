@@ -34,11 +34,20 @@ class ChordPiano extends Component
                 $this->chord['inversion'] ?? 'root'
             );
             
-            // Add octave to each note for display
-            foreach ($notes as $note) {
-                // Add notes in both octaves to show on our mini piano
-                $activeNotes[] = $note . '4';
-                $activeNotes[] = $note . '5';
+            // Only take the first 3 notes for triads
+            $notesToDisplay = array_slice($notes, 0, 3);
+            
+            // Add octave to each note for display based on inversion
+            foreach ($notesToDisplay as $index => $note) {
+                $octave = 4;
+                if ($index === 2 && $this->chord['inversion'] === 'first') {
+                    // For first inversion, raise the last note an octave
+                    $octave = 5;
+                } elseif ($index >= 1 && $this->chord['inversion'] === 'second') {
+                    // For second inversion, raise the last two notes an octave
+                    $octave = 5;
+                }
+                $activeNotes[] = $note . $octave;
             }
         }
         
