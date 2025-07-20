@@ -8,12 +8,12 @@
             title="{{ $isPlaying ? 'Pause' : 'Play' }}"
         >
             @if($isPlaying)
-                <svg class="w-6 h-6 text-gray-400 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-secondary group-hover:text-primary" fill="currentColor" viewBox="0 0 24 24">
                     <rect x="6" y="4" width="4" height="16" />
                     <rect x="14" y="4" width="4" height="16" />
                 </svg>
             @else
-                <svg class="w-6 h-6 text-gray-400 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-secondary group-hover:text-primary" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                 </svg>
             @endif
@@ -25,7 +25,7 @@
             class="transport-button group"
             title="Stop"
         >
-            <svg class="w-6 h-6 text-gray-400 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-secondary group-hover:text-primary" fill="currentColor" viewBox="0 0 24 24">
                 <rect x="6" y="6" width="12" height="12" />
             </svg>
         </button>
@@ -43,23 +43,23 @@
     
     {{-- Tempo Control --}}
     <div class="flex items-center space-x-3">
-        <label class="text-sm text-gray-400">BPM</label>
+        <label class="text-sm text-secondary">BPM</label>
         <input 
             type="number" 
             wire:model.lazy="tempo"
             wire:change="updateTempo($event.target.value)"
             min="60" 
             max="200" 
-            class="w-16 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm text-white focus:border-blue-500 focus:outline-none"
+            class="w-16 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm text-primary focus:border-blue-500 focus:outline-none"
         >
-        <span class="text-lg font-bold text-white">{{ $tempo }}</span>
+        <span class="text-lg font-bold text-primary">{{ $tempo }}</span>
     </div>
     
     {{-- Key Signature --}}
     <div class="flex items-center space-x-2">
-        <span class="text-sm text-gray-400">Key</span>
+        <span class="text-sm text-secondary">Key</span>
         <div class="bg-zinc-800 border border-zinc-700 rounded px-3 py-1">
-            <span class="text-white font-medium">C Major</span>
+            <span class="text-primary font-medium">C Major</span>
         </div>
     </div>
 </div>

@@ -16,7 +16,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="/" class="text-xl font-semibold text-white flex items-center space-x-2">
+                        <a href="/" class="text-xl font-semibold text-primary flex items-center space-x-2">
                             <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
                             </svg>
@@ -24,11 +24,11 @@
                         </a>
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="{{ route('chords.index') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('chords.*') ? 'text-white border-b-2 border-blue-500' : 'text-gray-400 hover:text-gray-300' }}">
+                        <a href="{{ route('chords.index') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('chords.*') ? 'text-primary border-b-2 border-blue-500' : 'text-secondary hover:text-primary' }}">
                             Chords
                         </a>
                         @auth
-                            <a href="{{ route('chords.my-sets') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('chords.my-sets') ? 'text-white border-b-2 border-blue-500' : 'text-gray-400 hover:text-gray-300' }}">
+                            <a href="{{ route('chords.my-sets') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('chords.my-sets') ? 'text-primary border-b-2 border-blue-500' : 'text-secondary hover:text-primary' }}">
                                 My Sets
                             </a>
                         @endauth
@@ -36,12 +36,12 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     @guest
-                        <a href="{{ route('login') }}" class="text-sm text-gray-400 hover:text-gray-300">Login</a>
+                        <a href="{{ route('login') }}" class="text-sm text-secondary hover:text-primary">Login</a>
                     @else
-                        <span class="text-sm text-gray-300">{{ auth()->user()->name }}</span>
+                        <span class="text-sm text-secondary">{{ auth()->user()->name }}</span>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
-                            <button type="submit" class="text-sm text-gray-400 hover:text-gray-300">
+                            <button type="submit" class="text-sm text-secondary hover:text-primary">
                                 Logout
                             </button>
                         </form>

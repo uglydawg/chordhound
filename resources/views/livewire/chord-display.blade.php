@@ -1,6 +1,6 @@
 <div class="w-full overflow-x-auto dark-scrollbar">
     <div>
-        <h2 class="text-lg font-semibold text-white mb-4">Piano Keyboard</h2>
+        <h2 class="text-lg font-semibold text-primary mb-4">Piano Keyboard</h2>
         
         <div class="relative" style="width: {{ $totalWidth }}px; height: 200px;">
             <svg viewBox="0 0 {{ $totalWidth }} 200" style="width: {{ $totalWidth }}px; height: 200px;">
@@ -34,7 +34,8 @@
                                 y="195" 
                                 text-anchor="middle"
                                 font-size="8"
-                                fill="#666666"
+                                fill="var(--color-text-tertiary)"
+                                class="text-tertiary"
                             >
                                 {{ $key['note'] }}{{ $key['octave'] }}
                             </text>
@@ -76,11 +77,11 @@
         <div class="mt-4 flex items-center space-x-6 text-sm">
             <div class="flex items-center space-x-2">
                 <div class="w-4 h-4 bg-green-500 rounded"></div>
-                <span>Active Notes</span>
+                <span class="text-secondary">Active Notes</span>
             </div>
             <div class="flex items-center space-x-2">
                 <div class="w-4 h-4 bg-blue-500 rounded"></div>
-                <span>Blue Notes</span>
+                <span class="text-secondary">Blue Notes</span>
             </div>
         </div>
     </div>

@@ -31,6 +31,12 @@
     --color-bg-dark: #121212;
     --color-surface: #1a1a1a;
     --color-surface-light: #2a2a2a;
+    
+    /* Text colors following best practices for dark theme */
+    --color-text-primary: #ffffff; /* 100% opacity for primary text */
+    --color-text-secondary: #b3b3b3; /* 70% opacity equivalent */
+    --color-text-tertiary: #737373; /* 45% opacity equivalent */
+    --color-text-disabled: #4d4d4d; /* 30% opacity equivalent */
 
     --color-accent: var(--color-primary-blue);
     --color-accent-content: var(--color-primary-blue);
@@ -73,6 +79,22 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* Text color utilities */
+@layer utilities {
+    .text-primary {
+        color: var(--color-text-primary);
+    }
+    .text-secondary {
+        color: var(--color-text-secondary);
+    }
+    .text-tertiary {
+        color: var(--color-text-tertiary);
+    }
+    .text-disabled {
+        color: var(--color-text-disabled);
+    }
+}
 
 /* Music Production Interface Styles */
 @layer components {
