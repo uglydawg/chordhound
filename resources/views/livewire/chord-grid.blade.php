@@ -2,27 +2,49 @@
     {{-- Chord Timeline/Grid --}}
     <div class="timeline-grid p-6">
         {{-- Key and Progression Selectors --}}
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800">
-            <div class="flex items-center space-x-4">
-                <label class="text-sm font-medium text-secondary">Key:</label>
-                <select 
-                    wire:change="setKey($event.target.value)"
-                    class="bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
+        <div class="flex flex-wrap items-center gap-4 mb-6 pb-4 border-b border-zinc-800">
+            <div class="flex flex-wrap items-center gap-2">
+                <label class="text-sm font-medium text-secondary mr-2">Key:</label>
+                <div class="flex space-x-1">
                     @foreach($availableKeys as $key)
-                        <option value="{{ $key }}" @if($key === $selectedKey) selected @endif>{{ $key }}</option>
+                        <button
+                            wire:click="setKey('{{ $key }}')"
+                            class="px-3 py-1.5 text-sm font-medium rounded transition-all
+                                {{ $selectedKey === $key 
+                                    ? 'bg-blue-600 text-white border border-blue-500 shadow-lg' 
+                                    : (str_contains($key, '#') 
+                                        ? 'bg-zinc-900 text-gray-400 border border-zinc-800 hover:bg-zinc-800 hover:text-white' 
+                                        : 'bg-zinc-800 text-gray-300 border border-zinc-700 hover:bg-zinc-700 hover:text-white') }}"
+                        >
+                            {{ $key }}
+                        </button>
                     @endforeach
-                </select>
+                </div>
                 
-                <select
-                    wire:change="setKeyType($event.target.value)"
-                    class="bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                    <option value="major" @if($selectedKeyType === 'major') selected @endif>Major</option>
-                    <option value="minor" @if($selectedKeyType === 'minor') selected @endif>Minor</option>
-                </select>
+                <div class="h-6 w-px bg-zinc-700 mx-3"></div>
                 
-                <div class="h-6 w-px bg-zinc-700"></div>
+                <div class="flex space-x-1">
+                    <button
+                        wire:click="setKeyType('major')"
+                        class="px-3 py-1.5 text-sm font-medium rounded transition-all
+                            {{ $selectedKeyType === 'major' 
+                                ? 'bg-blue-600 text-white border border-blue-500' 
+                                : 'bg-zinc-800 text-gray-300 border border-zinc-700 hover:bg-zinc-700 hover:text-white' }}"
+                    >
+                        Major
+                    </button>
+                    <button
+                        wire:click="setKeyType('minor')"
+                        class="px-3 py-1.5 text-sm font-medium rounded transition-all
+                            {{ $selectedKeyType === 'minor' 
+                                ? 'bg-blue-600 text-white border border-blue-500' 
+                                : 'bg-zinc-800 text-gray-300 border border-zinc-700 hover:bg-zinc-700 hover:text-white' }}"
+                    >
+                        Minor
+                    </button>
+                </div>
+                
+                <div class="h-6 w-px bg-zinc-700 mx-3"></div>
                 
                 <label class="text-sm font-medium text-secondary">Progression:</label>
                 <select
