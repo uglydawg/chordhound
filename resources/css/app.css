@@ -9,8 +9,9 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
+    /* Dark theme colors to match music production interface */
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
     --color-zinc-200: #e5e5e5;
@@ -20,11 +21,19 @@
     --color-zinc-600: #525252;
     --color-zinc-700: #404040;
     --color-zinc-800: #262626;
-    --color-zinc-900: #171717;
+    --color-zinc-900: #1a1a1a;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    /* Music production color palette */
+    --color-primary-blue: #3B82F6;
+    --color-primary-purple: #8B5CF6;
+    --color-secondary-dark: #1e1e1e;
+    --color-bg-dark: #121212;
+    --color-surface: #1a1a1a;
+    --color-surface-light: #2a2a2a;
+
+    --color-accent: var(--color-primary-blue);
+    --color-accent-content: var(--color-primary-blue);
     --color-accent-foreground: var(--color-white);
 }
 
@@ -64,6 +73,59 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* Music Production Interface Styles */
+@layer components {
+    /* Chord grid blocks */
+    .chord-block {
+        @apply bg-zinc-800 border border-zinc-700 rounded-lg p-4 hover:border-blue-500 transition-all cursor-pointer;
+    }
+    
+    .chord-block-active {
+        @apply bg-blue-600 border-blue-500 text-white;
+    }
+    
+    /* Transport controls */
+    .transport-button {
+        @apply bg-zinc-800 hover:bg-zinc-700 rounded-lg p-3 transition-colors;
+    }
+    
+    /* Timeline/Grid */
+    .timeline-grid {
+        @apply bg-zinc-900 border border-zinc-800 rounded-lg;
+    }
+    
+    /* Chord suggestions */
+    .chord-suggestion {
+        @apply bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-md px-4 py-2 text-sm font-medium transition-all;
+    }
+    
+    .chord-suggestion:hover {
+        @apply border-blue-500;
+    }
+    
+    /* MIDI Player */
+    .midi-player {
+        @apply bg-zinc-900 border border-zinc-800 rounded-lg p-4;
+    }
+    
+    /* Dark scrollbars */
+    .dark-scrollbar::-webkit-scrollbar {
+        @apply w-2 h-2;
+    }
+    
+    .dark-scrollbar::-webkit-scrollbar-track {
+        @apply bg-zinc-800;
+    }
+    
+    .dark-scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-zinc-600 rounded-full;
+    }
+    
+    .dark-scrollbar::-webkit-scrollbar-thumb:hover {
+        @apply bg-zinc-500;
+    }
+}
 
 /* Print styles for chord sheets */
 @media print {

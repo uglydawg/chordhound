@@ -1,6 +1,6 @@
-<div class="w-full overflow-x-auto">
-    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-sm p-6">
-        <h2 class="text-lg font-medium mb-4">Piano Keyboard</h2>
+<div class="w-full overflow-x-auto dark-scrollbar">
+    <div>
+        <h2 class="text-lg font-semibold text-white mb-4">Piano Keyboard</h2>
         
         <div class="relative" style="width: {{ $totalWidth }}px; height: 200px;">
             <svg viewBox="0 0 {{ $totalWidth }} 200" style="width: {{ $totalWidth }}px; height: 200px;">

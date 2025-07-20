@@ -1,6 +1,6 @@
 <div class="w-full">
     @if(!empty($chord['tone']))
-        <div class="mt-3 bg-gray-50 dark:bg-zinc-900 rounded p-2">
+        <div class="mt-3 bg-zinc-800 rounded p-2">
             <svg viewBox="0 0 {{ $totalWidth }} 100" class="w-full h-auto" style="max-height: 80px;">
                 {{-- Draw white keys first --}}
                 @foreach($pianoKeys as $key)

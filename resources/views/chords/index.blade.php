@@ -1,19 +1,21 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h1 class="text-xl font-semibold">Piano Chord Generator</h1>
-            @auth
-                <a href="{{ route('chords.my-sets') }}" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
-                    My Chord Sets
-                </a>
-            @endauth
+    <div class="min-h-screen">
+        {{-- MIDI Player Bar --}}
+        <div class="bg-zinc-900 border-b border-zinc-800 px-6 py-4">
+            <div class="max-w-7xl mx-auto">
+                <livewire:midi-player />
+            </div>
         </div>
-    </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <livewire:chord-selector />
-            <livewire:chord-display />
+        <div class="p-6">
+            <div class="max-w-7xl mx-auto space-y-6">
+                {{-- Chord Grid Editor --}}
+                <livewire:chord-grid />
+                
+                {{-- Full Piano Display --}}
+                <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+                    <livewire:chord-display />
+                </div>
 
             <div class="flex justify-end space-x-4 print:hidden">
                 <button onclick="window.print()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600 dark:hover:bg-zinc-600">
