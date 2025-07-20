@@ -77,6 +77,96 @@ class ChordService
         $noteNames = array_flip($this->noteToMidi);
         return $noteNames[$midi];
     }
+    
+    /**
+     * Calculate the optimal inversion for the next chord based on voice leading
+     * @param array $currentChord Current chord with tone, semitone, and inversion
+     * @param array $nextChord Next chord with tone and semitone
+     * @return string The optimal inversion for the next chord
+     */
+    public function calculateOptimalInversion(array $currentChord, array $nextChord): string
+    {
+        // Get the actual notes of the current chord with octaves
+        $currentNotes = $this->getChordNotesWithOctaves(
+            $currentChord['tone'],
+            $currentChord['semitone'] ?? 'major',
+            $currentChord['inversion'] ?? 'root'
+        );
+        
+        // Try all inversions of the next chord
+        $inversions = ['root', 'first', 'second'];
+        $bestInversion = 'root';
+        $smallestMovement = PHP_INT_MAX;
+        
+        foreach ($inversions as $inversion) {
+            $nextNotes = $this->getChordNotesWithOctaves(
+                $nextChord['tone'],
+                $nextChord['semitone'] ?? 'major',
+                $inversion
+            );
+            
+            // Calculate total movement distance
+            $totalMovement = $this->calculateVoiceLeadingDistance($currentNotes, $nextNotes);
+            
+            if ($totalMovement < $smallestMovement) {
+                $smallestMovement = $totalMovement;
+                $bestInversion = $inversion;
+            }
+        }
+        
+        return $bestInversion;
+    }
+    
+    /**
+     * Get chord notes with specific octaves based on comfortable voicing
+     */
+    private function getChordNotesWithOctaves(string $rootNote, string $chordType, string $inversion): array
+    {
+        $notes = $this->getChordNotes($rootNote, $chordType, $inversion);
+        
+        // Apply comfortable octaves based on inversion
+        $octaves = match($inversion) {
+            'root' => [4, 4, 4],
+            'first' => [3, 4, 4],
+            'second' => [3, 3, 4],
+            default => [4, 4, 4]
+        };
+        
+        $notesWithOctaves = [];
+        foreach ($notes as $index => $note) {
+            $notesWithOctaves[] = [
+                'note' => $note,
+                'octave' => $octaves[$index] ?? 4,
+                'midi' => $this->noteToMidi[$note] + (12 * ($octaves[$index] ?? 4))
+            ];
+        }
+        
+        return $notesWithOctaves;
+    }
+    
+    /**
+     * Calculate the total voice leading distance between two chords
+     */
+    private function calculateVoiceLeadingDistance(array $chord1, array $chord2): int
+    {
+        $totalDistance = 0;
+        
+        // For each note in the first chord, find the closest note in the second chord
+        foreach ($chord1 as $note1) {
+            $minDistance = PHP_INT_MAX;
+            
+            foreach ($chord2 as $note2) {
+                $distance = abs($note1['midi'] - $note2['midi']);
+                if ($distance < $minDistance) {
+                    $minDistance = $distance;
+                }
+            }
+            
+            $totalDistance += $minDistance;
+        }
+        
+        return $totalDistance;
+    }
 
     public function calculateBlueNotes(array $chords): array
     {

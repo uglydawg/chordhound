@@ -18,28 +18,40 @@ class ChordGrid extends Component
     
     private ChordService $chordService;
     
-    // Common chord progressions for suggestions
+    // Common chord progressions for suggestions (based on web search results)
     private array $chordSuggestions = [
-        'I-V-vi-IV' => [
+        'I-V-vi-IV (Pop)' => [
             ['tone' => 'C', 'semitone' => 'major'],
             ['tone' => 'G', 'semitone' => 'major'],
             ['tone' => 'A', 'semitone' => 'minor'],
             ['tone' => 'F', 'semitone' => 'major']
         ],
-        'I-vi-IV-V' => [
+        'I-vi-IV-V (50s)' => [
             ['tone' => 'C', 'semitone' => 'major'],
             ['tone' => 'A', 'semitone' => 'minor'],
             ['tone' => 'F', 'semitone' => 'major'],
             ['tone' => 'G', 'semitone' => 'major']
         ],
-        'ii-V-I' => [
+        'ii-V-I (Jazz)' => [
             ['tone' => 'D', 'semitone' => 'minor'],
             ['tone' => 'G', 'semitone' => 'major'],
             ['tone' => 'C', 'semitone' => 'major']
         ],
-        'I-IV-V' => [
+        'I-IV-V (Blues)' => [
             ['tone' => 'C', 'semitone' => 'major'],
             ['tone' => 'F', 'semitone' => 'major'],
+            ['tone' => 'G', 'semitone' => 'major']
+        ],
+        'vi-IV-I-V' => [
+            ['tone' => 'A', 'semitone' => 'minor'],
+            ['tone' => 'F', 'semitone' => 'major'],
+            ['tone' => 'C', 'semitone' => 'major'],
+            ['tone' => 'G', 'semitone' => 'major']
+        ],
+        'I-vi-ii-V' => [
+            ['tone' => 'C', 'semitone' => 'major'],
+            ['tone' => 'A', 'semitone' => 'minor'],
+            ['tone' => 'D', 'semitone' => 'minor'],
             ['tone' => 'G', 'semitone' => 'major']
         ]
     ];
@@ -167,18 +179,30 @@ class ChordGrid extends Component
         $this->showSuggestions = !$this->showSuggestions;
     }
 
-    public function applySuggestion($progressionKey)
+    public function applySuggestion($progressionKey, $autoInversion = false)
     {
         if (isset($this->chordSuggestions[$progressionKey])) {
             $progression = $this->chordSuggestions[$progressionKey];
             
             foreach ($progression as $index => $chord) {
                 if ($index < 4) {
-                    $this->chords[$index + 1] = [
-                        'position' => $index + 1,
+                    $position = $index + 1;
+                    
+                    // Determine inversion
+                    $inversion = 'root';
+                    if ($autoInversion && $index > 0) {
+                        // Calculate optimal inversion based on previous chord
+                        $prevChord = $this->chords[$position - 1];
+                        if (!empty($prevChord['tone'])) {
+                            $inversion = $this->chordService->calculateOptimalInversion($prevChord, $chord);
+                        }
+                    }
+                    
+                    $this->chords[$position] = [
+                        'position' => $position,
                         'tone' => $chord['tone'],
                         'semitone' => $chord['semitone'],
-                        'inversion' => 'root',
+                        'inversion' => $inversion,
                         'is_blue_note' => false,
                     ];
                 }
@@ -188,6 +212,23 @@ class ChordGrid extends Component
             $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
             $this->showSuggestions = false;
         }
+    }
+    
+    public function optimizeVoiceLeading()
+    {
+        // Optimize inversions for smooth voice leading
+        for ($i = 2; $i <= 4; $i++) {
+            if (!empty($this->chords[$i]['tone']) && !empty($this->chords[$i - 1]['tone'])) {
+                $optimalInversion = $this->chordService->calculateOptimalInversion(
+                    $this->chords[$i - 1],
+                    $this->chords[$i]
+                );
+                $this->chords[$i]['inversion'] = $optimalInversion;
+            }
+        }
+        
+        $this->calculateBlueNotes();
+        $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
     }
 
     private function calculateBlueNotes()

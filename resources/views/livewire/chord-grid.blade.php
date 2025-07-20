@@ -3,15 +3,27 @@
     <div class="timeline-grid p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-primary">Chord Progression</h2>
-            <button
-                wire:click="toggleSuggestions"
-                class="text-sm text-secondary hover:text-primary transition-colors flex items-center space-x-2"
-            >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-                <span>AI Suggestions</span>
-            </button>
+            <div class="flex items-center space-x-3">
+                <button
+                    wire:click="optimizeVoiceLeading"
+                    class="text-sm text-secondary hover:text-primary transition-colors flex items-center space-x-2"
+                    title="Optimize inversions for smooth voice leading"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                    </svg>
+                    <span>Optimize</span>
+                </button>
+                <button
+                    wire:click="toggleSuggestions"
+                    class="text-sm text-secondary hover:text-primary transition-colors flex items-center space-x-2"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <span>Progressions</span>
+                </button>
+            </div>
         </div>
         
         {{-- Chord Blocks --}}
@@ -116,18 +128,29 @@
         </div>
     </div>
     
-    {{-- AI Suggestions Dropdown --}}
+    {{-- Progressions Dropdown --}}
     @if($showSuggestions)
         <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 space-y-2">
-            <h4 class="text-sm font-medium text-secondary mb-3">Common Progressions</h4>
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="text-sm font-medium text-secondary">Common Progressions</h4>
+                <label class="flex items-center space-x-2 text-xs">
+                    <input type="checkbox" id="auto-inversion" class="rounded bg-zinc-700 border-zinc-600 text-blue-500 focus:ring-blue-500">
+                    <span class="text-secondary">Auto voice leading</span>
+                </label>
+            </div>
             @foreach($chordSuggestions as $name => $progression)
                 <button
-                    wire:click="applySuggestion('{{ $name }}')"
-                    class="w-full text-left px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors"
+                    wire:click="applySuggestion('{{ $name }}', document.getElementById('auto-inversion').checked)"
+                    class="w-full text-left px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors group"
                 >
-                    <span class="text-primary font-medium">{{ $name }}</span>
-                    <span class="text-secondary text-sm ml-2">
-                        ({{ collect($progression)->map(fn($c) => $c['tone'] . ($c['semitone'] === 'minor' ? 'm' : ''))->join(' - ') }})
+                    <div class="flex items-center justify-between">
+                        <span class="text-primary font-medium">{{ $name }}</span>
+                        <span class="text-secondary text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                            Click to apply
+                        </span>
+                    </div>
+                    <span class="text-secondary text-sm">
+                        {{ collect($progression)->map(fn($c) => $c['tone'] . ($c['semitone'] === 'minor' ? 'm' : ''))->join(' - ') }}
                     </span>
                 </button>
             @endforeach
