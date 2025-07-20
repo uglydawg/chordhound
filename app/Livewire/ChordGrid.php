@@ -20,6 +20,7 @@ class ChordGrid extends Component
     public bool $showRomanNumerals = false;
     public array $romanNumerals = [];
     public string $selectedProgression = '';
+    public bool $showVoiceLeading = true;
     
     private ChordService $chordService;
     
@@ -52,6 +53,7 @@ class ChordGrid extends Component
         $this->selectedKeyType = session('chord_grid.selected_key_type', 'major');
         $this->selectedProgression = session('chord_grid.selected_progression', 'I-V-vi-IV');
         $this->showRomanNumerals = session('chord_grid.show_roman_numerals', false);
+        $this->showVoiceLeading = session('chord_grid.show_voice_leading', true);
         
         // Initialize with 4 chord slots
         for ($i = 1; $i <= 4; $i++) {
@@ -273,6 +275,12 @@ class ChordGrid extends Component
         if ($this->showRomanNumerals) {
             $this->updateRomanNumerals();
         }
+    }
+    
+    public function toggleVoiceLeading()
+    {
+        $this->showVoiceLeading = !$this->showVoiceLeading;
+        session(['chord_grid.show_voice_leading' => $this->showVoiceLeading]);
     }
     
     private function updateRomanNumerals()

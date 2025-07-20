@@ -94,6 +94,16 @@
                     <span>Analysis</span>
                 </button>
                 <button
+                    wire:click="toggleVoiceLeading"
+                    class="text-sm {{ $showVoiceLeading ? 'text-green-500' : 'text-secondary' }} hover:text-primary transition-colors flex items-center space-x-2"
+                    title="Show voice leading animations"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    </svg>
+                    <span>Voice Leading</span>
+                </button>
+                <button
                     wire:click="optimizeVoiceLeading"
                     class="text-sm text-secondary hover:text-primary transition-colors flex items-center space-x-2"
                     title="Optimize inversions for smooth voice leading"
@@ -122,51 +132,85 @@
         @endif
         
         {{-- Chord Blocks --}}
-        <div class="grid grid-cols-4 gap-4">
-            @foreach($chords as $position => $chord)
-                <div class="space-y-2">
-                    {{-- Chord Button --}}
-                    <div 
-                        wire:click="selectChord({{ $position }})"
-                        class="chord-block {{ $activePosition === $position ? 'chord-block-active' : '' }} {{ $chord['is_blue_note'] ? 'ring-2 ring-purple-500' : '' }} relative group"
-                    >
-                        <div>
-                            @if($chord['tone'])
-                                <div class="text-lg font-bold text-center">
-                                    {{ $chord['tone'] }}{{ $chord['semitone'] === 'minor' ? 'm' : ($chord['semitone'] === 'diminished' ? 'dim' : '') }}
-                                </div>
-                                @if($chord['inversion'] !== 'root')
-                                    <div class="text-xs text-secondary text-center">{{ substr(ucfirst($chord['inversion']), 0, 3) }}</div>
+        <div class="space-y-4">
+            {{-- First row: all four chords with voice leading animations below each --}}
+            <div class="grid grid-cols-4 gap-4">
+                @foreach($chords as $pos => $ch)
+                    <div class="space-y-2">
+                        {{-- Chord Button --}}
+                        <div 
+                            wire:click="selectChord({{ $pos }})"
+                            class="chord-block {{ $activePosition === $pos ? 'chord-block-active' : '' }} {{ $ch['is_blue_note'] ? 'ring-2 ring-purple-500' : '' }} relative group"
+                        >
+                            <div>
+                                @if($ch['tone'])
+                                    <div class="text-lg font-bold text-center">
+                                        {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
+                                    </div>
+                                    @if($ch['inversion'] !== 'root')
+                                        <div class="text-xs text-secondary text-center">{{ substr(ucfirst($ch['inversion']), 0, 3) }}</div>
+                                    @endif
+                                @else
+                                    <div class="text-lg text-tertiary text-center">+</div>
                                 @endif
-                            @else
-                                <div class="text-lg text-tertiary text-center">+</div>
+                            </div>
+                            
+                            {{-- Clear button --}}
+                            @if($ch['tone'])
+                                <button
+                                    wire:click.stop="clearChord({{ $pos }})"
+                                    class="absolute -top-2 -right-2 w-6 h-6 bg-zinc-700 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
                             @endif
                         </div>
                         
-                        {{-- Clear button --}}
-                        @if($chord['tone'])
-                            <button
-                                wire:click.stop="clearChord({{ $position }})"
-                                class="absolute -top-2 -right-2 w-6 h-6 bg-zinc-700 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
+                        {{-- Mini Piano Display --}}
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-2">
+                            <livewire:chord-piano :chord="$ch" :position="$pos" :wire:key="'grid-piano-' . $pos" />
+                        </div>
+                        
+                        {{-- Voice Leading Animation below this chord --}}
+                        @if($showVoiceLeading)
+                            @php
+                                $nextChord = null;
+                                $nextPosition = null;
+                                
+                                // Determine what chord comes next for this position
+                                if ($pos < 4 && !empty($chords[$pos + 1]['tone'])) {
+                                    $nextChord = $chords[$pos + 1];
+                                    $nextPosition = $pos + 1;
+                                } elseif ($pos == 4 && !empty($chords[1]['tone'])) {
+                                    // Loop back to first chord
+                                    $nextChord = $chords[1];
+                                    $nextPosition = 1;
+                                }
+                            @endphp
+                            
+                            @if($ch['tone'] && $nextChord)
+                                <livewire:voice-leading-animation 
+                                    :fromChord="$ch" 
+                                    :toChord="$nextChord" 
+                                    :position="$pos"
+                                    :nextPosition="$nextPosition"
+                                    :wire:key="'voice-below-' . $pos . '-to-' . $nextPosition" 
+                                />
+                            @else
+                                {{-- Empty space to maintain layout --}}
+                                <div class="h-16"></div>
+                            @endif
                         @endif
+                        
+                        {{-- Beat indicator --}}
+                        <div class="text-center text-xs text-tertiary">
+                            Beat {{ ($pos - 1) * 2 + 1 }}-{{ ($pos - 1) * 2 + 2 }}
+                        </div>
                     </div>
-                    
-                    {{-- Mini Piano Display --}}
-                    <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-2">
-                        <livewire:chord-piano :chord="$chord" :position="$position" :wire:key="'grid-piano-' . $position" />
-                    </div>
-                    
-                    {{-- Beat indicator --}}
-                    <div class="text-center text-xs text-tertiary">
-                        Beat {{ ($position - 1) * 2 + 1 }}-{{ ($position - 1) * 2 + 2 }}
-                    </div>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         </div>
     </div>
     
