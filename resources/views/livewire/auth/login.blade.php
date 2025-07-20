@@ -76,7 +76,9 @@
         </flux:modal>
         
         <flux:button onclick="document.querySelector('[data-flux-modal=magic-link]').showModal()" variant="ghost" class="w-full">
-            <flux:icon.mail class="w-5 h-5" />
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
             {{ __('Continue with Magic Link') }}
         </flux:button>
         
@@ -92,7 +94,9 @@
         </flux:modal>
         
         <flux:button onclick="document.querySelector('[data-flux-modal=auth-code]').showModal()" variant="ghost" class="w-full">
-            <flux:icon.lock-keyhole class="w-5 h-5" />
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+            </svg>
             {{ __('Continue with Auth Code') }}
         </flux:button>
     </div>
