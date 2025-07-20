@@ -22,6 +22,29 @@ class ChordPiano extends Component
         $this->chordService = app(ChordService::class);
     }
     
+    private function getComfortableOctaves(array $notes, string $inversion): array
+    {
+        // For comfortable hand position, keep notes within about an octave span
+        // Standard voicings for each inversion type
+        
+        switch ($inversion) {
+            case 'root':
+                // Root position: Close voicing in middle range
+                return [4, 4, 4];
+                
+            case 'first':
+                // First inversion: Bottom note stays low, top two notes close together
+                return [3, 4, 4];
+                
+            case 'second':
+                // Second inversion: Spread more evenly
+                return [3, 3, 4];
+                
+            default:
+                return [4, 4, 4];
+        }
+    }
+    
     public function render()
     {
         $pianoKeys = [];
@@ -37,17 +60,12 @@ class ChordPiano extends Component
             // Only take the first 3 notes for triads
             $notesToDisplay = array_slice($notes, 0, 3);
             
-            // Add octave to each note for display based on inversion
+            // Get comfortable octaves for hand position
+            $octaves = $this->getComfortableOctaves($notesToDisplay, $this->chord['inversion'] ?? 'root');
+            
+            // Add octave to each note for display
             foreach ($notesToDisplay as $index => $note) {
-                $octave = 4;
-                if ($index === 2 && $this->chord['inversion'] === 'first') {
-                    // For first inversion, raise the last note an octave
-                    $octave = 5;
-                } elseif ($index >= 1 && $this->chord['inversion'] === 'second') {
-                    // For second inversion, raise the last two notes an octave
-                    $octave = 5;
-                }
-                $activeNotes[] = $note . $octave;
+                $activeNotes[] = $note . $octaves[$index];
             }
         }
         

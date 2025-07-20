@@ -53,16 +53,11 @@ class ChordDisplay extends Component
                 // Only take the first 3 notes for triads
                 $notesToDisplay = array_slice($notes, 0, 3);
                 
+                // Determine octaves for comfortable hand position
+                $octaves = $this->getComfortableOctaves($notesToDisplay, $chord['inversion'] ?? 'root');
+                
                 foreach ($notesToDisplay as $index => $note) {
-                    // Display chord in middle octave (4) for clarity
-                    $octave = 4;
-                    if ($index === 2 && $chord['inversion'] === 'first') {
-                        // For first inversion, raise the last note an octave
-                        $octave = 5;
-                    } elseif ($index >= 1 && $chord['inversion'] === 'second') {
-                        // For second inversion, raise the last two notes an octave
-                        $octave = 5;
-                    }
+                    $octave = $octaves[$index];
                     
                     $keyPosition = $this->chordService->getPianoKeyPosition($note, $octave);
                     if ($keyPosition >= 0 && $keyPosition <= 87) {
@@ -76,6 +71,29 @@ class ChordDisplay extends Component
                     }
                 }
             }
+        }
+    }
+    
+    private function getComfortableOctaves(array $notes, string $inversion): array
+    {
+        // For comfortable hand position, keep notes within about an octave span
+        // Standard voicings for each inversion type
+        
+        switch ($inversion) {
+            case 'root':
+                // Root position: Close voicing in middle range
+                return [4, 4, 4];
+                
+            case 'first':
+                // First inversion: Bottom note stays low, top two notes close together
+                return [3, 4, 4];
+                
+            case 'second':
+                // Second inversion: Spread more evenly
+                return [3, 3, 4];
+                
+            default:
+                return [4, 4, 4];
         }
     }
 
