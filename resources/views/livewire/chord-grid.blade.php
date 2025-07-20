@@ -6,32 +6,32 @@
             <div class="flex items-center space-x-4">
                 <label class="text-sm font-medium text-secondary">Key:</label>
                 <select 
-                    wire:model.live="selectedKey"
+                    wire:change="setKey($event.target.value)"
                     class="bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                     @foreach($availableKeys as $key)
-                        <option value="{{ $key }}">{{ $key }}</option>
+                        <option value="{{ $key }}" @if($key === $selectedKey) selected @endif>{{ $key }}</option>
                     @endforeach
                 </select>
                 
                 <select
-                    wire:model.live="selectedKeyType"
+                    wire:change="setKeyType($event.target.value)"
                     class="bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                    <option value="major">Major</option>
-                    <option value="minor">Minor</option>
+                    <option value="major" @if($selectedKeyType === 'major') selected @endif>Major</option>
+                    <option value="minor" @if($selectedKeyType === 'minor') selected @endif>Minor</option>
                 </select>
                 
                 <div class="h-6 w-px bg-zinc-700"></div>
                 
                 <label class="text-sm font-medium text-secondary">Progression:</label>
                 <select
-                    wire:model.live="selectedProgression"
+                    wire:change="setProgression($event.target.value)"
                     class="bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]"
                 >
-                    <option value="">Custom</option>
+                    <option value="" @if(!$selectedProgression) selected @endif>Custom</option>
                     @foreach($progressions as $romanNumerals => $progression)
-                        <option value="{{ $romanNumerals }}">
+                        <option value="{{ $romanNumerals }}" @if($selectedProgression === $romanNumerals) selected @endif>
                             {{ $romanNumerals }}
                             @if(isset($progressionDescriptions[$romanNumerals]))
                                 - {{ $progressionDescriptions[$romanNumerals] }}
