@@ -16,9 +16,6 @@
                 <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 chords-section">
                     <livewire:chord-display wire:key="chord-display-main" />
                 </div>
-
-            <div class="flex justify-end space-x-4 print:hidden">
-                <livewire:print-chord-sheet />
             </div>
         </div>
     </div>
@@ -89,33 +86,62 @@
     {{-- Print styles --}}
     <style>
     @media print {
-        /* Hide everything except the Chords section */
-        body > *:not(.min-h-screen),
-        .min-h-screen > *:not(.p-6),
-        .p-6 > *:not(.max-w-7xl),
-        .max-w-7xl > *:not(.chords-section),
-        nav, 
+        /* Hide specific components and elements */
+        nav,
+        .bg-zinc-900.border-b,
+        [wire\\:id*="chord-grid"],
+        [wire\\:id*="midi-player"],
         .print\\:hidden,
-        .timeline-grid,
-        .midi-player,
         #save-chord-set-modal {
             display: none !important;
         }
         
-        /* Show page structure for chords section */
-        body, .min-h-screen, .p-6, .max-w-7xl {
-            display: block !important;
-            background: white !important;
-            padding: 0 !important;
+        /* Reset page styles for print */
+        html, body {
             margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            height: auto !important;
+            overflow: visible !important;
         }
         
-        /* Only show the Chords section */
+        /* Hide all content except chords section */
+        .min-h-screen > .bg-zinc-900,
+        .min-h-screen > .p-6 > .max-w-7xl > :not(.chords-section) {
+            display: none !important;
+        }
+        
+        /* Reset container styles */
+        .min-h-screen,
+        .p-6,
+        .max-w-7xl {
+            min-height: auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            background: transparent !important;
+        }
+        
+        /* Style the chords section for print */
         .chords-section {
-            display: block !important;
             border: none !important;
             padding: 1rem !important;
             background: white !important;
+            margin: 0 !important;
+        }
+        
+        /* Ensure all child elements are visible with proper display types */
+        .chords-section * {
+            visibility: visible !important;
+        }
+        
+        /* Maintain grid and flex layouts */
+        .chords-section .grid {
+            display: grid !important;
+        }
+        
+        .chords-section .flex {
+            display: flex !important;
         }
         
         /* Reset background colors for print */

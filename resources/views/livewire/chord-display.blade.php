@@ -1,6 +1,9 @@
 <div class="w-full">
-    <div class="mb-4">
+    <div class="mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold text-primary">Chords</h2>
+        <div class="print:hidden">
+            <livewire:print-chord-sheet />
+        </div>
     </div>
     
     {{-- Individual chord displays in 2x2 grid --}}
