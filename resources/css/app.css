@@ -100,7 +100,7 @@ select:focus[data-flux-control] {
 @layer components {
     /* Chord grid blocks */
     .chord-block {
-        @apply bg-zinc-800 border border-zinc-700 rounded-lg p-4 hover:border-blue-500 transition-all cursor-pointer;
+        @apply bg-zinc-800 border border-zinc-700 rounded-lg p-4 hover:border-blue-500 transition-all cursor-pointer aspect-square flex items-center justify-center;
     }
     
     .chord-block-active {

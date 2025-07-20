@@ -21,16 +21,16 @@
                     wire:click="selectChord({{ $position }})"
                     class="chord-block {{ $activePosition === $position ? 'chord-block-active' : '' }} {{ $chord['is_blue_note'] ? 'ring-2 ring-purple-500' : '' }} relative group"
                 >
-                    <div class="text-center">
+                    <div>
                         @if($chord['tone'])
-                            <div class="text-2xl font-bold mb-1">
+                            <div class="text-2xl font-bold text-center">
                                 {{ $chord['tone'] }}{{ $chord['semitone'] === 'minor' ? 'm' : ($chord['semitone'] === 'diminished' ? 'dim' : '') }}
                             </div>
                             @if($chord['inversion'] !== 'root')
-                                <div class="text-xs text-secondary">{{ ucfirst($chord['inversion']) }}</div>
+                                <div class="text-xs text-secondary text-center mt-1">{{ ucfirst($chord['inversion']) }}</div>
                             @endif
                         @else
-                            <div class="text-2xl text-tertiary">+</div>
+                            <div class="text-2xl text-tertiary text-center">+</div>
                         @endif
                     </div>
                     
