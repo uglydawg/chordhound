@@ -101,7 +101,7 @@ class ChordDisplay extends Component
     {
         $keys = [];
         $whiteKeyWidth = 30;
-        $blackKeyWidth = 20;
+        $blackKeyWidth = 18;  // Narrower black keys to show white key edges
         $whiteKeyCount = 0;
         
         for ($octave = $this->startOctave; $octave < $this->startOctave + $this->octaveCount; $octave++) {
@@ -131,11 +131,11 @@ class ChordDisplay extends Component
         // Add black keys on top
         // Black keys are positioned relative to each octave's starting C
         $blackKeyOffsets = [
-            'C#' => 0.65,  // Between C and D
-            'D#' => 1.35,  // Between D and E
-            'F#' => 3.65,  // Between F and G
-            'G#' => 4.35,  // Between G and A
-            'A#' => 5.35,  // Between A and B
+            'C#' => 0.75,  // Between C and D
+            'D#' => 1.75,  // Between D and E
+            'F#' => 3.75,  // Between F and G
+            'G#' => 4.75,  // Between G and A
+            'A#' => 5.75,  // Between A and B
         ];
         
         // Calculate black key positions for each octave

@@ -71,15 +71,15 @@ class ChordPiano extends Component
         
         // Create a mini piano (2 octaves centered around middle C)
         $whiteKeyWidth = 20;
-        $blackKeyWidth = 14;
+        $blackKeyWidth = 12;  // Narrower black keys
         $whiteKeyOffsets = ['C' => 0, 'D' => 1, 'E' => 2, 'F' => 3, 'G' => 4, 'A' => 5, 'B' => 6];
         // Black keys positioned between white keys (no black key between E-F and B-C)
         $blackKeyPositions = [
-            'C#' => 0.65,  // Between C and D
-            'D#' => 1.35,  // Between D and E
-            'F#' => 3.65,  // Between F and G
-            'G#' => 4.35,  // Between G and A
-            'A#' => 5.35,  // Between A and B
+            'C#' => 0.75,  // Between C and D
+            'D#' => 1.75,  // Between D and E
+            'F#' => 3.75,  // Between F and G
+            'G#' => 4.75,  // Between G and A
+            'A#' => 5.75,  // Between A and B
         ];
         
         $x = 0;

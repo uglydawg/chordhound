@@ -15,11 +15,11 @@
                                 <rect 
                                     x="{{ $key['x'] }}" 
                                     y="0" 
-                                    width="{{ $key['width'] - 2 }}" 
+                                    width="{{ $key['width'] - 1 }}" 
                                     height="175"
                                     fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#60A5FA' : '#34D399') : '#FAFAFA' }}"
                                     stroke="#333333"
-                                    stroke-width="1"
+                                    stroke-width="0.5"
                                     rx="3"
                                     class="cursor-pointer transition-all hover:opacity-90"
                                 />
@@ -27,7 +27,7 @@
                                 <rect 
                                     x="{{ $key['x'] }}" 
                                     y="170" 
-                                    width="{{ $key['width'] - 2 }}" 
+                                    width="{{ $key['width'] - 1 }}" 
                                     height="5"
                                     fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#3B82F6' : '#10B981') : '#E5E5E5' }}"
                                     rx="1"

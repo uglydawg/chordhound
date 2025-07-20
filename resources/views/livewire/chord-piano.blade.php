@@ -12,18 +12,18 @@
                             <rect 
                                 x="{{ $key['x'] }}" 
                                 y="0" 
-                                width="{{ $key['width'] - 2 }}" 
+                                width="{{ $key['width'] - 1 }}" 
                                 height="98"
                                 fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#60A5FA' : '#34D399') : '#FAFAFA' }}"
                                 stroke="#333333"
-                                stroke-width="1"
+                                stroke-width="0.5"
                                 rx="2"
                             />
                             {{-- Key shadow/3D effect --}}
                             <rect 
                                 x="{{ $key['x'] }}" 
                                 y="94" 
-                                width="{{ $key['width'] - 2 }}" 
+                                width="{{ $key['width'] - 1 }}" 
                                 height="4"
                                 fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#3B82F6' : '#10B981') : '#E5E5E5' }}"
                                 rx="1"
