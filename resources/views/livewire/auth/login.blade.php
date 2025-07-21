@@ -49,11 +49,12 @@
             <span class="w-full border-t border-zinc-300 dark:border-zinc-700"></span>
         </div>
         <div class="relative flex justify-center text-sm">
-            <span class="bg-white dark:bg-zinc-900 px-2 text-zinc-500 dark:text-zinc-400">{{ __('Or continue with') }}</span>
+            <span class="bg-white dark:bg-zinc-900 px-2 text-zinc-500 dark:text-zinc-400">{{ __('Or sign in with') }}</span>
         </div>
     </div>
     
     <div class="flex flex-col gap-3">
+        @if (false) {{-- Google OAuth temporarily hidden --}}
         <flux:button href="{{ route('auth.google') }}" variant="ghost" class="w-full">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -63,6 +64,7 @@
             </svg>
             {{ __('Continue with Google') }}
         </flux:button>
+        @endif
         
         <flux:modal name="magic-link">
             <flux:card class="w-full max-w-md">
@@ -75,7 +77,18 @@
             </flux:card>
         </flux:modal>
         
-        <flux:button onclick="document.querySelector('[data-flux-modal=magic-link]').showModal()" variant="ghost" class="w-full">
+        <flux:button onclick="
+            const email = document.querySelector('input[name=email]').value;
+            const modal = document.querySelector('[data-modal=magic-link]');
+            modal.showModal();
+            setTimeout(() => {
+                const modalEmail = modal.querySelector('input[type=email]');
+                if (modalEmail && email) {
+                    modalEmail.value = email;
+                    modalEmail.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }, 100);
+        " variant="ghost" class="w-full">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
             </svg>
@@ -93,7 +106,18 @@
             </flux:card>
         </flux:modal>
         
-        <flux:button onclick="document.querySelector('[data-flux-modal=auth-code]').showModal()" variant="ghost" class="w-full">
+        <flux:button onclick="
+            const email = document.querySelector('input[name=email]').value;
+            const modal = document.querySelector('[data-modal=auth-code]');
+            modal.showModal();
+            setTimeout(() => {
+                const modalEmail = modal.querySelector('input[type=email]');
+                if (modalEmail && email) {
+                    modalEmail.value = email;
+                    modalEmail.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }, 100);
+        " variant="ghost" class="w-full">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
             </svg>

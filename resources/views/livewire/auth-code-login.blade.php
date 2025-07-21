@@ -17,7 +17,7 @@
             />
             
             @if($error)
-                <flux:alert variant="danger">{{ $error }}</flux:alert>
+                <flux:alert variant="error">{{ $error }}</flux:alert>
             @endif
             
             <flux:button type="submit" variant="primary" class="w-full">

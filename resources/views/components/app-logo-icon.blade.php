@@ -1,8 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 42" {{ $attributes }}>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" {{ $attributes }}>
+    <!-- Dog head outline -->
     <path 
         fill="currentColor" 
-        fill-rule="evenodd" 
-        clip-rule="evenodd"
-        d="M17.2 5.633 8.6.855 0 5.633v26.51l16.2 9 16.2-9v-8.442l7.6-4.223V9.856l-8.6-4.777-8.6 4.777V18.3l-5.6 3.111V5.633ZM38 18.301l-5.6 3.11v-6.157l5.6-3.11V18.3Zm-1.06-7.856-5.54 3.078-5.54-3.079 5.54-3.078 5.54 3.079ZM24.8 18.3v-6.157l5.6 3.111v6.158L24.8 18.3Zm-1 1.732 5.54 3.078-13.14 7.302-5.54-3.078 13.14-7.3v-.002Zm-16.2 7.89 7.6 4.222V38.3L2 30.966V7.92l5.6 3.111v16.892ZM8.6 9.3 3.06 6.222 8.6 3.143l5.54 3.08L8.6 9.3Zm21.8 15.51-13.2 7.334V38.3l13.2-7.334v-6.156ZM9.6 11.034l5.6-3.11v14.6l-5.6 3.11v-14.6Z"
+        d="M24 8c-6 0-11 4-13 9-1 2-1 4 0 6l1 2c0 3 2 5 4 7 2 3 5 5 8 5s6-2 8-5c2-2 4-4 4-7l1-2c1-2 1-4 0-6-2-5-7-9-13-9z"
     />
+    <!-- Left ear -->
+    <path 
+        fill="currentColor" 
+        d="M14 12c-2-1-4 0-5 2-1 2 0 4 2 5l3 2c1 0 2-1 2-2l-2-7z"
+    />
+    <!-- Right ear -->
+    <path 
+        fill="currentColor" 
+        d="M34 12c2-1 4 0 5 2 1 2 0 4-2 5l-3 2c-1 0-2-1-2-2l2-7z"
+    />
+    <!-- Eyes -->
+    <circle fill="currentColor" cx="20" cy="22" r="2"/>
+    <circle fill="currentColor" cx="28" cy="22" r="2"/>
+    <!-- Nose -->
+    <path 
+        fill="currentColor" 
+        d="M24 26c-1 0-2 1-2 2s1 2 2 2 2-1 2-2-1-2-2-2z"
+    />
+    <!-- Mouth -->
+    <path 
+        fill="currentColor" 
+        d="M24 30c-2 0-4 1-4 3 0 1 1 2 2 2h4c1 0 2-1 2-2 0-2-2-3-4-3z"
+    />
+    <!-- Piano keys at bottom -->
+    <rect fill="currentColor" x="12" y="38" width="3" height="6"/>
+    <rect fill="currentColor" x="18" y="38" width="3" height="6"/>
+    <rect fill="currentColor" x="24" y="38" width="3" height="6"/>
+    <rect fill="currentColor" x="30" y="38" width="3" height="6"/>
+    <rect fill="currentColor" x="36" y="38" width="3" height="6"/>
+    <!-- Black keys -->
+    <rect fill="currentColor" x="14.5" y="38" width="2" height="4"/>
+    <rect fill="currentColor" x="20.5" y="38" width="2" height="4"/>
+    <rect fill="currentColor" x="32.5" y="38" width="2" height="4"/>
 </svg>
