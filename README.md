@@ -195,6 +195,10 @@ Tests are written using Pest. Follow the existing patterns:
 - Use database transactions for isolation
 - Follow Arrange-Act-Assert pattern
 
+### Test Credit Cards
+
+For testing payment functionality, refer to the [Test Cards Documentation](documentation/test-cards.md) which contains all supported Stripe test card numbers and usage instructions.
+
 ## License
 
 [Add your license information here]
