@@ -21,8 +21,9 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-/test-results
-/playwright-report
+/tests/Browser/console
+/tests/Browser/screenshots
+/tests/Browser/.env
 
 **/caddy
 frankenphp
