@@ -9,9 +9,22 @@ use Illuminate\Http\Request;
 
 class ChordController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('chords.index');
+        $chordSetId = null;
+        
+        // Check if we need to load a specific chord set
+        if ($request->has('load') && auth()->check()) {
+            $chordSet = ChordSet::where('id', $request->load)
+                ->where('user_id', auth()->id())
+                ->first();
+                
+            if ($chordSet) {
+                $chordSetId = $chordSet->id;
+            }
+        }
+        
+        return view('chords.index', compact('chordSetId'));
     }
 
     public function mySets()

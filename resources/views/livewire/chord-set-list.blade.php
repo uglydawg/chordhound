@@ -25,10 +25,39 @@
                         Created {{ $chordSet->created_at->diffForHumans() }}
                     </div>
                     
+                    {{-- Display chords preview --}}
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        @foreach($chordSet->chords->take(4) as $chord)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                                {{ $chord->tone }}{{ $chord->semitone === 'minor' ? 'm' : ($chord->semitone === 'diminished' ? 'dim' : '') }}
+                                @if($chord->inversion !== 'root')
+                                    <span class="text-[10px] ml-0.5">({{ substr($chord->inversion, 0, 3) }})</span>
+                                @endif
+                            </span>
+                        @endforeach
+                        @if($chordSet->chords->count() > 4)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                                +{{ $chordSet->chords->count() - 4 }} more
+                            </span>
+                        @endif
+                    </div>
+                    
                     <div class="mt-6 flex space-x-2">
                         <flux:button 
-                            href="{{ route('chords.edit', $chordSet) }}" 
+                            href="{{ route('chords.index', ['load' => $chordSet->id]) }}" 
                             variant="primary"
+                            size="sm"
+                        >
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Play
+                        </flux:button>
+                        
+                        <flux:button 
+                            href="{{ route('chords.edit', $chordSet) }}" 
+                            variant="ghost"
                             size="sm"
                         >
                             Edit

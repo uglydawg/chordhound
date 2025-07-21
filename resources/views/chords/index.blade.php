@@ -10,7 +10,7 @@
         <div class="p-6">
             <div class="max-w-7xl mx-auto space-y-6">
                 {{-- Chord Grid Editor --}}
-                <livewire:chord-grid />
+                <livewire:chord-grid :chord-set-id="$chordSetId ?? null" />
                 
                 {{-- Chords Display (2x2 Grid) --}}
                 <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 chords-section">

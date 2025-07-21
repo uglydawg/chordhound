@@ -298,6 +298,49 @@ class ChordGrid extends Component
         );
     }
 
+    #[On('save-chord-set')]
+    public function saveChordSet($name, $description = null)
+    {
+        if (!auth()->check()) {
+            $this->dispatch('notify', type: 'error', message: 'You must be logged in to save chord sets.');
+            return;
+        }
+
+        $chordSet = $this->chordSetId 
+            ? \App\Models\ChordSet::find($this->chordSetId)
+            : new \App\Models\ChordSet();
+
+        $chordSet->fill([
+            'user_id' => auth()->id(),
+            'name' => $name,
+            'description' => $description,
+        ]);
+
+        $chordSet->save();
+
+        // Delete existing chords if updating
+        if ($this->chordSetId) {
+            $chordSet->chords()->delete();
+        }
+
+        // Save new chords
+        foreach ($this->chords as $chord) {
+            if (!empty($chord['tone'])) {
+                $chordSet->chords()->create([
+                    'position' => $chord['position'],
+                    'tone' => $chord['tone'],
+                    'semitone' => $chord['semitone'],
+                    'inversion' => $chord['inversion'],
+                    'is_blue_note' => $chord['is_blue_note'],
+                ]);
+            }
+        }
+
+        $this->chordSetId = $chordSet->id;
+        $this->dispatch('notify', type: 'success', message: 'Chord set saved successfully!');
+        $this->dispatch('chord-set-saved', id: $chordSet->id);
+    }
+
     public function render()
     {
         $tones = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
