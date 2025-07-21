@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Uglydawg's Piano Generator</title>
+        <title>ChordHound</title>
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -53,7 +53,7 @@
         <div class="flex items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
             <main class="flex max-w-[335px] w-full flex-col-reverse lg:max-w-4xl lg:flex-row">
                 <div class="text-[13px] leading-[20px] flex-1 p-6 pb-12 lg:p-20 bg-white dark:bg-[#161615] dark:text-[#EDEDEC] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] rounded-es-lg rounded-ee-lg lg:rounded-ss-lg lg:rounded-ee-none">
-                    <h1 class="mb-1 font-medium text-orange-700 dark:text-orange-300">Welcome to Uglydawg's Piano Generator!</h1>
+                    <h1 class="mb-1 font-medium text-orange-700 dark:text-orange-300">Welcome to ChordHound!</h1>
                     <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">Create beautiful piano chord progressions with ease. <br>Get started with these amazing features.</p>
                     <ul class="flex flex-col mb-4 lg:mb-6">
                         <li class="flex items-center gap-4 py-2 relative before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A] before:top-1/2 before:bottom-0 before:left-[0.4rem] before:absolute">
@@ -149,8 +149,8 @@
                                 <rect fill="currentColor" x="87" y="101" width="5" height="11"/>
                             </svg>
                         </div>
-                        <h2 class="text-3xl font-bold text-orange-600 dark:text-orange-300 mb-2">Uglydawg's</h2>
-                        <h3 class="text-2xl font-semibold text-orange-700 dark:text-orange-400 mb-4">Piano Generator</h3>
+                        <h2 class="text-3xl font-bold text-orange-600 dark:text-orange-300 mb-2">ChordHound</h2>
+                        <h3 class="text-2xl font-semibold text-orange-700 dark:text-orange-400 mb-4">Piano Chord Generator</h3>
                         <p class="text-sm text-orange-600/80 dark:text-orange-300/80">🎹 Bark up the right tree with perfect chords! 🐕</p>
                     </div>
                 </div>

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Laravel 12.x application for a Piano Chord Generator. Currently, it's a base Laravel installation with authentication scaffolding that needs the piano chord functionality implemented according to the PRD.
+This is a Laravel 12.x application for ChordHound, a piano chord generator. The application features dog-themed branding and provides an intuitive interface for creating and managing piano chord progressions.
 
 ## Development Commands
 

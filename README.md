@@ -1,4 +1,4 @@
-# Uglydawg's Piano Generator
+# ChordHound
 
 A Laravel-based piano chord application that helps musicians visualize and play chord progressions with an intuitive interface.
 
@@ -6,7 +6,7 @@ A Laravel-based piano chord application that helps musicians visualize and play 
 
 - **Visual Piano Display**: Interactive piano keyboard showing chord notes
 - **Chord Progression Builder**: Create and save custom chord progressions
-- **Dog-Themed Branding**: Custom Uglydawg branding with orange color scheme
+- **Dog-Themed Branding**: Custom ChordHound branding with orange color scheme
 - **Multiple Authentication Methods**: Email/Password, Google OAuth, Magic Links, and Auth Codes
 - **Save/Load Functionality**: Authenticated users can save and name their chord progressions
 - **Voice Leading Optimization**: Automatic chord inversion calculations for smooth transitions

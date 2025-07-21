@@ -1,11 +1,11 @@
-# Product Requirements Document (PRD) for Uglydawg's Piano Generator
+# Product Requirements Document (PRD) for ChordHound
 
 ## 1. Overview
-**Uglydawg's Piano Generator** is a dog-themed piano chord application that allows users to select up to eight chords (with tone, semitone, and inversion options) and view a real-time piano keyboard display of the chords. Users can toggle blue note highlights, order chords, print chord diagrams, and save named chord sets with user accounts. The application features custom dog-themed branding with an orange color scheme and provides a simple, intuitive tool for musicians and learners to visualize and reference piano chords.
+**ChordHound** is a dog-themed piano chord application that allows users to select up to eight chords (with tone, semitone, and inversion options) and view a real-time piano keyboard display of the chords. Users can toggle blue note highlights, order chords, print chord diagrams, and save named chord sets with user accounts. The application features custom dog-themed branding with an orange color scheme and provides a simple, intuitive tool for musicians and learners to visualize and reference piano chords.
 
 ## 2. Goals
 
-- Deliver an intuitive tool for generating and visualizing piano chord diagrams with unique dog-themed branding
+- Deliver an intuitive tool for generating and visualizing piano chord diagrams with ChordHound branding
 - Support music education with accurate chord and blue note displays
 - Enable users to save and manage chord sets with accounts
 - Ensure fast, responsive performance on desktop and mobile using Laravel Octane
@@ -51,7 +51,7 @@ Accounts allow users to:
 
 ## 4. User Flow
 
-1. User lands on the homepage featuring Uglydawg's branding and sees the chord progression grid
+1. User lands on the homepage featuring ChordHound branding and sees the chord progression grid
 2. User selects a chord position (1-4) and chooses root note, chord type, and inversion from the palette
 3. The mini piano keyboard updates instantly showing the selected chord notes
 4. Voice leading animations display transitions between chords when enabled
@@ -119,7 +119,7 @@ Accounts allow users to:
 ## 8. Current Implementation Status
 
 ### Completed Features
-- ✅ Dog-themed branding with custom logo and orange color scheme
+- ✅ ChordHound branding with custom logo and orange color scheme
 - ✅ 4-chord progression grid with interactive selection
 - ✅ Chord palette with all 12 tones and 4 chord types
 - ✅ Inversion selection (root, first, second)
