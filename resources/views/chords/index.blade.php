@@ -1,15 +1,8 @@
 <x-layouts.app :title="__('Piano Chords')">
     <div class="min-h-screen">
-        {{-- MIDI Player Bar --}}
-        <div class="bg-zinc-900 border-b border-zinc-800 px-6 py-4">
-            <div class="max-w-7xl mx-auto">
-                <livewire:midi-player />
-            </div>
-        </div>
-
         <div class="p-6">
             <div class="max-w-7xl mx-auto space-y-6">
-                {{-- Chord Grid Editor --}}
+                {{-- Chord Grid Editor (includes Chord Palette) --}}
                 <livewire:chord-grid :chord-set-id="$chordSetId ?? null" />
                 
                 {{-- Chords Display (2x2 Grid) --}}
@@ -202,6 +195,11 @@
             setTimeout(() => {
                 Livewire.dispatch('request-chord-state');
             }, 100);
+            
+            // Listen for chord updates to ensure piano player stays in sync
+            Livewire.on('chordsUpdated', (event) => {
+                console.log('Chords updated in main view:', event);
+            });
         });
     </script>
     
@@ -212,7 +210,7 @@
         nav,
         .bg-zinc-900.border-b,
         [wire\\:id*="chord-grid"],
-        [wire\\:id*="midi-player"],
+        [wire\\:id*="piano-player"],
         .print\\:hidden,
         #save-chord-set-modal {
             display: none !important;

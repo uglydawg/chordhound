@@ -128,20 +128,6 @@
             </div>
         </div>
         
-        {{-- Roman Numeral Analysis --}}
-        @if($showRomanNumerals)
-            <div class="grid grid-cols-4 gap-4 mb-4">
-                @foreach($chords as $position => $chord)
-                    <div class="text-center">
-                        <div class="bg-zinc-800 rounded-lg px-3 py-2 border border-zinc-700">
-                            <span class="text-sm font-medium {{ $chord['tone'] ? 'text-blue-400' : 'text-tertiary' }}">
-                                {{ $romanNumerals[$position] ?? '' }}
-                            </span>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
         
         {{-- Chord Blocks --}}
         <div class="space-y-4">
@@ -152,20 +138,64 @@
                         {{-- Chord Button --}}
                         <div 
                             wire:click="selectChord({{ $pos }})"
-                            class="chord-block {{ $activePosition === $pos ? 'chord-block-active' : '' }} {{ $ch['is_blue_note'] ? 'ring-2 ring-purple-500' : '' }} relative group"
+                            class="relative rounded-lg border-2 {{ $activePosition === $pos ? 'border-blue-500 bg-blue-600' : ($ch['is_blue_note'] ? 'border-purple-500 bg-zinc-800' : 'border-zinc-700 bg-zinc-800') }} hover:border-blue-400 transition-all cursor-pointer p-6 min-h-[180px] flex flex-col justify-between group"
                         >
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            {{-- Roman Numeral --}}
+                            @if($ch['tone'] && $showRomanNumerals && isset($romanNumerals[$pos]))
+                                <div class="text-center mb-2">
+                                    <span class="text-sm font-medium {{ $activePosition === $pos ? 'text-blue-200' : 'text-blue-400' }}">
+                                        {{ $romanNumerals[$pos] }}
+                                    </span>
+                                </div>
+                            @else
+                                <div class="mb-2">&nbsp;</div>
+                            @endif
+                            
+                            {{-- Chord Name --}}
+                            <div class="flex-1 flex items-center justify-center">
                                 @if($ch['tone'])
-                                    <div class="text-5xl lg:text-6xl font-bold text-center leading-none">
-                                        {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
+                                    <div class="text-center">
+                                        <div class="text-4xl lg:text-5xl font-bold {{ $activePosition === $pos ? 'text-white' : 'text-white' }}">
+                                            {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
+                                        </div>
+                                        @if($ch['inversion'] !== 'root')
+                                            <div class="text-xs lg:text-sm {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }} mt-1">
+                                                {{ ucfirst($ch['inversion']) }} Inversion
+                                            </div>
+                                        @endif
                                     </div>
-                                    @if($ch['inversion'] !== 'root')
-                                        <div class="text-sm lg:text-base text-secondary text-center mt-1">{{ substr(ucfirst($ch['inversion']), 0, 3) }}</div>
-                                    @endif
                                 @else
-                                    <div class="text-5xl lg:text-6xl text-tertiary text-center">+</div>
+                                    <div class="text-4xl lg:text-5xl text-zinc-600">+</div>
                                 @endif
                             </div>
+                            
+                            {{-- Chord Notes --}}
+                            @if($ch['tone'])
+                                @php
+                                    $notes = app(\App\Services\ChordService::class)->getChordNotes(
+                                        $ch['tone'],
+                                        $ch['semitone'] ?? 'major',
+                                        $ch['inversion'] ?? 'root'
+                                    );
+                                    $notesDisplay = array_slice($notes, 0, 3);
+                                    // Add octave numbers based on inversion
+                                    $octaves = match($ch['inversion']) {
+                                        'first' => [3, 4, 4],
+                                        'second' => [3, 3, 4],
+                                        default => [4, 4, 4]
+                                    };
+                                    $notesWithOctaves = array_map(function($note, $octave) {
+                                        return $note . $octave;
+                                    }, $notesDisplay, $octaves);
+                                @endphp
+                                <div class="text-center mt-2">
+                                    <span class="text-xs {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }}">
+                                        {{ implode(', ', $notesWithOctaves) }}
+                                    </span>
+                                </div>
+                            @else
+                                <div class="mt-2">&nbsp;</div>
+                            @endif
                             
                             {{-- Clear button --}}
                             @if($ch['tone'])
@@ -178,11 +208,6 @@
                                     </svg>
                                 </button>
                             @endif
-                        </div>
-                        
-                        {{-- Mini Piano Display --}}
-                        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-2">
-                            <livewire:chord-piano :chord="$ch" :position="$pos" :wire:key="'grid-piano-' . $pos" />
                         </div>
                         
                         {{-- Voice Leading Animation below this chord --}}
@@ -278,6 +303,21 @@
                     {{ $label }}
                 </button>
             @endforeach
+        </div>
+    </div>
+    
+    {{-- Piano Player - Main Feature --}}
+    <div class="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                </svg>
+                Piano Player
+            </h2>
+        </div>
+        <div class="p-6">
+            <livewire:piano-player />
         </div>
     </div>
 </div>

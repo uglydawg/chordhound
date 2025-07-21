@@ -24,7 +24,7 @@ class ChordGrid extends Component
 
     public string $selectedKeyType = 'major';
 
-    public bool $showRomanNumerals = false;
+    public bool $showRomanNumerals = true;
 
     public array $romanNumerals = [];
 

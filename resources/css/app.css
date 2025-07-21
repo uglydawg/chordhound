@@ -98,14 +98,7 @@ select:focus[data-flux-control] {
 
 /* Music Production Interface Styles */
 @layer components {
-    /* Chord grid blocks */
-    .chord-block {
-        @apply bg-zinc-800 border border-zinc-700 rounded-lg p-2 hover:border-blue-500 transition-all cursor-pointer aspect-square flex items-center justify-center relative min-h-[100px] lg:min-h-[120px];
-    }
-    
-    .chord-block-active {
-        @apply bg-blue-600 border-blue-500 text-white;
-    }
+    /* Chord grid blocks - removed old styles */
     
     /* Transport controls */
     .transport-button {
@@ -126,9 +119,9 @@ select:focus[data-flux-control] {
         @apply border-blue-500;
     }
     
-    /* MIDI Player */
-    .midi-player {
-        @apply bg-zinc-900 border border-zinc-800 rounded-lg p-4;
+    /* Piano Player */
+    .piano-player {
+        /* Component styles handled inline */
     }
     
     /* Dark scrollbars */

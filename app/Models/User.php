@@ -73,7 +73,7 @@ class User extends Authenticatable
      */
     public function getDisplayNameAttribute(): string
     {
-        return $this->attributes['display_name'] ?: $this->name;
+        return $this->attributes['display_name'] ?? $this->name;
     }
 
     /**

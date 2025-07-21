@@ -12,6 +12,10 @@ Route::get('/test', function () {
     return view('test');
 });
 
+Route::get('/piano-test', function () {
+    return view('piano-test');
+})->name('piano.test');
+
 Route::get('/', [ChordController::class, 'index'])->name('home');
 Route::get('/chords', [ChordController::class, 'index'])->name('chords.index');
 

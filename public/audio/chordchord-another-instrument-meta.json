@@ -1,0 +1,61 @@
+{
+    "volume": 9.2,
+    "octaveShift": 1,
+    "limiter": -17,
+    "envelope": {
+        "attack": 0.1,
+        "release": 0.98
+    },
+    "samples": [
+        {
+            "root": "C1",
+            "offset": 0,
+            "duration": 4
+        },
+        {
+            "root": "E1",
+            "offset": 4,
+            "duration": 4
+        },
+        {
+            "root": "G#1",
+            "offset": 8,
+            "duration": 4
+        },
+        {
+            "root": "C2",
+            "offset": 12,
+            "duration": 4
+        },
+        {
+            "root": "E2",
+            "offset": 16,
+            "duration": 4
+        },
+        {
+            "root": "G#2",
+            "offset": 20,
+            "duration": 4
+        },
+        {
+            "root": "C3",
+            "offset": 24,
+            "duration": 4
+        },
+        {
+            "root": "E3",
+            "offset": 28,
+            "duration": 4
+        },
+        {
+            "root": "G#3",
+            "offset": 32,
+            "duration": 4
+        },
+        {
+            "root": "C4",
+            "offset": 36,
+            "duration": 4
+        }
+    ]
+}
