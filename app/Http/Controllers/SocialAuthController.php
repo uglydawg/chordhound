@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Models\MagicLink;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -23,7 +22,7 @@ class SocialAuthController extends Controller
     {
         try {
             $googleUser = Socialite::driver('google')->user();
-            
+
             $user = User::updateOrCreate(
                 ['email' => $googleUser->getEmail()],
                 [
@@ -46,7 +45,7 @@ class SocialAuthController extends Controller
     {
         $magicLink = MagicLink::where('token', $token)->first();
 
-        if (!$magicLink) {
+        if (! $magicLink) {
             return redirect()->route('login')->with('error', 'Invalid login link.');
         }
 

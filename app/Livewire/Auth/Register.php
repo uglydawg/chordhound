@@ -16,13 +16,21 @@ use Livewire\Component;
 class Register extends Component
 {
     public string $name = '';
+
     public string $username = '';
+
     public string $display_name = '';
+
     public string $email = '';
+
     public string $password = '';
+
     public string $password_confirmation = '';
+
     public bool $robot_verification = false;
+
     public string $step = 'email'; // email, details, verification
+
     public array $usernameSuggestions = [];
 
     /**
@@ -48,7 +56,7 @@ class Register extends Component
     public function validateDetails(): void
     {
         $usernameRules = $this->username ? User::getUsernameValidationRules() : ['nullable'];
-        
+
         $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => $usernameRules,
@@ -64,8 +72,9 @@ class Register extends Component
      */
     public function verifyRobot(): void
     {
-        if (!$this->robot_verification) {
+        if (! $this->robot_verification) {
             $this->addError('robot_verification', 'Please confirm you are not a robot.');
+
             return;
         }
 
@@ -78,7 +87,7 @@ class Register extends Component
     public function register(): void
     {
         $usernameRules = $this->username ? User::getUsernameValidationRules() : ['nullable'];
-        
+
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => $usernameRules,
@@ -120,7 +129,7 @@ class Register extends Component
             return;
         }
 
-        if (!User::isUsernameAvailable($this->username)) {
+        if (! User::isUsernameAvailable($this->username)) {
             $this->usernameSuggestions = User::suggestUsernames($this->username);
             $this->addError('username', 'This username is already taken. Try one of the suggestions below.');
         } else {

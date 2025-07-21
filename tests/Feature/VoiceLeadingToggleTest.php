@@ -19,7 +19,7 @@ it('remembers voice leading toggle state in session', function () {
     Livewire::test(ChordGrid::class)
         ->call('toggleVoiceLeading')
         ->assertSet('showVoiceLeading', false);
-    
+
     // New instance should remember the toggle state
     Livewire::test(ChordGrid::class)
         ->assertSet('showVoiceLeading', false);
@@ -39,16 +39,16 @@ it('persists voice leading preference in new sessions', function () {
     Livewire::test(ChordGrid::class)
         ->call('toggleVoiceLeading')
         ->assertSet('showVoiceLeading', false);
-    
+
     // Create new component - should restore from session
     Livewire::test(ChordGrid::class)
         ->assertSet('showVoiceLeading', false);
-    
+
     // Toggle back on
     Livewire::test(ChordGrid::class)
         ->call('toggleVoiceLeading')
         ->assertSet('showVoiceLeading', true);
-    
+
     // New component should remember it's on
     Livewire::test(ChordGrid::class)
         ->assertSet('showVoiceLeading', true);

@@ -6,8 +6,9 @@ use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
+use Laravel\Pulse\Facades\Pulse;
 
-Route::get('/test', function() {
+Route::get('/test', function () {
     return view('test');
 });
 
@@ -31,10 +32,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/profile', Profile::class)->name('settings.profile');
     Route::get('settings/password', Password::class)->name('settings.password');
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
-    
+
     // Chord routes
     Route::get('/my-chord-sets', [ChordController::class, 'mySets'])->name('chords.my-sets');
     Route::get('/chords/{chordSet}/edit', [ChordController::class, 'edit'])->name('chords.edit');
 });
 
 require __DIR__.'/auth.php';
+
+// Admin monitoring routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/pulse', function () {
+        return Pulse::dashboard();
+    })->name('pulse');
+});

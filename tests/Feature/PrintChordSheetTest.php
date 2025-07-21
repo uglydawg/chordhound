@@ -23,7 +23,7 @@ it('updates chords when chordsUpdated event is dispatched', function () {
         3 => ['position' => 3, 'tone' => 'G', 'semitone' => 'major', 'inversion' => 'root', 'is_blue_note' => false],
         4 => ['position' => 4, 'tone' => 'C', 'semitone' => 'major', 'inversion' => 'root', 'is_blue_note' => false],
     ];
-    
+
     Livewire::test(PrintChordSheet::class)
         ->dispatch('chordsUpdated', ['chords' => $chords])
         ->assertSet('chords', $chords);

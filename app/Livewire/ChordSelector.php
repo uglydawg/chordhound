@@ -12,15 +12,17 @@ use Livewire\Component;
 class ChordSelector extends Component
 {
     public array $chords = [];
+
     public array $blueNotes = [];
+
     public ?int $chordSetId = null;
-    
+
     private ChordService $chordService;
 
     public function mount(?int $chordSetId = null)
     {
         $this->chordSetId = $chordSetId;
-        
+
         // Initialize with 8 empty chord slots
         for ($i = 1; $i <= 8; $i++) {
             $this->chords[$i] = [
@@ -65,7 +67,7 @@ class ChordSelector extends Component
                 'inversion' => 'root',
                 'is_blue_note' => false,
             ];
-            
+
             // Calculate blue notes for default chords
             $this->calculateBlueNotes();
             $this->dispatch('chordsUpdated', chords: $this->chords, blueNotes: $this->blueNotes);
@@ -120,7 +122,7 @@ class ChordSelector extends Component
     private function calculateBlueNotes()
     {
         $this->blueNotes = $this->chordService->calculateBlueNotes($this->chords);
-        
+
         // Update blue note flags
         foreach ($this->chords as $position => &$chord) {
             $chord['is_blue_note'] = isset($this->blueNotes[$position]);
@@ -130,14 +132,15 @@ class ChordSelector extends Component
     #[On('save-chord-set')]
     public function saveChordSet($name, $description = null)
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             $this->dispatch('notify', type: 'error', message: 'You must be logged in to save chord sets.');
+
             return;
         }
 
-        $chordSet = $this->chordSetId 
+        $chordSet = $this->chordSetId
             ? \App\Models\ChordSet::find($this->chordSetId)
-            : new \App\Models\ChordSet();
+            : new \App\Models\ChordSet;
 
         $chordSet->fill([
             'user_id' => auth()->id(),
@@ -154,7 +157,7 @@ class ChordSelector extends Component
 
         // Save new chords
         foreach ($this->chords as $chord) {
-            if (!empty($chord['tone'])) {
+            if (! empty($chord['tone'])) {
                 $chordSet->chords()->create([
                     'position' => $chord['position'],
                     'tone' => $chord['tone'],

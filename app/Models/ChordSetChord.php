@@ -24,7 +24,7 @@ class ChordSetChord extends Model
     ];
 
     public const TONES = [
-        'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'
+        'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B',
     ];
 
     public const SEMITONES = [
@@ -49,6 +49,7 @@ class ChordSetChord extends Model
     public function getNotesAttribute(): array
     {
         $chordService = app(\App\Services\ChordService::class);
+
         return $chordService->getChordNotes($this->tone, $this->semitone, $this->inversion);
     }
 }

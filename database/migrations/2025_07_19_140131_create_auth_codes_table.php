@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamp('used_at')->nullable();
             $table->integer('attempts')->default(0);
             $table->timestamps();
-            
+
             $table->index(['email', 'code']);
             $table->index('expires_at');
         });

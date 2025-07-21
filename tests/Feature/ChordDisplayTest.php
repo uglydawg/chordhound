@@ -12,7 +12,7 @@ it('shows all four chords in 2x2 grid layout', function () {
         3 => ['position' => 3, 'tone' => 'C', 'semitone' => 'major', 'inversion' => 'root', 'is_blue_note' => false],
         4 => ['position' => 4, 'tone' => 'D', 'semitone' => 'major', 'inversion' => 'root', 'is_blue_note' => false],
     ];
-    
+
     Livewire::test(ChordDisplay::class)
         ->call('updateChords', ['chords' => $chords, 'blueNotes' => []])
         ->assertSee('Chords') // Should say "Chords" not "Piano Keyboard"
@@ -67,7 +67,7 @@ it('shows empty state for chords without tones', function () {
         3 => ['position' => 3, 'tone' => '', 'semitone' => 'major', 'inversion' => 'root', 'is_blue_note' => false],
         4 => ['position' => 4, 'tone' => 'C', 'semitone' => 'major', 'inversion' => 'root', 'is_blue_note' => false],
     ];
-    
+
     Livewire::test(ChordDisplay::class)
         ->call('updateChords', ['chords' => $chords, 'blueNotes' => []])
         ->assertSee('Empty', false)

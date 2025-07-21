@@ -11,12 +11,16 @@ use Livewire\Component;
 class ChordDisplay extends Component
 {
     public array $chords = [];
+
     public array $blueNotes = [];
+
     public array $activeNotes = [];
+
     public int $startOctave = 3;
+
     public int $octaveCount = 3;
     // Removed selectedChords as we no longer need selection
-    
+
     private ChordService $chordService;
 
     public function mount()
@@ -32,7 +36,7 @@ class ChordDisplay extends Component
             ];
         }
         $this->activeNotes = [];
-        
+
         // Request initial chord state after mount
         $this->dispatch('request-chord-state');
     }
@@ -52,45 +56,44 @@ class ChordDisplay extends Component
             $this->calculateActiveNotes();
         }
     }
-    
+
     public function rendered()
     {
         // After component is rendered, request chord state if we don't have any chords
         $hasChords = false;
         foreach ($this->chords as $chord) {
-            if (!empty($chord['tone'])) {
+            if (! empty($chord['tone'])) {
                 $hasChords = true;
                 break;
             }
         }
-        
-        if (!$hasChords) {
+
+        if (! $hasChords) {
             $this->dispatch('request-chord-state');
         }
     }
 
-
     private function calculateActiveNotes()
     {
         $this->activeNotes = [];
-        
+
         foreach ($this->chords as $position => $chord) {
-            if (!empty($chord['tone'])) {
+            if (! empty($chord['tone'])) {
                 $notes = $this->chordService->getChordNotes(
                     $chord['tone'],
                     $chord['semitone'] ?? 'major',
                     $chord['inversion'] ?? 'root'
                 );
-                
+
                 // Only take the first 3 notes for triads
                 $notesToDisplay = array_slice($notes, 0, 3);
-                
+
                 // Determine octaves for comfortable hand position
                 $octaves = $this->getComfortableOctaves($notesToDisplay, $chord['inversion'] ?? 'root');
-                
+
                 foreach ($notesToDisplay as $index => $note) {
                     $octave = $octaves[$index];
-                    
+
                     $keyPosition = $this->chordService->getPianoKeyPosition($note, $octave);
                     if ($keyPosition >= 0 && $keyPosition <= 87) {
                         $this->activeNotes[] = [
@@ -105,25 +108,25 @@ class ChordDisplay extends Component
             }
         }
     }
-    
+
     private function getComfortableOctaves(array $notes, string $inversion): array
     {
         // For comfortable hand position, keep notes within about an octave span
         // Standard voicings for each inversion type
-        
+
         switch ($inversion) {
             case 'root':
                 // Root position: Close voicing in middle range
                 return [4, 4, 4];
-                
+
             case 'first':
                 // First inversion: Bottom note stays low, top two notes close together
                 return [3, 4, 4];
-                
+
             case 'second':
                 // Second inversion: Spread more evenly
                 return [3, 3, 4];
-                
+
             default:
                 return [4, 4, 4];
         }
@@ -135,15 +138,15 @@ class ChordDisplay extends Component
         $whiteKeyWidth = 30;
         $blackKeyWidth = 18;  // Narrower black keys to show white key edges
         $whiteKeyCount = 0;
-        
+
         for ($octave = $this->startOctave; $octave < $this->startOctave + $this->octaveCount; $octave++) {
             foreach (['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as $note) {
                 $keyPosition = $this->chordService->getPianoKeyPosition($note, $octave);
                 $isBlack = $this->chordService->isBlackKey($note);
-                
+
                 $activeNote = collect($this->activeNotes)->firstWhere('position', $keyPosition);
-                
-                if (!$isBlack) {
+
+                if (! $isBlack) {
                     $keys[] = [
                         'type' => 'white',
                         'note' => $note,
@@ -159,7 +162,7 @@ class ChordDisplay extends Component
                 }
             }
         }
-        
+
         // Add black keys on top
         // Black keys are positioned relative to each octave's starting C
         $blackKeyOffsets = [
@@ -169,17 +172,17 @@ class ChordDisplay extends Component
             'G#' => 4.75,  // Between G and A
             'A#' => 5.75,  // Between A and B
         ];
-        
+
         // Calculate black key positions for each octave
         for ($octave = $this->startOctave; $octave < $this->startOctave + $this->octaveCount; $octave++) {
             // Find the starting position of C in this octave
             $octaveOffset = ($octave - $this->startOctave) * 7; // 7 white keys per octave
             $baseX = $octaveOffset * $whiteKeyWidth;
-            
+
             foreach ($blackKeyOffsets as $blackNote => $offset) {
                 $keyPosition = $this->chordService->getPianoKeyPosition($blackNote, $octave);
                 $activeNote = collect($this->activeNotes)->firstWhere('position', $keyPosition);
-                
+
                 $keys[] = [
                     'type' => 'black',
                     'note' => $blackNote,
@@ -193,16 +196,15 @@ class ChordDisplay extends Component
                 ];
             }
         }
-        
+
         return $keys;
     }
 
-    
     public function render()
     {
         $pianoKeys = $this->generatePianoKeys();
         $totalWidth = $this->octaveCount * 7 * 30; // 7 white keys per octave * 30px width
-        
+
         return view('livewire.chord-display', [
             'pianoKeys' => $pianoKeys,
             'totalWidth' => $totalWidth,

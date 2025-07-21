@@ -23,3 +23,7 @@ yarn-error.log
 /.zed
 /test-results
 /playwright-report
+
+**/caddy
+frankenphp
+frankenphp-worker.php

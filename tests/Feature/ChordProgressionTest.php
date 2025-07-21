@@ -14,7 +14,7 @@ it('applies chord progressions when selecting key and progression', function () 
         ->assertSet('chords.3.tone', 'E')
         ->assertSet('chords.3.semitone', 'minor')
         ->assertSet('chords.4.tone', 'C');
-        
+
     // Test changing key with existing progression
     Livewire::test(ChordGrid::class)
         ->call('setProgression', 'I-V-vi-IV')
@@ -24,7 +24,7 @@ it('applies chord progressions when selecting key and progression', function () 
         ->assertSet('chords.3.tone', 'A')
         ->assertSet('chords.3.semitone', 'minor')
         ->assertSet('chords.4.tone', 'F');
-        
+
     // Test I-vi-IV-V progression
     Livewire::test(ChordGrid::class)
         ->call('setKey', 'G')

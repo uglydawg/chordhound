@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('inversion')->nullable(); // root, first, second, third
             $table->boolean('is_blue_note')->default(false);
             $table->timestamps();
-            
+
             $table->index(['chord_set_id', 'position']);
             $table->unique(['chord_set_id', 'position']);
         });

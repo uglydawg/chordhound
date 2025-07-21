@@ -15,7 +15,7 @@ class ChordSetList extends Component
     public function deleteChordSet($id)
     {
         $chordSet = ChordSet::where('user_id', auth()->id())->find($id);
-        
+
         if ($chordSet) {
             $chordSet->delete();
             $this->dispatch('notify', type: 'success', message: 'Chord set deleted successfully.');
@@ -27,7 +27,7 @@ class ChordSetList extends Component
         return view('livewire.chord-set-list', [
             'chordSets' => ChordSet::where('user_id', auth()->id())
                 ->latest()
-                ->paginate(10)
+                ->paginate(10),
         ]);
     }
 }

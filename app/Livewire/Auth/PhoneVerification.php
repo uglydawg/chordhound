@@ -19,7 +19,9 @@ class PhoneVerification extends Component
     public string $verificationCode = '';
 
     public bool $codeSent = false;
+
     public string $error = '';
+
     public ?User $user = null;
 
     public function mount(?User $user = null)
@@ -38,6 +40,7 @@ class PhoneVerification extends Component
             ->where('id', '!=', $this->user?->id)
             ->exists()) {
             $this->error = 'This phone number is already registered to another account.';
+
             return;
         }
 
@@ -61,23 +64,27 @@ class PhoneVerification extends Component
             ->where('code', $this->verificationCode)
             ->first();
 
-        if (!$verification) {
+        if (! $verification) {
             $this->addError('verificationCode', 'Invalid verification code.');
+
             return;
         }
 
         if ($verification->isExpired()) {
             $this->addError('verificationCode', 'This verification code has expired.');
+
             return;
         }
 
         if ($verification->isUsed()) {
             $this->addError('verificationCode', 'This verification code has already been used.');
+
             return;
         }
 
         if ($verification->tooManyAttempts()) {
             $this->addError('verificationCode', 'Too many failed attempts. Please request a new code.');
+
             return;
         }
 
@@ -91,6 +98,7 @@ class PhoneVerification extends Component
             $verification->markAsUsed();
 
             session()->flash('success', 'Phone number verified successfully!');
+
             return redirect()->route('dashboard');
         }
     }

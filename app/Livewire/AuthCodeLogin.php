@@ -22,6 +22,7 @@ class AuthCodeLogin extends Component
     public string $code = '';
 
     public bool $codeSent = false;
+
     public string $error = '';
 
     public function sendCode()
@@ -61,6 +62,7 @@ class AuthCodeLogin extends Component
             );
 
             Auth::login($user, true);
+
             return redirect()->intended(route('dashboard'));
         }
 
@@ -68,23 +70,27 @@ class AuthCodeLogin extends Component
             ->where('code', $this->code)
             ->first();
 
-        if (!$authCode) {
+        if (! $authCode) {
             $this->error = 'Invalid code. Please check and try again.';
+
             return;
         }
 
         if ($authCode->isExpired()) {
             $this->error = 'This code has expired. Please request a new one.';
+
             return;
         }
 
         if ($authCode->isUsed()) {
             $this->error = 'This code has already been used.';
+
             return;
         }
 
         if ($authCode->tooManyAttempts()) {
             $this->error = 'Too many failed attempts. Please request a new code.';
+
             return;
         }
 

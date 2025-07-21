@@ -17,7 +17,7 @@ it('updates chords when key changes with selected progression', function () {
         ->assertSet('chords.3.tone', 'E')
         ->assertSet('chords.3.semitone', 'minor')
         ->assertSet('chords.4.tone', 'C');
-    
+
     // Change key to C - chords should update automatically
     $component->call('setKey', 'C')
         ->assertSet('selectedKey', 'C')
@@ -27,7 +27,7 @@ it('updates chords when key changes with selected progression', function () {
         ->assertSet('chords.3.tone', 'A')
         ->assertSet('chords.3.semitone', 'minor')
         ->assertSet('chords.4.tone', 'F');
-    
+
     // Change key to D - chords should update again
     $component->call('setKey', 'D')
         ->assertSet('selectedKey', 'D')
@@ -49,11 +49,11 @@ it('updates chords when key type changes', function () {
         ->assertSet('chords.1.semitone', 'major')
         ->assertSet('chords.2.tone', 'A')
         ->assertSet('chords.2.semitone', 'minor');
-    
+
     // Change to C minor - chords should update for minor key
     $component->call('setKeyType', 'minor')
         ->assertSet('selectedKeyType', 'minor');
-    
+
     // In minor key, I-vi-IV-V becomes i-VI-iv-v
     // The qualities change based on the minor scale
 });

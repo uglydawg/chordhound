@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamp('used_at')->nullable();
             $table->integer('attempts')->default(0);
             $table->timestamps();
-            
+
             $table->index(['phone_number', 'code']);
         });
     }
