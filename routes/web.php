@@ -40,6 +40,15 @@ Route::middleware(['auth'])->group(function () {
 
 require __DIR__.'/auth.php';
 
+// Donation routes
+Route::get('/donate', function () {
+    return view('donate');
+})->name('donate');
+
+Route::get('/donation/success', function () {
+    return view('donation.success');
+})->name('donation.success');
+
 // Admin monitoring routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/pulse', function () {

@@ -13,7 +13,9 @@
 
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                    @auth
+                        <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                    @endauth
                     <flux:navlist.item icon="musical-note" :href="route('chords.index')" :current="request()->routeIs('chords.*')" wire:navigate>{{ __('Piano Chords') }}</flux:navlist.item>
                     @auth
                         <flux:navlist.item icon="folder" :href="route('chords.my-sets')" :current="request()->routeIs('chords.my-sets')" wire:navigate>{{ __('My Chord Sets') }}</flux:navlist.item>
@@ -24,8 +26,8 @@
             <flux:spacer />
 
             <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
+                <flux:navlist.item icon="heart" :href="route('donate')" wire:navigate>
+                {{ __('Support ChordHound') }}
                 </flux:navlist.item>
 
                 <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
