@@ -80,6 +80,13 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
+            @else
+            <!-- Login Button for Non-Authenticated Users -->
+            <div class="hidden lg:block">
+                <flux:button variant="primary" size="sm" :href="route('login')" wire:navigate class="w-full">
+                    {{ __('Login') }}
+                </flux:button>
+            </div>
             @endauth
         </flux:sidebar>
 
@@ -132,6 +139,11 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
+            @else
+            <!-- Login Button for Non-Authenticated Users -->
+            <flux:button variant="primary" size="sm" :href="route('login')" wire:navigate>
+                {{ __('Login') }}
+            </flux:button>
             @endauth
         </flux:header>
 

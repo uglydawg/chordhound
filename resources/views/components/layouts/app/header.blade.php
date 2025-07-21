@@ -40,6 +40,7 @@
             </flux:navbar>
 
             <!-- Desktop User Menu -->
+            @auth
             <flux:dropdown position="top" align="end">
                 <flux:profile
                     class="cursor-pointer"
@@ -82,6 +83,12 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
+            @else
+            <!-- Login Button for Non-Authenticated Users -->
+            <flux:button variant="primary" size="sm" :href="route('login')" wire:navigate>
+                {{ __('Login') }}
+            </flux:button>
+            @endauth
         </flux:header>
 
         <!-- Mobile Menu -->
