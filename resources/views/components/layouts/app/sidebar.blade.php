@@ -1,7 +1,16 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
+        
+        <script>
+            // Check for dark mode preference and apply immediately to prevent flash
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark')
+            } else {
+                document.documentElement.classList.remove('dark')
+            }
+        </script>
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
         <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
@@ -31,6 +40,14 @@
                 </flux:navlist.item>
 
             </flux:navlist>
+
+            <!-- Dark mode toggle -->
+            <div class="px-3 py-2 border-t border-zinc-200 dark:border-zinc-700 mt-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-zinc-600 dark:text-zinc-400">Theme</span>
+                    <x-dark-mode-toggle />
+                </div>
+            </div>
 
             <!-- Desktop User Menu -->
             @auth

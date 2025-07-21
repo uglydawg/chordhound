@@ -7,7 +7,7 @@
             <p class="text-lg text-zinc-600 dark:text-zinc-400 mb-2">
                 Help keep ChordHound free and support future development
             </p>
-            <p class="text-sm text-zinc-500 dark:text-zinc-500">
+            <p class="text-sm text-zinc-500 dark:text-zinc-300">
                 Your donations help us maintain the servers, improve the platform, and add new features for the music community.
             </p>
         </div>
@@ -21,7 +21,7 @@
                 <h3 class="text-lg font-semibold text-zinc-900 dark:text-white mb-3">
                     Why Support ChordHound?
                 </h3>
-                <div class="grid md:grid-cols-2 gap-4 text-sm text-zinc-600 dark:text-zinc-400">
+                <div class="grid md:grid-cols-2 gap-4 text-sm text-zinc-600 dark:text-zinc-300">
                     <div class="flex items-start space-x-3">
                         <span class="text-orange-500 text-base">🎹</span>
                         <span>Free chord generation for all musicians</span>
@@ -41,7 +41,7 @@
                 </div>
                 
                 <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-600">
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p class="text-xs text-zinc-500 dark:text-zinc-300">
                         ChordHound is a passion project created by musicians, for musicians. Every contribution helps us keep the music flowing! 🎶
                     </p>
                 </div>
