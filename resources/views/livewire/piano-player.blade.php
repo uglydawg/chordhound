@@ -438,10 +438,13 @@ document.addEventListener('livewire:initialized', () => {
         // Get the chord notes
         const notes = getChordNotes(chord.tone, chord.semitone, chord.inversion);
         
-        // Play the chord using MultiInstrumentPlayer
+        // Stop any currently playing notes and play the new chord with sostenuto
         if (pianoPlayer && pianoPlayer.isLoaded) {
-            pianoPlayer.playChordWithSustain(notes, 4.0);
-            console.log('Playing chord with multi-instrument player:', notes);
+            pianoPlayer.stopAll(); // Stop previous chord
+            setTimeout(() => {
+                pianoPlayer.playChordWithSostenuto(notes); // Play with sostenuto pedal behavior
+                console.log('Playing chord with sostenuto:', notes);
+            }, 50); // Brief delay for smooth transition
         }
         
         // Update the piano player's current chord display
@@ -474,42 +477,90 @@ document.addEventListener('livewire:initialized', () => {
 
         if (chordNotes.length > 0 && pianoPlayer) {
             let chordIndex = 0;
+            let beatCount = 0;
             const beatDuration = 60000 / tempo; // Duration of one beat in milliseconds
-            const chordDuration = beatDuration * 4; // 4 beats per chord (changed from 2)
 
-            function playNextChord() {
-                if (chordIndex < chordNotes.length) {
-                    console.log(`Playing chord ${chordIndex + 1}:`, chordNotes[chordIndex]);
+            function playNextBeat() {
+                const currentChordNotes = chordNotes[chordIndex];
+                const beat = beatCount % 4; // 4 beats per measure
+                const measureBeat = beat + 1; // 1-4 for display
+                
+                console.log(`Measure ${chordIndex + 1}, Beat ${measureBeat}:`, currentChordNotes);
+
+                // Extract root note name for bass
+                const rootNote = currentChordNotes[0];
+                const noteMatch = rootNote.match(/([A-G]#?)(\d+)/);
+                
+                if (noteMatch) {
+                    const [, noteName] = noteMatch;
                     
-                    // Play current chord
-                    pianoPlayer.playChordWithSustain(chordNotes[chordIndex], 4.0); // Sustain for 4 beats
+                    // Transpose all chord notes to C4 octave (right hand)
+                    const chordInC4 = currentChordNotes.map(note => {
+                        const chordNoteMatch = note.match(/([A-G]#?)(\d+)/);
+                        if (chordNoteMatch) {
+                            const [, chordNoteName] = chordNoteMatch;
+                            return chordNoteName + '4'; // Right hand in octave 4
+                        }
+                        return note;
+                    });
 
-                    // Update the displayed chord and active notes
-                    @this.call('updateCurrentChord', chordIndex);
-                    
-                    // Update active keys on piano
-                    updateActiveKeys(chordNotes[chordIndex]);
-
-                    // Highlight the chord in the grid
-                    const chordPosition = chordData[chordIndex].position;
-                    Livewire.dispatch('highlight-chord-position', { position: chordPosition });
-
-                    chordIndex++;
-
-                    // Update progress
-                    @this.set('currentTime', (chordIndex * 4) % 16); // Updated for 4 beats per chord
-
-                    // Schedule next chord
-                    sequence = setTimeout(playNextChord, chordDuration);
-                } else {
-                    // Loop back to beginning
-                    console.log('Looping back to start');
-                    chordIndex = 0;
-                    sequence = setTimeout(playNextChord, 500);
+                    if (beat === 0) {
+                        // Beat 1 of measure: Play bass note (left hand) + chord (right hand)
+                        const bassNote = noteName + '2'; // Left hand bass in C2
+                        console.log(`Beat 1: Bass ${bassNote} + Chord ${chordInC4.join(',')}`);
+                        
+                        // Play bass note (sustains for whole measure)
+                        pianoPlayer.playNote(bassNote, 4.0); // Sustain for full measure (4 beats)
+                        
+                        // Play chord on right hand
+                        pianoPlayer.playChord(chordInC4, 0.8); // Shorter chord hit
+                        
+                        // Show both bass and chord on piano
+                        console.log(`DEBUG: Setting active keys:`, [bassNote, ...chordInC4]);
+                        updateActiveKeys([bassNote, ...chordInC4]);
+                        
+                    } else {
+                        // Beats 2, 3, 4: Play only chord (right hand), bass continues sustaining
+                        console.log(`Beat ${measureBeat}: Chord ${chordInC4.join(',')}`);
+                        
+                        // Play chord hit on right hand
+                        pianoPlayer.playChord(chordInC4, 0.8);
+                        
+                        // Show chord + sustained bass note from beat 1
+                        const bassNote = noteName + '2';
+                        console.log(`DEBUG: Setting active keys (sustained bass):`, [bassNote, ...chordInC4]);
+                        updateActiveKeys([bassNote, ...chordInC4]);
+                    }
                 }
+
+                // Update the displayed chord info
+                @this.call('updateCurrentChord', chordIndex);
+                
+                // Highlight the chord in the grid
+                const chordPosition = chordData[chordIndex].position;
+                Livewire.dispatch('highlight-chord-position', { position: chordPosition });
+
+                beatCount++;
+
+                // Move to next chord after 4 beats (end of measure)
+                if (beatCount % 4 === 0) {
+                    chordIndex++;
+                    
+                    // Loop back to beginning if we've reached the end
+                    if (chordIndex >= chordNotes.length) {
+                        console.log('Looping back to start of progression');
+                        chordIndex = 0;
+                    }
+                }
+
+                // Update progress (beat-based)
+                @this.set('currentTime', beatCount % 16);
+
+                // Schedule next beat
+                sequence = setTimeout(playNextBeat, beatDuration);
             }
 
-            playNextChord();
+            playNextBeat();
         } else {
             console.error('Cannot start playback:', {
                 hasChords: chordNotes.length > 0,
@@ -540,11 +591,18 @@ document.addEventListener('livewire:initialized', () => {
             key.classList.remove('active', 'pressed');
         });
         
+        console.log(`DEBUG updateActiveKeys: Looking for notes:`, notes);
+        
         // Highlight the new chord notes
         notes.forEach(note => {
-            const key = document.getElementById('key-' + note);
+            const keyId = 'key-' + note;
+            const key = document.getElementById(keyId);
+            console.log(`DEBUG: Looking for key ID '${keyId}', found:`, !!key);
             if (key) {
                 key.classList.add('active', 'pressed');
+                console.log(`DEBUG: Activated key ${note}`);
+            } else {
+                console.warn(`DEBUG: Key not found for note ${note} (ID: ${keyId})`);
             }
         });
     }

@@ -260,6 +260,97 @@ class MultiInstrumentPlayer {
         notes.forEach(note => this.playNote(note, sustainDuration));
     }
 
+    // Play chord with sostenuto pedal behavior (notes continue until stopped)
+    playChordWithSostenuto(notes) {
+        notes.forEach(note => this.playNoteWithSostenuto(note));
+    }
+
+    // Play a single note with sostenuto behavior (no automatic stop)
+    playNoteWithSostenuto(note) {
+        if (!this.audioContext) return;
+
+        // Try to play with samples first, fallback to synthesis
+        const instrument = this.instruments[this.currentInstrument];
+        if (instrument && instrument.buffer) {
+            this.playSampleWithSostenuto(note, instrument);
+        } else {
+            this.playSynthesisWithSostenuto(note);
+        }
+    }
+
+    playSampleWithSostenuto(note, instrument) {
+        const now = this.audioContext.currentTime;
+        const noteInfo = this.parseNote(note);
+        if (!noteInfo) return;
+
+        // Find the best sample for this note
+        const sample = this.findBestSample(noteInfo, instrument.samples);
+        if (!sample) {
+            console.warn(`No sample found for note ${note}, falling back to synthesis`);
+            this.playSynthesisWithSostenuto(note);
+            return;
+        }
+
+        // Create buffer source
+        const source = this.audioContext.createBufferSource();
+        const noteGain = this.audioContext.createGain();
+        
+        source.buffer = instrument.buffer;
+        source.loop = true; // Enable looping for sostenuto
+        
+        // Calculate playback rate for pitch shifting
+        const semitoneRatio = this.calculateSemitoneRatio(noteInfo, sample);
+        source.playbackRate.value = semitoneRatio;
+        
+        // Apply envelope from metadata with sustained level
+        const envelope = instrument.metadata.envelope || { attack: 0.01, release: 0.5 };
+        const volume = (instrument.metadata.volume || 1) / 10; // Scale down volume
+        
+        // Attack phase
+        noteGain.gain.setValueAtTime(0, now);
+        noteGain.gain.linearRampToValueAtTime(volume, now + envelope.attack);
+        // Sustain at 80% volume indefinitely (no automatic release)
+        noteGain.gain.setValueAtTime(volume * 0.8, now + envelope.attack + 0.01);
+        
+        // Connect
+        source.connect(noteGain);
+        noteGain.connect(this.gainNode);
+        
+        // Start the looped sample
+        source.start(now, sample.offset, sample.duration);
+        
+        // Store for tracking (no automatic cleanup)
+        this.activeNotes.set(note, { source, gain: noteGain, isSostenuto: true });
+    }
+
+    playSynthesisWithSostenuto(note) {
+        const freq = this.noteToFrequency(note);
+        if (!freq) return;
+
+        const now = this.audioContext.currentTime;
+        
+        // Create oscillator for sustained playback
+        const oscillator = this.audioContext.createOscillator();
+        const noteGain = this.audioContext.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(freq, now);
+        
+        // Sostenuto envelope - attack then sustain indefinitely
+        noteGain.gain.setValueAtTime(0, now);
+        noteGain.gain.linearRampToValueAtTime(0.3, now + 0.01);
+        noteGain.gain.exponentialRampToValueAtTime(0.2, now + 0.1);
+        // Hold at sustain level (no automatic release)
+        
+        oscillator.connect(noteGain);
+        noteGain.connect(this.gainNode);
+        
+        oscillator.start(now);
+        // No automatic stop - will be stopped manually
+        
+        this.activeNotes.set(note, { oscillator, gain: noteGain, isSostenuto: true });
+    }
+
     // Convert note name to frequency
     noteToFrequency(note) {
         const noteMap = {
@@ -282,15 +373,38 @@ class MultiInstrumentPlayer {
 
     // Stop all playing notes
     stopAll() {
+        const now = this.audioContext ? this.audioContext.currentTime : 0;
+        
         this.activeNotes.forEach((noteData, note) => {
             try {
-                if (noteData.oscillator) {
-                    noteData.oscillator.stop();
-                } else if (noteData.source) {
-                    noteData.source.stop();
+                if (noteData.isSostenuto) {
+                    // Apply smooth release for sostenuto notes
+                    if (noteData.gain) {
+                        const currentGain = noteData.gain.gain.value;
+                        noteData.gain.gain.cancelScheduledValues(now);
+                        noteData.gain.gain.setValueAtTime(currentGain, now);
+                        noteData.gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    }
+                    
+                    // Stop the audio source after release
+                    setTimeout(() => {
+                        if (noteData.oscillator) {
+                            noteData.oscillator.stop();
+                        } else if (noteData.source) {
+                            noteData.source.stop();
+                        }
+                    }, 300);
+                } else {
+                    // Immediate stop for regular notes
+                    if (noteData.oscillator) {
+                        noteData.oscillator.stop();
+                    } else if (noteData.source) {
+                        noteData.source.stop();
+                    }
                 }
             } catch (e) {
                 // Note might have already stopped
+                console.warn('Error stopping note:', e);
             }
         });
         this.activeNotes.clear();
