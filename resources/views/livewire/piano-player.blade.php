@@ -120,6 +120,7 @@
                 wire:click="togglePlayback"
                 class="transport-button group flex items-center justify-center"
                 title="{{ $isPlaying ? 'Pause' : 'Play' }}"
+                onclick="initializeAudio()"
             >
                 @if($isPlaying)
                     <svg class="w-6 h-6 text-secondary group-hover:text-primary" fill="currentColor" viewBox="0 0 24 24">
@@ -297,6 +298,33 @@ let pianoPlayer = null;
 let isAudioLoaded = false;
 
 
+// Initialize audio immediately on page load
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Initialize multi-instrument player immediately
+        if (typeof MultiInstrumentPlayer !== 'undefined' && !pianoPlayer) {
+            pianoPlayer = new MultiInstrumentPlayer();
+            window.pianoPlayer = pianoPlayer; // Make it globally accessible
+            console.log('Multi-instrument player initialized on page load');
+            
+            // Wait a bit for the player to initialize
+            setTimeout(() => {
+                if (pianoPlayer && pianoPlayer.isLoaded) {
+                    console.log('Piano samples loaded successfully');
+                    isAudioLoaded = true;
+                } else {
+                    console.log('Piano samples still loading...');
+                }
+            }, 1000);
+        }
+    } catch (error) {
+        console.error('Failed to initialize audio on page load:', error);
+    }
+});
+
+// Make initializeAudio globally accessible
+window.initializeAudio = null;
+
 document.addEventListener('livewire:initialized', () => {
     let sequence = null;
     let currentSound = 'piano';
@@ -304,15 +332,23 @@ document.addEventListener('livewire:initialized', () => {
     
     // Request chord state from chord grid when piano player loads
     Livewire.dispatch('request-chord-state');
+    
+    // Listen for chord updates
+    Livewire.on('chordsUpdated', (event) => {
+        console.log('JavaScript received chordsUpdated event:', event);
+        if (event && event.chords) {
+            console.log('Chords from event:', event.chords);
+        }
+    });
 
-    // Initialize audio with MultiInstrumentPlayer
+    // Initialize/resume audio context
     async function initializeAudio() {
-        if (!audioInitialized) {
+        if (!audioInitialized || (pianoPlayer && pianoPlayer.audioContext && pianoPlayer.audioContext.state === 'suspended')) {
             try {
-                // Initialize multi-instrument player if available
+                // Initialize if not already done
                 if (typeof MultiInstrumentPlayer !== 'undefined' && !pianoPlayer) {
                     pianoPlayer = new MultiInstrumentPlayer();
-                    window.pianoPlayer = pianoPlayer; // Make it globally accessible
+                    window.pianoPlayer = pianoPlayer;
                     console.log('Multi-instrument player initialized');
                 }
 
@@ -324,12 +360,15 @@ document.addEventListener('livewire:initialized', () => {
 
                 audioInitialized = true;
                 isAudioLoaded = true;
-                console.log('Audio initialized successfully with MultiInstrumentPlayer');
+                console.log('Audio ready for playback');
             } catch (error) {
                 console.error('Failed to initialize audio:', error);
             }
         }
     }
+
+    // Make initializeAudio available globally
+    window.initializeAudio = initializeAudio;
 
     // Initialize on first user interaction
     document.addEventListener('click', async () => {
@@ -344,12 +383,21 @@ document.addEventListener('livewire:initialized', () => {
         await initializeAudio(); // Ensure audio is initialized
         if (!pianoPlayer) {
             console.error('Piano player not initialized');
+            alert('Audio not initialized. Please click anywhere on the page first, then try playing again.');
+            return;
+        }
+
+        if (!pianoPlayer.isLoaded) {
+            console.error('Piano samples not loaded yet');
+            alert('Piano samples are still loading. Please wait a moment and try again.');
             return;
         }
 
         if (isPlaying) {
-            startPlayback();
+            console.log('Starting playback...');
+            startPlayback().catch(err => console.error('Error starting playback:', err));
         } else {
+            console.log('Pausing playback...');
             stopPlayback();
         }
     });
@@ -400,10 +448,15 @@ document.addEventListener('livewire:initialized', () => {
         @this.call('setCurrentChord', chord);
     });
 
-    function startPlayback() {
-        // Get current chords from the component
-        const chords = @js($chords);
-        const tempo = @this.tempo;
+    async function startPlayback() {
+        // Get current chords from the Livewire component dynamically
+        const chords = await @this.get('chords');
+        const tempo = await @this.get('tempo');
+
+        console.log('Starting playback with chords:', chords);
+        console.log('Chords object keys:', Object.keys(chords));
+        console.log('Chords values:', Object.values(chords));
+        console.log('Tempo:', tempo);
 
         // Create chord progression sequence
         const chordNotes = [];
@@ -416,6 +469,9 @@ document.addEventListener('livewire:initialized', () => {
             }
         });
 
+        console.log('Chord notes to play:', chordNotes);
+        console.log('Piano player status:', pianoPlayer ? pianoPlayer.getStatus() : 'Not initialized');
+
         if (chordNotes.length > 0 && pianoPlayer) {
             let chordIndex = 0;
             const beatDuration = 60000 / tempo; // Duration of one beat in milliseconds
@@ -423,11 +479,13 @@ document.addEventListener('livewire:initialized', () => {
 
             function playNextChord() {
                 if (chordIndex < chordNotes.length) {
+                    console.log(`Playing chord ${chordIndex + 1}:`, chordNotes[chordIndex]);
+                    
                     // Play current chord
                     pianoPlayer.playChordWithSustain(chordNotes[chordIndex], 4.0); // Sustain for 4 beats
 
                     // Update the displayed chord and active notes
-                    @this.updateCurrentChord(chordIndex);
+                    @this.call('updateCurrentChord', chordIndex);
                     
                     // Update active keys on piano
                     updateActiveKeys(chordNotes[chordIndex]);
@@ -439,18 +497,24 @@ document.addEventListener('livewire:initialized', () => {
                     chordIndex++;
 
                     // Update progress
-                    @this.currentTime = (chordIndex * 4) % 16; // Updated for 4 beats per chord
+                    @this.set('currentTime', (chordIndex * 4) % 16); // Updated for 4 beats per chord
 
                     // Schedule next chord
                     sequence = setTimeout(playNextChord, chordDuration);
                 } else {
                     // Loop back to beginning
+                    console.log('Looping back to start');
                     chordIndex = 0;
                     sequence = setTimeout(playNextChord, 500);
                 }
             }
 
             playNextChord();
+        } else {
+            console.error('Cannot start playback:', {
+                hasChords: chordNotes.length > 0,
+                hasPianoPlayer: !!pianoPlayer
+            });
         }
     }
 
@@ -462,7 +526,7 @@ document.addEventListener('livewire:initialized', () => {
         if (pianoPlayer) {
             pianoPlayer.stopAll();
         }
-        @this.currentTime = 0;
+        @this.set('currentTime', 0);
         
         // Clear all active keys
         document.querySelectorAll('.piano-key.active').forEach(key => {

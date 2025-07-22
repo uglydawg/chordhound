@@ -64,6 +64,8 @@ class PianoPlayer extends Component
         // Handle both array parameter and event object
         $chords = is_array($data) && isset($data['chords']) ? $data['chords'] : $data;
 
+        \Log::info('PianoPlayer received chords update:', ['chords' => $chords]);
+        
         $this->chords = $chords;
         // Don't automatically display any chord - wait for user interaction
         $this->currentChord = [];
