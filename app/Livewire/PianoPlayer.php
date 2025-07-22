@@ -65,6 +65,11 @@ class PianoPlayer extends Component
             $this->currentChord = [];
         }
     }
+    
+    public function setCurrentChord(array $chord)
+    {
+        $this->currentChord = $chord;
+    }
 
     public function togglePlayback()
     {
@@ -117,13 +122,13 @@ class PianoPlayer extends Component
     {
         switch ($inversion) {
             case 'root':
-                return [4, 4, 4];
+                return [3, 3, 3];
             case 'first':
-                return [3, 4, 4];
+                return [2, 3, 3];
             case 'second':
-                return [3, 3, 4];
+                return [2, 2, 3];
             default:
-                return [4, 4, 4];
+                return [3, 3, 3];
         }
     }
 
