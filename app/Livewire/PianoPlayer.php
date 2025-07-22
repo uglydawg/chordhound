@@ -29,6 +29,11 @@ class PianoPlayer extends Component
     public int $currentChordIndex = 0;
 
     public array $activeNotes = []; // Currently active/highlighted notes
+    
+    // Piano display configuration
+    public array $octaves = [3, 4]; // Default to C3 and C4
+    public int $startOctave = 3;
+    public int $endOctave = 4;
 
     // Available piano sounds
     public array $availableSounds = [

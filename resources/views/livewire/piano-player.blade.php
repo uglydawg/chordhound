@@ -20,14 +20,13 @@
                 </div>
             </div>
 
-            {{-- Piano Keyboard - Proper Layout --}}
+            {{-- Piano Keyboard - Realistic Layout --}}
             <div class="piano-container bg-zinc-800 rounded-lg p-4 overflow-x-auto" id="piano-keyboard">
-                <div class="piano-keys relative" style="height: 120px; width: 100%; min-width: 600px;">
-                    {{-- White Keys Container --}}
-                    <div class="white-keys-container absolute inset-0 flex">
+                <div class="piano-keys relative" style="height: 150px; width: 100%; min-width: 400px; max-width: 600px; margin: 0 auto;">
+                    {{-- White Keys Container (Full height, will be overlapped by black keys) --}}
+                    <div class="white-keys-container absolute inset-0 flex gap-0">
                         @php
                             $whiteKeyPattern = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-                            $octaves = [2, 3, 4];
                             $totalWhiteKeys = count($octaves) * count($whiteKeyPattern);
                             $whiteKeyIndex = 0;
                         @endphp
@@ -41,10 +40,10 @@
                                     $whiteKeyIndex++;
                                 @endphp
                                 <button
-                                    class="piano-key white-key bg-white hover:bg-gray-100 border-r border-gray-300 transition-all duration-100 {{ $isActive ? 'pressed' : '' }}"
+                                    class="piano-key white-key relative {{ $isActive ? 'pressed active' : '' }}"
                                     data-note="{{ $noteWithOctave }}"
                                     id="key-{{ $noteWithOctave }}"
-                                    style="flex: 1; height: 100%; border-radius: 0 0 4px 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                                    style="flex: 1; height: 100%; position: relative;"
                                 >
                                     <div class="h-full flex flex-col justify-between items-center p-1">
                                         @if($isC)
@@ -60,48 +59,50 @@
                         @endforeach
                     </div>
 
-                    {{-- Black Keys Container --}}
-                    <div class="black-keys-container absolute top-0 w-full h-3/5 pointer-events-none">
+                    {{-- Black Keys Container (Overlaps white keys) --}}
+                    <div class="black-keys-container absolute top-0 w-full pointer-events-none" style="height: 70%;">
                         @php
-                            $blackKeyPattern = ['C#', 'D#', null, 'F#', 'G#', 'A#', null];
                             // Calculate positions based on white key width
                             $whiteKeyWidth = 100 / $totalWhiteKeys; // percentage width of each white key
+                            $blackKeyWidth = $whiteKeyWidth * 0.65; // Black keys are 65% width of white keys for better visibility
+                            
+                            // Black keys with their positions relative to white keys
+                            // The number represents which white key they come after (0-based)
+                            $blackKeys = [
+                                ['note' => 'C#', 'afterWhiteKey' => 0],  // After C
+                                ['note' => 'D#', 'afterWhiteKey' => 1],  // After D
+                                ['note' => 'F#', 'afterWhiteKey' => 3],  // After F
+                                ['note' => 'G#', 'afterWhiteKey' => 4],  // After G
+                                ['note' => 'A#', 'afterWhiteKey' => 5],  // After A
+                            ];
                         @endphp
 
                         @foreach($octaves as $octaveIndex => $octave)
-                            @foreach($blackKeyPattern as $positionInOctave => $note)
-                                @if($note)
-                                    @php
-                                        $noteWithOctave = $note . $octave;
-                                        $isActive = isset($activeNotes) && in_array($noteWithOctave, $activeNotes);
-                                        
-                                        // Calculate position based on which white keys this black key sits between
-                                        $basePosition = ($octaveIndex * 7 + $positionInOctave) * $whiteKeyWidth;
-                                        
-                                        // Fine-tune positions for better visual alignment
-                                        $adjustments = [
-                                            0 => 0.7,  // C# - between C and D
-                                            1 => 0.3,  // D# - between D and E  
-                                            3 => 0.7,  // F# - between F and G
-                                            4 => 0,    // G# - between G and A
-                                            5 => 0.3   // A# - between A and B
-                                        ];
-                                        
-                                        $leftPercentage = $basePosition + ($adjustments[$positionInOctave] * $whiteKeyWidth);
-                                    @endphp
-                                    <button
-                                        class="piano-key black-key absolute bg-black hover:bg-gray-800 transition-all duration-100 pointer-events-auto z-10 {{ $isActive ? 'pressed' : '' }}"
-                                        data-note="{{ $noteWithOctave }}"
-                                        id="key-{{ $noteWithOctave }}"
-                                        style="width: {{ $whiteKeyWidth * 0.6 }}%; height: 100%; left: {{ $leftPercentage }}%; border-radius: 0 0 3px 3px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);"
-                                    >
+                            @foreach($blackKeys as $blackKey)
+                                @php
+                                    $note = $blackKey['note'];
+                                    $noteWithOctave = $note . $octave;
+                                    $isActive = isset($activeNotes) && in_array($noteWithOctave, $activeNotes);
+                                    
+                                    // Calculate which white key this comes after in the full keyboard
+                                    $whiteKeyIndex = ($octaveIndex * 7) + $blackKey['afterWhiteKey'];
+                                    
+                                    // Position the black key between this white key and the next
+                                    // Black keys are positioned at the right edge of their "after" white key
+                                    $leftPosition = ($whiteKeyIndex + 1) * $whiteKeyWidth - ($blackKeyWidth * 0.5);
+                                @endphp
+                                <button
+                                    class="piano-key black-key absolute {{ $isActive ? 'pressed active' : '' }}"
+                                    data-note="{{ $noteWithOctave }}"
+                                    id="key-{{ $noteWithOctave }}"
+                                    style="width: {{ $blackKeyWidth }}%; height: 100%; left: {{ $leftPosition }}%; z-index: 20;"
+                                >
                                         @if($showLabels)
                                             <div class="h-full flex items-end justify-center pb-1">
                                                 <span class="key-label text-xs text-gray-300 font-medium">{{ $noteWithOctave }}</span>
                                             </div>
                                         @endif
                                     </button>
-                                @endif
                             @endforeach
                         @endforeach
                     </div>
@@ -213,54 +214,61 @@
     </div>
 
     <style>
-/* Piano key styling */
+/* Piano key styling to match reference */
+.piano-keys {
+    display: flex;
+    position: relative;
+    background: transparent;
+}
+
 .white-key {
-    background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
-    border: 1px solid #d1d5db;
+    background: white;
+    border: 1px solid #000;
+    border-radius: 0 0 4px 4px;
     cursor: pointer;
-    transition: all 0.1s ease;
+    transition: background-color 0.1s ease;
+    position: relative;
+    margin-right: 1px;
 }
 
 .white-key:hover {
-    background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
-    transform: translateY(1px);
+    background: #f0f0f0;
 }
 
 .white-key.pressed,
-.white-key:active {
-    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
-    transform: translateY(3px);
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+.white-key.active {
+    background: #60a5fa !important; /* Light blue like in reference */
 }
 
 .white-key.pressed .key-label,
-.white-key.pressed .octave-marker {
-    color: white !important;
-    font-weight: 600;
+.white-key.active .key-label,
+.white-key.pressed .octave-marker,
+.white-key.active .octave-marker {
+    color: #1e40af !important; /* Dark blue text */
 }
 
 .black-key {
-    background: linear-gradient(180deg, #374151 0%, #1f2937 100%);
-    border: 1px solid #111827;
+    background: #000;
+    border: none;
+    border-radius: 0 0 4px 4px;
     cursor: pointer;
-    transition: all 0.1s ease;
+    transition: background-color 0.1s ease;
+    position: absolute;
+    top: 0;
 }
 
 .black-key:hover {
-    background: linear-gradient(180deg, #4b5563 0%, #374151 100%);
-    transform: translateY(1px);
+    background: #333;
 }
 
 .black-key.pressed,
-.black-key:active {
-    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
-    transform: translateY(2px);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+.black-key.active {
+    background: #3b82f6 !important; /* Darker blue for black keys */
 }
 
-.black-key.pressed .key-label {
+.black-key.pressed .key-label,
+.black-key.active .key-label {
     color: white !important;
-    font-weight: 600;
 }
 
 /* Animation for key press */
@@ -276,14 +284,15 @@
 
 /* Piano container styling */
 .piano-container {
-    background: linear-gradient(145deg, #1f2937, #374151);
-    border: 2px solid #4b5563;
+    background: #1f2937;
+    padding: 16px;
+    border-radius: 8px;
 }
 
-.piano-keys {
-    background: #000;
-    border-radius: 4px;
-    padding: 2px;
+.white-keys-container {
+    display: flex;
+    gap: 0;
+    height: 100%;
 }
 </style>
 
