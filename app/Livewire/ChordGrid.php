@@ -126,6 +126,19 @@ class ChordGrid extends Component
     public function selectChord($position)
     {
         $this->activePosition = $position;
+        
+        // Also play the chord if it has content
+        if (isset($this->chords[$position]) && !empty($this->chords[$position]['tone'])) {
+            $this->playChord($position);
+        }
+    }
+    
+    public function playChord($position)
+    {
+        if (isset($this->chords[$position]) && !empty($this->chords[$position]['tone'])) {
+            $chord = $this->chords[$position];
+            $this->dispatch('play-chord', chord: $chord);
+        }
     }
 
     public function setChord($tone, $semitone = 'major')
