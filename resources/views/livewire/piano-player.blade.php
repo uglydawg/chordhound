@@ -1,26 +1,24 @@
 <div class="piano-player space-y-4">
     {{-- Piano Display --}}
     <div class="bg-zinc-950 rounded-lg p-4 shadow-inner">
-        {{-- Current Chord Info --}}
-        <div class="text-center mb-4">
-            <div class="inline-flex items-center gap-2 bg-zinc-800 rounded-lg px-3 py-1">
-                <span class="text-sm text-zinc-400">Now Playing:</span>
-                @if(!empty($currentChord['tone']))
-                    <span class="text-lg font-bold text-white">
-                        {{ $currentChord['tone'] }}{{ $currentChord['semitone'] === 'minor' ? 'm' : ($currentChord['semitone'] === 'diminished' ? 'dim' : '') }}
-                        @if($currentChord['inversion'] !== 'root')
-                            <span class="text-sm text-zinc-400">/ {{ ucfirst($currentChord['inversion']) }} inv.</span>
-                        @endif
-                    </span>
-                @else
-                    <span class="text-lg font-medium text-zinc-500">No chord selected</span>
-                @endif
-            </div>
-        </div>
 
         {{-- Full Piano Layout (C1 - C5) --}}
         <div class="bg-zinc-900 rounded-lg p-4">
-            <h3 class="text-sm font-medium text-zinc-400 mb-3">Full Piano Layout (C1 - C5)</h3>
+            <div class="flex items-center justify-between mb-3">
+                <div class="inline-flex items-center gap-2">
+                    <span class="text-sm text-zinc-400">Now Playing:</span>
+                    @if(!empty($currentChord['tone']))
+                        <span class="text-lg font-bold text-white">
+                            {{ $currentChord['tone'] }}{{ $currentChord['semitone'] === 'minor' ? 'm' : ($currentChord['semitone'] === 'diminished' ? 'dim' : '') }}
+                            @if($currentChord['inversion'] !== 'root')
+                                <span class="text-sm text-zinc-400">/ {{ ucfirst($currentChord['inversion']) }} inv.</span>
+                            @endif
+                        </span>
+                    @else
+                        <span class="text-lg font-medium text-zinc-500">No chord selected</span>
+                    @endif
+                </div>
+            </div>
             
             {{-- Piano Keyboard - ChordChord Style --}}
             <div class="full-piano-container bg-zinc-800 rounded-lg p-4 overflow-x-auto" id="piano-keyboard">

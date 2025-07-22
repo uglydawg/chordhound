@@ -30,7 +30,7 @@ class ChordGrid extends Component
 
     public string $selectedProgression = '';
 
-    public bool $showVoiceLeading = true;
+    public bool $showVoiceLeading = false;
 
     private ChordService $chordService;
 

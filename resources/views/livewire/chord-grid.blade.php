@@ -4,12 +4,12 @@
         {{-- Key and Progression Selectors --}}
         <div class="flex flex-wrap items-center gap-4 mb-6 pb-4 border-b border-zinc-800">
             <div class="flex flex-wrap items-center gap-2">
-                <label class="text-sm font-medium text-secondary mr-2">Key:</label>
+                <label class="text-xs font-medium text-secondary mr-2">Key:</label>
                 <div class="flex space-x-1">
                     @foreach($availableKeys as $key)
                         <button
                             wire:click="setKey('{{ $key }}')"
-                            class="px-3 py-1.5 text-sm font-medium rounded transition-all
+                            class="px-2 py-0.5 text-xs font-medium rounded transition-all
                                 {{ $selectedKey === $key 
                                     ? 'bg-blue-600 text-white border border-blue-500 shadow-lg' 
                                     : (str_contains($key, '#') 
@@ -21,12 +21,12 @@
                     @endforeach
                 </div>
                 
-                <div class="h-6 w-px bg-zinc-700 mx-3"></div>
+                <div class="h-4 w-px bg-zinc-700 mx-2"></div>
                 
                 <div class="flex space-x-1">
                     <button
                         wire:click="setKeyType('major')"
-                        class="px-3 py-1.5 text-sm font-medium rounded transition-all
+                        class="px-2 py-0.5 text-xs font-medium rounded transition-all
                             {{ $selectedKeyType === 'major' 
                                 ? 'bg-blue-600 text-white border border-blue-500' 
                                 : 'bg-zinc-800 text-gray-300 border border-zinc-700 hover:bg-zinc-700 hover:text-white' }}"
@@ -35,7 +35,7 @@
                     </button>
                     <button
                         wire:click="setKeyType('minor')"
-                        class="px-3 py-1.5 text-sm font-medium rounded transition-all
+                        class="px-2 py-0.5 text-xs font-medium rounded transition-all
                             {{ $selectedKeyType === 'minor' 
                                 ? 'bg-blue-600 text-white border border-blue-500' 
                                 : 'bg-zinc-800 text-gray-300 border border-zinc-700 hover:bg-zinc-700 hover:text-white' }}"
@@ -44,12 +44,12 @@
                     </button>
                 </div>
                 
-                <div class="h-6 w-px bg-zinc-700 mx-3"></div>
+                <div class="h-4 w-px bg-zinc-700 mx-2"></div>
                 
-                <label class="text-sm font-medium text-secondary">Progression:</label>
+                <label class="text-xs font-medium text-secondary">Progression:</label>
                 <select
                     wire:change="setProgression($event.target.value)"
-                    class="bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]"
+                    class="bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-0.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[150px]"
                 >
                     <option value="" @if(!$selectedProgression) selected @endif>Custom</option>
                     @foreach($progressions as $romanNumerals => $progression)
@@ -66,7 +66,7 @@
                     @php
                         $transposedChords = app(\App\Services\ChordService::class)->transposeProgression($selectedKey, $selectedKeyType, $progressions[$selectedProgression]);
                     @endphp
-                    <div class="text-sm text-blue-400">
+                    <div class="text-xs text-blue-400">
                         = {{ collect($transposedChords)->map(fn($c) => $c['tone'] . ($c['semitone'] === 'minor' ? 'm' : ($c['semitone'] === 'diminished' ? 'dim' : '')))->join(' - ') }}
                     </div>
                 @endif
@@ -254,21 +254,21 @@
     </div>
     
     {{-- Chord Palette --}}
-    <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-medium text-secondary">Chord Palette</h3>
+    <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-medium text-secondary">Chord Palette</h3>
             @if($chords[$activePosition]['tone'])
-                <div class="text-lg font-bold text-primary">
+                <div class="text-sm font-bold text-primary">
                     Selected: {{ $chords[$activePosition]['tone'] }}{{ $chords[$activePosition]['semitone'] === 'minor' ? 'm' : ($chords[$activePosition]['semitone'] === 'diminished' ? 'dim' : '') }}
                     @if($chords[$activePosition]['inversion'] !== 'root')
-                        <span class="text-sm text-secondary ml-1">({{ ucfirst($chords[$activePosition]['inversion']) }})</span>
+                        <span class="text-xs text-secondary ml-1">({{ ucfirst($chords[$activePosition]['inversion']) }})</span>
                     @endif
                 </div>
             @endif
         </div>
         
         {{-- Root Notes --}}
-        <div class="grid grid-cols-12 gap-2 mb-4">
+        <div class="grid grid-cols-12 gap-1 mb-2">
             @foreach($tones as $tone)
                 <button
                     wire:click="setChord('{{ $tone }}')"
@@ -280,12 +280,12 @@
         </div>
         
         {{-- Chord Types --}}
-        <div class="flex space-x-2 mb-4">
+        <div class="flex space-x-1 mb-2">
             <span class="text-xs text-tertiary">Type:</span>
             @foreach(['major' => '', 'minor' => 'm', 'diminished' => 'dim', 'augmented' => 'aug'] as $type => $suffix)
                 <button
                     wire:click="setChord('{{ $chords[$activePosition]['tone'] ?? 'C' }}', '{{ $type }}')"
-                    class="text-xs px-3 py-1 rounded transition-colors {{ $chords[$activePosition]['semitone'] === $type ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-secondary hover:text-primary' }}"
+                    class="text-xs px-2 py-0.5 rounded transition-colors {{ $chords[$activePosition]['semitone'] === $type ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-secondary hover:text-primary' }}"
                 >
                     {{ ucfirst($type) }}
                 </button>
@@ -293,12 +293,12 @@
         </div>
         
         {{-- Inversion Controls --}}
-        <div class="flex space-x-2">
+        <div class="flex space-x-1">
             <span class="text-xs text-tertiary">Inversion:</span>
             @foreach(['root' => 'Root', 'first' => 'First', 'second' => 'Second'] as $inv => $label)
                 <button
                     wire:click="setInversion('{{ $inv }}')"
-                    class="text-xs px-3 py-1 rounded transition-colors {{ $chords[$activePosition]['inversion'] === $inv ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-secondary hover:text-primary' }}"
+                    class="text-xs px-2 py-0.5 rounded transition-colors {{ $chords[$activePosition]['inversion'] === $inv ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-secondary hover:text-primary' }}"
                 >
                     {{ $label }}
                 </button>
