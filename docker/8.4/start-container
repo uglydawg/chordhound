@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+if [ "$SUPERVISOR_PHP_USER" != "root" ] && [ "$SUPERVISOR_PHP_USER" != "sail" ]; then
+    echo "You should set SUPERVISOR_PHP_USER to either 'sail' or 'root'."
+    exit 1
+fi
+
+if [ ! -z "$WWWUSER" ]; then
+    usermod -u $WWWUSER sail
+fi
+
+if [ ! -d /.composer ]; then
+    mkdir /.composer
+fi
+
+chmod -R ugo+rw /.composer
+
+# Create PHP run directory
+mkdir -p /var/run/php
+chown -R www-data:www-data /var/run/php
+
+# Setup nginx configuration
+# Remove all existing site configurations first
+rm -f /etc/nginx/sites-enabled/*
+
+# Enable SSL configuration if available, otherwise fall back to non-SSL
+if [ -f /etc/nginx/sites-available/laravel-ssl ]; then
+    ln -sf /etc/nginx/sites-available/laravel-ssl /etc/nginx/sites-enabled/laravel-ssl
+    echo "Nginx: SSL configuration enabled"
+elif [ -f /etc/nginx/sites-available/laravel ]; then
+    ln -sf /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/laravel
+    echo "Nginx: Non-SSL configuration enabled (SSL config not found)"
+fi
+
+if [ $# -gt 0 ]; then
+    if [ "$SUPERVISOR_PHP_USER" = "root" ]; then
+        exec "$@"
+    else
+        exec gosu $WWWUSER "$@"
+    fi
+else
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+fi

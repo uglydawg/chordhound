@@ -1,0 +1,32 @@
+# ChordHound - Main Laravel application
+server {
+    listen 80;
+    server_name chordhound.localtest.me localhost;
+    root /var/www/html/public;
+    index index.php;
+    
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_param HTTP_HOST $host;
+        fastcgi_param SERVER_NAME $host;
+        fastcgi_param X_FORWARDED_HOST $host;
+        fastcgi_param X_FORWARDED_PROTO $scheme;
+        fastcgi_param HTTPS off;
+        
+        # Increase timeouts
+        fastcgi_connect_timeout 300s;
+        fastcgi_send_timeout 300s;
+        fastcgi_read_timeout 300s;
+    }
+    
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
