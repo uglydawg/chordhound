@@ -13,9 +13,9 @@ class MultiInstrumentPlayer {
         
         this.availableInstruments = {
             'piano': { 
-                path: '/audio/instruments/piano.mp3', 
-                meta: '/audio/instruments/piano-meta.json',
-                name: 'Piano'
+                path: '/audio/chordchord-cinematic-piano.mp3', 
+                meta: '/audio/chordchord-cinematic-piano-meta.json',
+                name: 'Cinematic Piano'
             }
         };
         
@@ -37,12 +37,48 @@ class MultiInstrumentPlayer {
             this.gainNode.gain.value = 0.7;
             this.gainNode.connect(this.masterGainNode);
             
-            // For now, we'll use the Web Audio API synthesis
-            // In a full implementation, we'd load and parse the audio files
+            // Load the default piano instrument
+            await this.loadInstrument('piano');
+            
             this.isLoaded = true;
-            console.log('Multi-Instrument Player initialized successfully');
+            console.log('Multi-Instrument Player initialized successfully with samples');
         } catch (error) {
             console.error('Failed to initialize Multi-Instrument Player:', error);
+            // Fallback to synthesis if loading fails
+            this.isLoaded = true;
+        }
+    }
+
+    async loadInstrument(instrumentKey) {
+        const instrument = this.availableInstruments[instrumentKey];
+        if (!instrument) {
+            console.error(`Instrument ${instrumentKey} not found`);
+            return;
+        }
+
+        try {
+            console.log(`Loading instrument: ${instrument.name} from ${instrument.path}`);
+            
+            // Load metadata
+            const metaResponse = await fetch(instrument.meta);
+            const metadata = await metaResponse.json();
+            
+            // Load audio file
+            const audioResponse = await fetch(instrument.path);
+            const arrayBuffer = await audioResponse.arrayBuffer();
+            const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+            
+            // Store the instrument data
+            this.instruments[instrumentKey] = {
+                buffer: audioBuffer,
+                metadata: metadata,
+                samples: metadata.samples || []
+            };
+            
+            console.log(`Successfully loaded ${instrument.name} with ${metadata.samples.length} samples`);
+        } catch (error) {
+            console.error(`Failed to load instrument ${instrumentKey}:`, error);
+            // Don't throw - allow fallback to synthesis
         }
     }
 
@@ -50,7 +86,11 @@ class MultiInstrumentPlayer {
         if (this.availableInstruments[instrumentKey]) {
             this.currentInstrument = instrumentKey;
             console.log(`Switched to instrument: ${instrumentKey}`);
-            // In a full implementation, we'd load the instrument samples here
+            
+            // Load the instrument if not already loaded
+            if (!this.instruments[instrumentKey]) {
+                await this.loadInstrument(instrumentKey);
+            }
         }
     }
 
@@ -66,42 +106,148 @@ class MultiInstrumentPlayer {
     playNote(note, duration = 0.5) {
         if (!this.audioContext) return;
 
-        const freq = this.noteToFrequency(note);
-        if (!freq) return;
+        // Try to play with samples first, fallback to synthesis
+        const instrument = this.instruments[this.currentInstrument];
+        if (instrument && instrument.buffer) {
+            this.playSample(note, duration, instrument);
+        } else {
+            this.playSynthesis(note, duration);
+        }
+    }
 
+    playSample(note, duration, instrument) {
         const now = this.audioContext.currentTime;
-        
-        // Create oscillator
-        const oscillator = this.audioContext.createOscillator();
+        const noteInfo = this.parseNote(note);
+        if (!noteInfo) return;
+
+        // Find the best sample for this note
+        const sample = this.findBestSample(noteInfo, instrument.samples);
+        if (!sample) {
+            console.warn(`No sample found for note ${note}, falling back to synthesis`);
+            this.playSynthesis(note, duration);
+            return;
+        }
+
+        // Create buffer source
+        const source = this.audioContext.createBufferSource();
         const noteGain = this.audioContext.createGain();
         
-        // Configure for piano sound - using sine wave for cleaner piano-like tone
-        oscillator.type = 'sine';
+        source.buffer = instrument.buffer;
         
-        oscillator.frequency.setValueAtTime(freq, now);
+        // Calculate playback rate for pitch shifting
+        const semitoneRatio = this.calculateSemitoneRatio(noteInfo, sample);
+        source.playbackRate.value = semitoneRatio;
         
-        // ADSR envelope
+        // Apply envelope from metadata
+        const envelope = instrument.metadata.envelope || { attack: 0.01, release: 0.5 };
+        const volume = (instrument.metadata.volume || 1) / 10; // Scale down volume
+        
         noteGain.gain.setValueAtTime(0, now);
-        noteGain.gain.linearRampToValueAtTime(0.3, now + 0.01); // Attack
-        noteGain.gain.exponentialRampToValueAtTime(0.2, now + 0.1); // Decay
-        noteGain.gain.setValueAtTime(0.2, now + duration - 0.1); // Sustain
-        noteGain.gain.exponentialRampToValueAtTime(0.01, now + duration); // Release
+        noteGain.gain.linearRampToValueAtTime(volume, now + envelope.attack);
+        noteGain.gain.setValueAtTime(volume * 0.8, now + duration - envelope.release);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
         
         // Connect
-        oscillator.connect(noteGain);
+        source.connect(noteGain);
         noteGain.connect(this.gainNode);
         
-        // Play
-        oscillator.start(now);
-        oscillator.stop(now + duration);
+        // Play the specific sample segment
+        source.start(now, sample.offset, Math.min(sample.duration, duration + 0.5));
+        source.stop(now + duration);
         
         // Store for tracking
-        this.activeNotes.set(note, { oscillator, gain: noteGain });
+        this.activeNotes.set(note, { source, gain: noteGain });
         
         // Clean up after note ends
         setTimeout(() => {
             this.activeNotes.delete(note);
         }, duration * 1000);
+    }
+
+    playSynthesis(note, duration) {
+        const freq = this.noteToFrequency(note);
+        if (!freq) return;
+
+        const now = this.audioContext.currentTime;
+        
+        // Create oscillator (fallback)
+        const oscillator = this.audioContext.createOscillator();
+        const noteGain = this.audioContext.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(freq, now);
+        
+        // ADSR envelope
+        noteGain.gain.setValueAtTime(0, now);
+        noteGain.gain.linearRampToValueAtTime(0.3, now + 0.01);
+        noteGain.gain.exponentialRampToValueAtTime(0.2, now + 0.1);
+        noteGain.gain.setValueAtTime(0.2, now + duration - 0.1);
+        noteGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+        
+        oscillator.connect(noteGain);
+        noteGain.connect(this.gainNode);
+        
+        oscillator.start(now);
+        oscillator.stop(now + duration);
+        
+        this.activeNotes.set(note, { oscillator, gain: noteGain });
+        
+        setTimeout(() => {
+            this.activeNotes.delete(note);
+        }, duration * 1000);
+    }
+
+    parseNote(note) {
+        const match = note.match(/([A-G]#?)(\d+)/);
+        if (!match) return null;
+        
+        const [, noteName, octave] = match;
+        return { noteName, octave: parseInt(octave) };
+    }
+
+    findBestSample(noteInfo, samples) {
+        // Find the closest sample by root note
+        let bestSample = null;
+        let bestDistance = Infinity;
+        
+        const targetSemitone = this.noteToSemitone(noteInfo.noteName + noteInfo.octave);
+        
+        for (const sample of samples) {
+            const sampleSemitone = this.noteToSemitone(sample.root);
+            const distance = Math.abs(targetSemitone - sampleSemitone);
+            
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestSample = sample;
+            }
+        }
+        
+        return bestSample;
+    }
+
+    calculateSemitoneRatio(noteInfo, sample) {
+        const targetSemitone = this.noteToSemitone(noteInfo.noteName + noteInfo.octave);
+        const sampleSemitone = this.noteToSemitone(sample.root);
+        const semitoneDifference = targetSemitone - sampleSemitone;
+        
+        // Each semitone is a ratio of 2^(1/12)
+        return Math.pow(2, semitoneDifference / 12);
+    }
+
+    noteToSemitone(note) {
+        const noteMap = {
+            'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5,
+            'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11
+        };
+        
+        const match = note.match(/([A-G]#?)(\d+)/);
+        if (!match) return 0;
+        
+        const [, noteName, octave] = match;
+        const semitone = noteMap[noteName];
+        if (semitone === undefined) return 0;
+        
+        return semitone + (parseInt(octave) * 12);
     }
 
     // Play a chord (multiple notes)
@@ -138,12 +284,38 @@ class MultiInstrumentPlayer {
     stopAll() {
         this.activeNotes.forEach((noteData, note) => {
             try {
-                noteData.oscillator.stop();
+                if (noteData.oscillator) {
+                    noteData.oscillator.stop();
+                } else if (noteData.source) {
+                    noteData.source.stop();
+                }
             } catch (e) {
                 // Note might have already stopped
             }
         });
         this.activeNotes.clear();
+    }
+
+    // Debug method to check loading status
+    getStatus() {
+        const status = {
+            isLoaded: this.isLoaded,
+            currentInstrument: this.currentInstrument,
+            loadedInstruments: Object.keys(this.instruments),
+            audioContextState: this.audioContext?.state
+        };
+
+        if (this.instruments[this.currentInstrument]) {
+            const instrument = this.instruments[this.currentInstrument];
+            status.currentInstrumentData = {
+                hasBuffer: !!instrument.buffer,
+                bufferDuration: instrument.buffer?.duration,
+                sampleCount: instrument.samples?.length || 0,
+                samples: instrument.samples?.map(s => s.root) || []
+            };
+        }
+
+        return status;
     }
 }
 

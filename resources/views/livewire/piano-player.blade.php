@@ -287,35 +287,35 @@
 }
 </style>
 
+{{-- Load the multi-instrument player --}}
+<script src="{{ asset('js/multi-instrument-player.js') }}"></script>
+
 {{-- JavaScript for audio playback --}}
 <script>
 // Audio context and sample management
 let audioContext = null;
-let pianoSampler = null;
+let pianoPlayer = null;
 let isAudioLoaded = false;
 
 // Global test function
 window.testAudio = async function() {
-    if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
     try {
-        // Resume audio context if suspended
-        if (audioContext.state === 'suspended') {
-            await audioContext.resume();
+        // Initialize piano player if not already done
+        if (!pianoPlayer && typeof MultiInstrumentPlayer !== 'undefined') {
+            pianoPlayer = new MultiInstrumentPlayer();
+            window.pianoPlayer = pianoPlayer; // Make globally accessible
+            isAudioLoaded = true;
         }
 
-        // Use loaded samples if available
-        if (pianoSampler && isAudioLoaded) {
-            pianoSampler.triggerAttackRelease('C4', '8n');
-            console.log('Test sound played using samples');
-        } else if (typeof Tone !== 'undefined') {
-            // Fallback to Tone.js synthesis
-            await Tone.start();
-            const synth = new Tone.Synth().toDestination();
-            synth.triggerAttackRelease('C4', '8n');
-            console.log('Test sound played using synthesis');
+        // Resume audio context if suspended
+        if (pianoPlayer && pianoPlayer.audioContext && pianoPlayer.audioContext.state === 'suspended') {
+            await pianoPlayer.audioContext.resume();
+        }
+
+        // Test with piano player
+        if (pianoPlayer && pianoPlayer.isLoaded) {
+            pianoPlayer.playNote('C4', 0.5);
+            console.log('Test sound played using MultiInstrumentPlayer');
         } else {
             alert('Audio not loaded. Please wait a moment and try again.');
         }
@@ -326,111 +326,30 @@ window.testAudio = async function() {
 };
 
 document.addEventListener('livewire:initialized', () => {
-    let synth = null;
     let sequence = null;
     let currentSound = 'piano';
     let audioInitialized = false;
-    let multiPlayer = null;
 
-    // Sound preset for piano with enhanced audio quality
-    const soundPresets = {
-        piano: {
-            oscillator: {
-                type: 'triangle8',
-                partialCount: 16
-            },
-            envelope: {
-                attack: 0.005,
-                decay: 0.1,
-                sustain: 0.3,
-                release: 1.5,
-                attackCurve: 'exponential'
-            },
-            filterEnvelope: {
-                attack: 0.001,
-                decay: 0.2,
-                sustain: 0.5,
-                release: 1.5,
-                baseFrequency: 2000,
-                octaves: 2
-            }
-        }
-    };
-
-    // Initialize audio with piano samples
+    // Initialize audio with MultiInstrumentPlayer
     async function initializeAudio() {
         if (!audioInitialized) {
             try {
                 // Initialize multi-instrument player if available
-                if (typeof MultiInstrumentPlayer !== 'undefined' && !multiPlayer) {
-                    multiPlayer = new MultiInstrumentPlayer();
-                    window.pianoPlayer = multiPlayer; // Make it globally accessible
+                if (typeof MultiInstrumentPlayer !== 'undefined' && !pianoPlayer) {
+                    pianoPlayer = new MultiInstrumentPlayer();
+                    window.pianoPlayer = pianoPlayer; // Make it globally accessible
                     console.log('Multi-instrument player initialized');
                 }
 
-                // Initialize Tone.js as fallback or additional synthesis
-                if (typeof Tone !== 'undefined') {
-                    // Start the audio context
-                    await Tone.start();
-                    console.log('Tone.js audio context started');
-
-                    // Create a more sophisticated piano synth with effects chain
-                    const reverb = new Tone.Reverb({
-                        decay: 2.5,
-                        preDelay: 0.01,
-                        wet: 0.2
-                    }).toDestination();
-
-                const chorus = new Tone.Chorus({
-                    frequency: 1.5,
-                    delayTime: 3.5,
-                    depth: 0.7,
-                    type: 'triangle',
-                    spread: 180,
-                    wet: 0.1
-                }).connect(reverb);
-
-                // Create the synth with better piano characteristics
-                synth = new Tone.PolySynth(Tone.Synth, {
-                    maxPolyphony: 32,
-                    voice: 12,
-                    options: {
-                        oscillator: {
-                            type: 'triangle8'
-                        },
-                        envelope: {
-                            attack: 0.005,
-                            decay: 0.1,
-                            sustain: 0.3,
-                            release: 1.5,
-                            attackCurve: 'exponential'
-                        },
-                        volume: -8
-                    }
-                }).connect(chorus);
-
-                // Add a compressor for more consistent volume
-                const compressor = new Tone.Compressor({
-                    ratio: 3,
-                    threshold: -24,
-                    release: 0.25,
-                    attack: 0.003,
-                    knee: 5
-                });
-                synth.chain(compressor, chorus);
-
-                // Apply initial sound preset
-                synth.set(soundPresets.piano);
-
-                // Note about available audio samples
-                console.log('Piano audio initialized');
-
-                    audioInitialized = true;
-                    isAudioLoaded = true;
-                    console.log('Audio initialized successfully with effects chain');
-                } // End of Tone.js initialization
+                // Resume audio context if suspended
+                if (pianoPlayer && pianoPlayer.audioContext && pianoPlayer.audioContext.state === 'suspended') {
+                    await pianoPlayer.audioContext.resume();
+                    console.log('Audio context resumed');
+                }
 
                 audioInitialized = true;
+                isAudioLoaded = true;
+                console.log('Audio initialized successfully with MultiInstrumentPlayer');
             } catch (error) {
                 console.error('Failed to initialize audio:', error);
             }
@@ -448,8 +367,8 @@ document.addEventListener('livewire:initialized', () => {
     // Listen for playback events
     Livewire.on('toggle-playback', async ({ isPlaying }) => {
         await initializeAudio(); // Ensure audio is initialized
-        if (!synth) {
-            console.error('Synth not initialized');
+        if (!pianoPlayer) {
+            console.error('Piano player not initialized');
             return;
         }
 
@@ -465,34 +384,21 @@ document.addEventListener('livewire:initialized', () => {
     });
 
     Livewire.on('tempo-changed', ({ tempo }) => {
-        if (Tone.Transport.state === 'started') {
-            Tone.Transport.bpm.value = tempo;
-        }
+        console.log('Tempo changed to:', tempo);
+        // MultiInstrumentPlayer doesn't use transport, but we can note the tempo change
     });
 
     Livewire.on('sound-changed', async ({ sound }) => {
         currentSound = sound;
 
         // Update multi-instrument player to use piano
-        if (multiPlayer) {
-            await multiPlayer.switchInstrument('piano');
+        if (pianoPlayer) {
+            await pianoPlayer.switchInstrument('piano');
             console.log('Multi-instrument player using piano');
-        }
-
-        // Update Tone.js synth to piano preset
-        if (synth && soundPresets.piano) {
-            console.log('Using piano sound');
-
-            // Apply the piano preset
-            synth.set(soundPresets.piano);
 
             // Play a test note to demonstrate the sound
             if (audioInitialized) {
-                if (multiPlayer) {
-                    multiPlayer.playNote('C4', 0.5);
-                } else {
-                    synth.triggerAttackRelease('C4', '8n');
-                }
+                pianoPlayer.playNote('C4', 0.5);
             }
         }
     });
@@ -507,13 +413,10 @@ document.addEventListener('livewire:initialized', () => {
         // Get the chord notes
         const notes = getChordNotes(chord.tone, chord.semitone, chord.inversion);
         
-        // Play the chord using the current audio system
-        if (multiPlayer && multiPlayer.isLoaded) {
-            multiPlayer.playChord(notes, 1.5);
+        // Play the chord using MultiInstrumentPlayer
+        if (pianoPlayer && pianoPlayer.isLoaded) {
+            pianoPlayer.playChordWithSustain(notes, 4.0);
             console.log('Playing chord with multi-instrument player:', notes);
-        } else if (synth) {
-            synth.triggerAttackRelease(notes, '1n');
-            console.log('Playing chord with Tone.js:', notes);
         }
         
         // Update the piano player's current chord display
@@ -525,8 +428,6 @@ document.addEventListener('livewire:initialized', () => {
         const chords = @js($chords);
         const tempo = @this.tempo;
 
-        Tone.Transport.bpm.value = tempo;
-
         // Create chord progression sequence
         const chordNotes = [];
         Object.values(chords).forEach(chord => {
@@ -536,32 +437,45 @@ document.addEventListener('livewire:initialized', () => {
             }
         });
 
-        if (chordNotes.length > 0) {
+        if (chordNotes.length > 0 && pianoPlayer) {
             let chordIndex = 0;
-            sequence = new Tone.Loop((time) => {
-                synth.triggerAttackRelease(chordNotes[chordIndex % chordNotes.length], '2n', time);
+            const beatDuration = 60000 / tempo; // Duration of one beat in milliseconds
+            const chordDuration = beatDuration * 2; // 2 beats per chord
 
-                // Update the displayed chord
-                @this.updateCurrentChord(chordIndex % chordNotes.length);
+            function playNextChord() {
+                if (chordIndex < chordNotes.length) {
+                    // Play current chord
+                    pianoPlayer.playChordWithSustain(chordNotes[chordIndex], 2.0);
 
-                chordIndex++;
+                    // Update the displayed chord
+                    @this.updateCurrentChord(chordIndex);
 
-                // Update progress
-                @this.currentTime = (chordIndex * 2) % 8;
-            }, '2n');
+                    chordIndex++;
 
-            sequence.start(0);
-            Tone.Transport.start();
+                    // Update progress
+                    @this.currentTime = (chordIndex * 2) % 8;
+
+                    // Schedule next chord
+                    sequence = setTimeout(playNextChord, chordDuration);
+                } else {
+                    // Loop back to beginning
+                    chordIndex = 0;
+                    sequence = setTimeout(playNextChord, 500);
+                }
+            }
+
+            playNextChord();
         }
     }
 
     function stopPlayback() {
         if (sequence) {
-            sequence.stop();
-            sequence.dispose();
+            clearTimeout(sequence);
             sequence = null;
         }
-        Tone.Transport.stop();
+        if (pianoPlayer) {
+            pianoPlayer.stopAll();
+        }
         @this.currentTime = 0;
     }
 
@@ -648,18 +562,18 @@ document.addEventListener('livewire:initialized', () => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
         await initializeAudio();
-        if (!synth || !audioInitialized) return;
+        if (!pianoPlayer || !audioInitialized) return;
 
         // Map keyboard keys to piano notes
         const keyMap = {
-            'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4',
-            'f': 'F4', 't': 'F#4', 'g': 'G4', 'y': 'G#4', 'h': 'A4',
-            'u': 'A#4', 'j': 'B4', 'k': 'C5'
+            'a': 'C3', 'w': 'C#3', 's': 'D3', 'e': 'D#3', 'd': 'E3',
+            'f': 'F3', 't': 'F#3', 'g': 'G3', 'y': 'G#3', 'h': 'A3',
+            'u': 'A#3', 'j': 'B3', 'k': 'C4'
         };
 
         const note = keyMap[e.key.toLowerCase()];
         if (note) {
-            synth.triggerAttackRelease(note, '8n');
+            pianoPlayer.playNote(note, 0.5);
         }
     });
 
@@ -672,13 +586,10 @@ document.addEventListener('livewire:initialized', () => {
 
             const note = target.getAttribute('data-note');
             if (note) {
-                // Use multi-instrument player if available, otherwise use Tone.js
-                if (multiPlayer && multiPlayer.isLoaded) {
-                    multiPlayer.playNote(note, 0.5);
+                // Use MultiInstrumentPlayer for note playback
+                if (pianoPlayer && pianoPlayer.isLoaded) {
+                    pianoPlayer.playNote(note, 0.5);
                     console.log('Playing note with multi-instrument player:', note);
-                } else if (synth) {
-                    synth.triggerAttackRelease(note, '8n');
-                    console.log('Playing note with Tone.js:', note);
                 }
 
                 // Visual feedback
