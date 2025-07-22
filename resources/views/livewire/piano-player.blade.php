@@ -22,7 +22,7 @@
 
             {{-- Piano Keyboard - Realistic Layout --}}
             <div class="piano-container bg-zinc-800 rounded-lg p-4 overflow-x-auto" id="piano-keyboard">
-                <div class="piano-keys relative" style="height: 150px; width: 100%; min-width: 400px; max-width: 600px; margin: 0 auto;">
+                <div class="piano-keys relative" style="height: 150px; width: 100%; min-width: 600px; max-width: 900px; margin: 0 auto;">
                     {{-- White Keys Container (Full height, will be overlapped by black keys) --}}
                     <div class="white-keys-container absolute inset-0 flex gap-0">
                         @php

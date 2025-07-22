@@ -31,8 +31,8 @@ class PianoPlayer extends Component
     public array $activeNotes = []; // Currently active/highlighted notes
     
     // Piano display configuration
-    public array $octaves = [3, 4]; // Default to C3 and C4
-    public int $startOctave = 3;
+    public array $octaves = [2, 3, 4]; // Default to C2, C3 and C4
+    public int $startOctave = 2;
     public int $endOctave = 4;
 
     // Available piano sounds
@@ -49,6 +49,8 @@ class PianoPlayer extends Component
             $this->chords = [];
             $this->currentChord = [];
         }
+        // Ensure no keys are pressed by default
+        $this->activeNotes = [];
     }
 
     public function boot()
@@ -63,12 +65,9 @@ class PianoPlayer extends Component
         $chords = is_array($data) && isset($data['chords']) ? $data['chords'] : $data;
 
         $this->chords = $chords;
-        // Display first chord by default
-        if (! empty($chords)) {
-            $this->currentChord = array_values($chords)[0] ?? [];
-        } else {
-            $this->currentChord = [];
-        }
+        // Don't automatically display any chord - wait for user interaction
+        $this->currentChord = [];
+        $this->activeNotes = [];
     }
     
     public function setCurrentChord(array $chord)
