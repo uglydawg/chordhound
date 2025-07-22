@@ -32,13 +32,7 @@ class PianoPlayer extends Component
 
     // Available piano sounds
     public array $availableSounds = [
-        'piano' => 'Grand Piano',
-        'cinematic' => 'Cinematic Piano (Sample)',
-        'jazz' => 'Jazz Piano (Sample)',
-        'electric' => 'Electric Piano',
-        'synth' => 'Synth Piano',
-        'rhodes' => 'Rhodes',
-        'organ' => 'Organ',
+        'piano' => 'Piano',
     ];
 
     private ChordService $chordService;

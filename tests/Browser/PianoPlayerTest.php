@@ -68,7 +68,6 @@ class PianoPlayerTest extends DuskTestCase
             $browser->loginAs($user)
                 ->visit('/chords')
                 ->assertSee('Test Piano Sound')
-                ->assertSee('Audio samples imported from ChordChord')
                 ->click('button:contains("Test Piano Sound")')
                 ->pause(500) // Wait for audio test
                 ->assertSee('Sound')

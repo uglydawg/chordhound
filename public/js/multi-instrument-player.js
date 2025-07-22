@@ -6,36 +6,16 @@ class MultiInstrumentPlayer {
         this.gainNode = null;
         this.isLoaded = false;
         this.instruments = {};
-        this.currentInstrument = 'cinematic-piano';
+        this.currentInstrument = 'piano';
         this.currentKey = 'C';
         this.currentOctave = 3;
         this.activeNotes = new Map();
         
         this.availableInstruments = {
-            'cinematic-piano': { 
-                path: '/audio/instruments/cinematic-piano.mp3', 
-                meta: '/audio/instruments/cinematic-piano-meta.json',
-                name: 'Cinematic Piano'
-            },
-            'piano-jazz': { 
-                path: '/audio/instruments/piano-jazz.mp3', 
-                meta: '/audio/instruments/piano-jazz-meta.json',
-                name: 'Jazz Piano'
-            },
-            'synthwave': { 
-                path: '/audio/instruments/synthwave.mp3', 
-                meta: '/audio/instruments/synthwave-meta.json',
-                name: 'Synthwave'
-            },
-            'electric-guitar': { 
-                path: '/audio/instruments/electric-guitar.mp3', 
-                meta: '/audio/instruments/electric-guitar-meta.json',
-                name: 'Electric Guitar'
-            },
-            'strings': { 
-                path: '/audio/instruments/strings.mp3', 
-                meta: '/audio/instruments/strings-meta.json',
-                name: 'Strings'
+            'piano': { 
+                path: '/audio/instruments/piano.mp3', 
+                meta: '/audio/instruments/piano-meta.json',
+                name: 'Piano'
             }
         };
         
@@ -95,20 +75,8 @@ class MultiInstrumentPlayer {
         const oscillator = this.audioContext.createOscillator();
         const noteGain = this.audioContext.createGain();
         
-        // Configure based on instrument
-        switch (this.currentInstrument) {
-            case 'piano-jazz':
-                oscillator.type = 'triangle';
-                break;
-            case 'synthwave':
-                oscillator.type = 'sawtooth';
-                break;
-            case 'electric-guitar':
-                oscillator.type = 'square';
-                break;
-            default:
-                oscillator.type = 'sine';
-        }
+        // Configure for piano sound - using sine wave for cleaner piano-like tone
+        oscillator.type = 'sine';
         
         oscillator.frequency.setValueAtTime(freq, now);
         

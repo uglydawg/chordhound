@@ -22,7 +22,7 @@ it('displays piano with correct layout from C1 to C5', function () {
     $response = $this->get('/chords');
 
     $response->assertOk()
-        ->assertSee('Full Piano Layout (C1 - C5)')
+        ->assertSee('Now Playing:')
         ->assertSee('C1')
         ->assertSee('C2')
         ->assertSee('C3')
@@ -71,24 +71,18 @@ it('shows test audio button and audio sample indicator', function () {
     $response = $this->get('/chords');
 
     $response->assertOk()
-        ->assertSee('Test Piano Sound')
-        ->assertSee('Audio samples imported from ChordChord');
+        ->assertSee('Test Piano Sound');
 });
 
-it('includes piano sound selector with sample options', function () {
+it('includes piano sound selector', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
     $response = $this->get('/chords');
 
     $response->assertOk()
-        ->assertSee('Grand Piano')
-        ->assertSee('Cinematic Piano (Sample)')
-        ->assertSee('Jazz Piano (Sample)')
-        ->assertSee('Electric Piano')
-        ->assertSee('Synth Piano')
-        ->assertSee('Rhodes')
-        ->assertSee('Organ');
+        ->assertSee('Piano')
+        ->assertSee('Sound');
 });
 
 it('shows transport controls for playback', function () {
