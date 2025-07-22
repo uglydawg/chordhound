@@ -16,7 +16,7 @@ class PianoPlayer extends Component
 
     public float $currentTime = 0;
 
-    public float $duration = 8; // 8 beats for 4 chords (2 beats each)
+    public float $duration = 16; // 16 beats for 4 chords (4 beats each)
 
     public array $chords = [];
 

@@ -138,7 +138,7 @@
                         {{-- Chord Button --}}
                         <div 
                             wire:click="selectChord({{ $pos }})"
-                            class="relative rounded-lg border-2 {{ $activePosition === $pos ? 'border-blue-500 bg-blue-600' : ($ch['is_blue_note'] ? 'border-purple-500 bg-zinc-800' : 'border-zinc-700 bg-zinc-800') }} hover:border-blue-400 transition-all cursor-pointer p-6 min-h-[180px] flex flex-col justify-between group"
+                            class="relative rounded-lg border-2 {{ $playingPosition === $pos ? 'border-orange-500 bg-orange-600 animate-pulse' : ($activePosition === $pos ? 'border-blue-500 bg-blue-600' : ($ch['is_blue_note'] ? 'border-purple-500 bg-zinc-800' : 'border-zinc-700 bg-zinc-800')) }} hover:border-blue-400 transition-all cursor-pointer p-6 min-h-[180px] flex flex-col justify-between group"
                         >
                             {{-- Roman Numeral --}}
                             @if($ch['tone'] && $showRomanNumerals && isset($romanNumerals[$pos]))
@@ -245,7 +245,7 @@
                         
                         {{-- Beat indicator --}}
                         <div class="text-center text-xs text-tertiary">
-                            Beat {{ ($pos - 1) * 2 + 1 }}-{{ ($pos - 1) * 2 + 2 }}
+                            Beat {{ ($pos - 1) * 4 + 1 }}-{{ ($pos - 1) * 4 + 4 }}
                         </div>
                     </div>
                 @endforeach

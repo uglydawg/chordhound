@@ -32,6 +32,8 @@ class ChordGrid extends Component
 
     public bool $showVoiceLeading = false;
 
+    public ?int $playingPosition = null;
+
     private ChordService $chordService;
 
     // Common chord progressions as roman numerals (based on image and popular progressions)
@@ -319,6 +321,18 @@ class ChordGrid extends Component
             $this->selectedKey,
             $this->selectedKeyType
         );
+    }
+
+    #[On('highlight-chord-position')]
+    public function highlightChordPosition($position)
+    {
+        $this->playingPosition = $position;
+    }
+
+    #[On('stop-playback')]
+    public function clearHighlight()
+    {
+        $this->playingPosition = null;
     }
 
     #[On('save-chord-set')]

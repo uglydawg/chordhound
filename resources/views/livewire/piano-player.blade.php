@@ -111,16 +111,6 @@
         </div>
     </div>
 
-    {{-- Test Audio Button --}}
-    <div class="mb-4 text-center">
-        <button
-            onclick="testAudio()"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-        >
-            Test Piano Sound
-        </button>
-    </div>
-
     {{-- Transport Controls --}}
     <div class="flex items-center justify-between space-x-4 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
         {{-- Play/Pause/Stop Controls --}}
@@ -306,38 +296,14 @@ let audioContext = null;
 let pianoPlayer = null;
 let isAudioLoaded = false;
 
-// Global test function
-window.testAudio = async function() {
-    try {
-        // Initialize piano player if not already done
-        if (!pianoPlayer && typeof MultiInstrumentPlayer !== 'undefined') {
-            pianoPlayer = new MultiInstrumentPlayer();
-            window.pianoPlayer = pianoPlayer; // Make globally accessible
-            isAudioLoaded = true;
-        }
-
-        // Resume audio context if suspended
-        if (pianoPlayer && pianoPlayer.audioContext && pianoPlayer.audioContext.state === 'suspended') {
-            await pianoPlayer.audioContext.resume();
-        }
-
-        // Test with piano player
-        if (pianoPlayer && pianoPlayer.isLoaded) {
-            pianoPlayer.playNote('C4', 0.5);
-            console.log('Test sound played using MultiInstrumentPlayer');
-        } else {
-            alert('Audio not loaded. Please wait a moment and try again.');
-        }
-    } catch (error) {
-        alert('Audio error: ' + error.message);
-        console.error('Audio test failed:', error);
-    }
-};
 
 document.addEventListener('livewire:initialized', () => {
     let sequence = null;
     let currentSound = 'piano';
     let audioInitialized = false;
+    
+    // Request chord state from chord grid when piano player loads
+    Livewire.dispatch('request-chord-state');
 
     // Initialize audio with MultiInstrumentPlayer
     async function initializeAudio() {
@@ -390,6 +356,8 @@ document.addEventListener('livewire:initialized', () => {
 
     Livewire.on('stop-playback', () => {
         stopPlayback();
+        // Clear the highlight in chord grid
+        Livewire.dispatch('stop-playback');
     });
 
     Livewire.on('tempo-changed', ({ tempo }) => {
@@ -439,30 +407,39 @@ document.addEventListener('livewire:initialized', () => {
 
         // Create chord progression sequence
         const chordNotes = [];
+        const chordData = [];
         Object.values(chords).forEach(chord => {
             if (chord.tone) {
                 const notes = getChordNotes(chord.tone, chord.semitone, chord.inversion);
                 chordNotes.push(notes);
+                chordData.push(chord);
             }
         });
 
         if (chordNotes.length > 0 && pianoPlayer) {
             let chordIndex = 0;
             const beatDuration = 60000 / tempo; // Duration of one beat in milliseconds
-            const chordDuration = beatDuration * 2; // 2 beats per chord
+            const chordDuration = beatDuration * 4; // 4 beats per chord (changed from 2)
 
             function playNextChord() {
                 if (chordIndex < chordNotes.length) {
                     // Play current chord
-                    pianoPlayer.playChordWithSustain(chordNotes[chordIndex], 2.0);
+                    pianoPlayer.playChordWithSustain(chordNotes[chordIndex], 4.0); // Sustain for 4 beats
 
-                    // Update the displayed chord
+                    // Update the displayed chord and active notes
                     @this.updateCurrentChord(chordIndex);
+                    
+                    // Update active keys on piano
+                    updateActiveKeys(chordNotes[chordIndex]);
+
+                    // Highlight the chord in the grid
+                    const chordPosition = chordData[chordIndex].position;
+                    Livewire.dispatch('highlight-chord-position', { position: chordPosition });
 
                     chordIndex++;
 
                     // Update progress
-                    @this.currentTime = (chordIndex * 2) % 8;
+                    @this.currentTime = (chordIndex * 4) % 16; // Updated for 4 beats per chord
 
                     // Schedule next chord
                     sequence = setTimeout(playNextChord, chordDuration);
@@ -486,6 +463,26 @@ document.addEventListener('livewire:initialized', () => {
             pianoPlayer.stopAll();
         }
         @this.currentTime = 0;
+        
+        // Clear all active keys
+        document.querySelectorAll('.piano-key.active').forEach(key => {
+            key.classList.remove('active', 'pressed');
+        });
+    }
+    
+    function updateActiveKeys(notes) {
+        // Clear all active keys
+        document.querySelectorAll('.piano-key.active').forEach(key => {
+            key.classList.remove('active', 'pressed');
+        });
+        
+        // Highlight the new chord notes
+        notes.forEach(note => {
+            const key = document.getElementById('key-' + note);
+            if (key) {
+                key.classList.add('active', 'pressed');
+            }
+        });
     }
 
     function getChordNotes(root, type, inversion) {

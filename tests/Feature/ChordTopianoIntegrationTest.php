@@ -25,13 +25,12 @@ it('displays chord progression page with both chord grid and piano player', func
         // Chord grid elements
         ->assertSee('Chord Progression')
         ->assertSee('Chord Palette')
-        ->assertSee('Beat 1-2') // First chord beat indicator
+        ->assertSee('Beat 1-4') // First chord beat indicator (4 beats per chord)
         // Piano player elements  
         ->assertSee('Piano Player')
         ->assertSee('Now Playing:')
-        ->assertSee('Test Piano Sound')
         // Integrated functionality
-        ->assertSee('C1') // Piano keys
+        ->assertSee('C2') // Piano keys (starts at C2)
         ->assertSee('Major') // Chord type selector
         ->assertSee('BPM'); // Piano controls
 });

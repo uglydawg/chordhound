@@ -13,11 +13,10 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
-        cors: true,
-        host: '0.0.0.0',
-        port: 5173,
+        port: parseInt(process.env.VITE_PORT || 5173),
+        strictPort: true, // Don't auto-switch ports
         hmr: {
-            host: 'chordhound.localtest.me'
+            host: 'localhost'
         }
     },
 });
