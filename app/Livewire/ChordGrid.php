@@ -30,7 +30,7 @@ class ChordGrid extends Component
 
     public string $selectedProgression = '';
 
-    public bool $showVoiceLeading = false;
+    public bool $showVoiceLeading = true; // Default to optimized voice leading
 
     public ?int $playingPosition = null;
 
@@ -44,6 +44,44 @@ class ChordGrid extends Component
         'vi-IV-I-V' => ['vi', 'IV', 'I', 'V'],
         'I-vi-ii-V' => ['I', 'vi', 'ii', 'V'],
         'ii-V-I' => ['ii', 'V', 'I'],
+    ];
+
+    // Optimal inversions for voice leading (minimizing right hand movement)
+    private array $voiceLeadingInversions = [
+        'I-IV-V' => [
+            'root',    // I - root position
+            'second',  // IV - second inversion (bass = I)
+            'first',   // V - first inversion (bass = VII)
+        ],
+        'I-V-vi-IV' => [
+            'root',    // I - root position
+            'first',   // V - first inversion
+            'first',   // vi - first inversion
+            'second',  // IV - second inversion
+        ],
+        'I-vi-IV-V' => [
+            'root',    // I - root position
+            'first',   // vi - first inversion (bass = I)
+            'second',  // IV - second inversion (bass = I)
+            'first',   // V - first inversion (bass = VII)
+        ],
+        'vi-IV-I-V' => [
+            'root',    // vi - root position
+            'first',   // IV - first inversion (bass = vi)
+            'second',  // I - second inversion (bass = V)
+            'root',    // V - root position
+        ],
+        'I-vi-ii-V' => [
+            'root',    // I - root position
+            'first',   // vi - first inversion (bass = I)
+            'root',    // ii - root position
+            'first',   // V - first inversion (bass = VII)
+        ],
+        'ii-V-I' => [
+            'second',  // ii - second inversion (bass = vi)
+            'first',   // V - first inversion (bass = VII)
+            'root',    // I - root position
+        ],
     ];
 
     // Progression descriptions
@@ -245,8 +283,12 @@ class ChordGrid extends Component
 
                     // Determine inversion
                     $inversion = 'root';
-                    if ($autoInversion && $index > 0) {
-                        // Calculate optimal inversion based on previous chord
+                    
+                    // Use voice-leading inversions if enabled
+                    if ($this->showVoiceLeading && isset($this->voiceLeadingInversions[$progressionKey][$index])) {
+                        $inversion = $this->voiceLeadingInversions[$progressionKey][$index];
+                    } elseif ($autoInversion && $index > 0) {
+                        // Fall back to calculated optimal inversion
                         $prevChord = $this->chords[$position - 1];
                         if (! empty($prevChord['tone'])) {
                             $inversion = $this->chordService->calculateOptimalInversion($prevChord, $chord);
@@ -312,6 +354,11 @@ class ChordGrid extends Component
     {
         $this->showVoiceLeading = ! $this->showVoiceLeading;
         session(['chord_grid.show_voice_leading' => $this->showVoiceLeading]);
+        
+        // Re-apply current progression with voice-leading inversions if enabled
+        if ($this->selectedProgression) {
+            $this->applySelectedProgression();
+        }
     }
 
     private function updateRomanNumerals()
