@@ -23,13 +23,13 @@ chown -R www-data:www-data /var/run/php
 # Remove all existing site configurations first
 rm -f /etc/nginx/sites-enabled/*
 
-# Enable SSL configuration if available, otherwise fall back to non-SSL
-if [ -f /etc/nginx/sites-available/laravel-ssl ]; then
-    ln -sf /etc/nginx/sites-available/laravel-ssl /etc/nginx/sites-enabled/laravel-ssl
-    echo "Nginx: SSL configuration enabled"
+# Enable HTTP-only configuration
+if [ -f /etc/nginx/sites-available/laravel-http ]; then
+    ln -sf /etc/nginx/sites-available/laravel-http /etc/nginx/sites-enabled/laravel-http
+    echo "Nginx: HTTP-only configuration enabled"
 elif [ -f /etc/nginx/sites-available/laravel ]; then
     ln -sf /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/laravel
-    echo "Nginx: Non-SSL configuration enabled (SSL config not found)"
+    echo "Nginx: Default configuration enabled"
 fi
 
 if [ $# -gt 0 ]; then
