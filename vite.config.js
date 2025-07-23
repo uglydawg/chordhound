@@ -19,4 +19,14 @@ export default defineConfig({
             host: 'localhost'
         }
     },
+    build: {
+        rollupOptions: {
+            output: {
+                assetFileNames: 'assets/[name]-[hash][extname]',
+                chunkFileNames: 'assets/[name]-[hash].js',
+                entryFileNames: 'assets/[name]-[hash].js',
+            }
+        }
+    },
+    base: process.env.NODE_ENV === 'production' ? 'https://chordhound.com/' : '/',
 });

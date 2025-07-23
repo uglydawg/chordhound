@@ -1,0 +1,80 @@
+# Simple serverless build for ChordHound
+FROM php:8.4-fpm-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    git \
+    curl \
+    libpng-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    sqlite \
+    sqlite-dev \
+    nodejs \
+    npm \
+    bash
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_sqlite zip gd bcmath
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy dependency files first for better caching
+COPY composer.json composer.lock package.json package-lock.json ./
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Install Node.js dependencies
+RUN npm ci --only=production
+
+# Copy application code
+COPY . .
+
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
+
+# Create SQLite database file with proper permissions
+RUN touch database/database.sqlite \
+    && chown www-data:www-data database/database.sqlite \
+    && chmod 664 database/database.sqlite
+
+# Build assets with production APP_URL
+ENV APP_URL=https://chordhound.com/
+ENV VITE_APP_URL=https://chordhound.com/
+ENV ASSET_URL=https://chordhound.com/
+ENV NODE_ENV=production
+RUN npm run build
+
+# Generate optimized autoloader
+RUN composer dump-autoload --optimize
+
+# Remove dev dependencies and build artifacts
+RUN npm prune --omit=dev \
+    && rm -rf node_modules/.cache \
+    && rm -rf /tmp/*
+
+# Create entrypoint script for initialization
+RUN echo '#!/bin/sh' > /entrypoint.sh \
+    && echo 'set -e' >> /entrypoint.sh \
+    && echo 'cd /var/www/html' >> /entrypoint.sh \
+    && echo 'if [ ! -f .docker-initialized ]; then' >> /entrypoint.sh \
+    && echo '  export TELESCOPE_ENABLED=false' >> /entrypoint.sh \
+    && echo '  php artisan migrate --force || true' >> /entrypoint.sh \
+    && echo '  php artisan config:cache || true' >> /entrypoint.sh \
+    && echo '  touch .docker-initialized' >> /entrypoint.sh \
+    && echo 'fi' >> /entrypoint.sh \
+    && echo 'exec "$@"' >> /entrypoint.sh \
+    && chmod +x /entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
