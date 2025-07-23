@@ -287,8 +287,7 @@
 }
 </style>
 
-{{-- Load the multi-instrument player --}}
-<script src="{{ asset('js/multi-instrument-player.js') }}"></script>
+{{-- Multi-instrument player loaded in head --}}
 
 {{-- JavaScript for audio playback --}}
 <script>

@@ -20,7 +20,7 @@ class ChordGrid extends Component
 
     public bool $showSuggestions = false;
 
-    public string $selectedKey = 'G';
+    public string $selectedKey = 'C';
 
     public string $selectedKeyType = 'major';
 
