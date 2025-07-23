@@ -586,27 +586,40 @@ document.addEventListener('livewire:initialized', () => {
         // Get the exact voicing for this chord and inversion
         let notes = chordVoicings[root]?.[inversion] || chordVoicings['C']['root'];
 
-        // Apply chord type modifications
+        // Apply chord type modifications by finding the actual chord tones
         if (type === 'minor') {
             // Lower the third by a semitone for minor chords
-            notes = notes.map((note, index) => {
-                if (index === 1) { // Third of the chord
+            // Find the third degree note regardless of inversion
+            const rootNoteName = root.replace('#', 's'); // Convert # to s for lookup
+            const thirdInterval = getThirdNote(root);
+            
+            notes = notes.map(note => {
+                const noteName = note.replace(/\d+/, ''); // Remove octave
+                if (noteName === thirdInterval || noteName === thirdInterval.replace('s', '#')) {
                     return lowerNote(note);
                 }
                 return note;
             });
         } else if (type === 'diminished') {
             // Lower both third and fifth for diminished
-            notes = notes.map((note, index) => {
-                if (index === 1 || index === 2) { // Third and fifth
+            const thirdInterval = getThirdNote(root);
+            const fifthInterval = getFifthNote(root);
+            
+            notes = notes.map(note => {
+                const noteName = note.replace(/\d+/, '');
+                if (noteName === thirdInterval || noteName === thirdInterval.replace('s', '#') ||
+                    noteName === fifthInterval || noteName === fifthInterval.replace('s', '#')) {
                     return lowerNote(note);
                 }
                 return note;
             });
         } else if (type === 'augmented') {
             // Raise the fifth for augmented
-            notes = notes.map((note, index) => {
-                if (index === 2) { // Fifth of the chord
+            const fifthInterval = getFifthNote(root);
+            
+            notes = notes.map(note => {
+                const noteName = note.replace(/\d+/, '');
+                if (noteName === fifthInterval || noteName === fifthInterval.replace('s', '#')) {
                     return raiseNote(note);
                 }
                 return note;
@@ -614,6 +627,21 @@ document.addEventListener('livewire:initialized', () => {
         }
 
         return notes;
+    }
+
+    // Helper functions to identify chord intervals
+    function getThirdNote(root) {
+        const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const rootIndex = noteOrder.indexOf(root);
+        const thirdIndex = (rootIndex + 4) % 12; // Major third is 4 semitones up
+        return noteOrder[thirdIndex];
+    }
+
+    function getFifthNote(root) {
+        const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const rootIndex = noteOrder.indexOf(root);
+        const fifthIndex = (rootIndex + 7) % 12; // Perfect fifth is 7 semitones up
+        return noteOrder[fifthIndex];
     }
 
     // Helper functions for note manipulation
