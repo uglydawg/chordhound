@@ -13,7 +13,7 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
-        port: parseInt(process.env.VITE_PORT || 5173),
+        port: parseInt(process.env.VITE_PORT || 5175),
         strictPort: true, // Don't auto-switch ports
         hmr: {
             host: 'localhost'
