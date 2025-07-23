@@ -504,14 +504,25 @@ document.addEventListener('livewire:initialized', () => {
         
         console.log(`DEBUG updateActiveKeys: Looking for notes:`, notes);
         
+        // Convert flat notes to sharp equivalents for piano key lookup
+        const flatToSharp = {
+            'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'
+        };
+        
         // Highlight the new chord notes
         notes.forEach(note => {
-            const keyId = 'key-' + note;
+            // Convert flats to sharps if needed
+            let pianoNote = note;
+            for (const [flat, sharp] of Object.entries(flatToSharp)) {
+                pianoNote = pianoNote.replace(flat, sharp);
+            }
+            
+            const keyId = 'key-' + pianoNote;
             const key = document.getElementById(keyId);
-            console.log(`DEBUG: Looking for key ID '${keyId}', found:`, !!key);
+            console.log(`DEBUG: Looking for key ID '${keyId}' (original: ${note}), found:`, !!key);
             if (key) {
                 key.classList.add('active', 'pressed');
-                console.log(`DEBUG: Activated key ${note}`);
+                console.log(`DEBUG: Activated key ${pianoNote}`);
             } else {
                 console.warn(`DEBUG: Key not found for note ${note} (ID: ${keyId})`);
             }
@@ -583,43 +594,101 @@ document.addEventListener('livewire:initialized', () => {
             }
         };
 
-        // Get the exact voicing for this chord and inversion
+        // For minor chords, use exact minor voicings
+        if (type === 'minor') {
+            const minorChordVoicings = {
+                'C': {
+                    'root': ['C4', 'Eb4', 'G4'],
+                    'first': ['Eb4', 'G4', 'C5'],
+                    'second': ['G3', 'C4', 'Eb4']
+                },
+                'C#': {
+                    'root': ['C#4', 'E4', 'G#4'],
+                    'first': ['E3', 'G#3', 'C#4'],
+                    'second': ['G#3', 'C#4', 'E4']
+                },
+                'D': {
+                    'root': ['D4', 'F4', 'A4'],
+                    'first': ['F3', 'A3', 'D4'],
+                    'second': ['A3', 'D4', 'F4']
+                },
+                'D#': {
+                    'root': ['D#4', 'F#4', 'A#4'],
+                    'first': ['F#3', 'A#3', 'D#4'],
+                    'second': ['A#3', 'D#4', 'F#4']
+                },
+                'E': {
+                    'root': ['E4', 'G4', 'B4'],
+                    'first': ['G3', 'B3', 'E4'],
+                    'second': ['B3', 'E4', 'G4']
+                },
+                'F': {
+                    'root': ['F4', 'Ab4', 'C5'],
+                    'first': ['Ab3', 'C4', 'F4'],
+                    'second': ['C4', 'F4', 'Ab4']
+                },
+                'F#': {
+                    'root': ['F#3', 'A3', 'C#4'],
+                    'first': ['A3', 'C#4', 'F#4'],
+                    'second': ['C#4', 'F#4', 'A4']
+                },
+                'G': {
+                    'root': ['G3', 'Bb3', 'D4'],
+                    'first': ['Bb3', 'D4', 'G4'],
+                    'second': ['D4', 'G4', 'Bb4']
+                },
+                'G#': {
+                    'root': ['G#3', 'B3', 'D#4'],
+                    'first': ['B3', 'D#4', 'G#4'],
+                    'second': ['D#4', 'G#4', 'B4']
+                },
+                'A': {
+                    'root': ['A3', 'C4', 'E4'],
+                    'first': ['C4', 'E4', 'A4'],
+                    'second': ['E3', 'A3', 'C4']
+                },
+                'A#': {
+                    'root': ['A#3', 'C#4', 'F4'],
+                    'first': ['C#4', 'F4', 'A#4'],
+                    'second': ['F3', 'A#3', 'C#4']
+                },
+                'B': {
+                    'root': ['B3', 'D4', 'F#4'],
+                    'first': ['D4', 'F#4', 'B4'],
+                    'second': ['F#3', 'B3', 'D4']
+                }
+            };
+            
+            return minorChordVoicings[root]?.[inversion] || chordVoicings['C']['root'];
+        }
+        
+        // Get the exact voicing for major chords
         let notes = chordVoicings[root]?.[inversion] || chordVoicings['C']['root'];
 
-        // Apply chord type modifications by finding the actual chord tones
-        if (type === 'minor') {
-            // Lower the third by a semitone for minor chords
-            // Find the third degree note regardless of inversion
-            const rootNoteName = root.replace('#', 's'); // Convert # to s for lookup
-            const thirdInterval = getThirdNote(root);
-            
-            notes = notes.map(note => {
-                const noteName = note.replace(/\d+/, ''); // Remove octave
-                if (noteName === thirdInterval || noteName === thirdInterval.replace('s', '#')) {
-                    return lowerNote(note);
-                }
-                return note;
-            });
-        } else if (type === 'diminished') {
+        // Handle diminished and augmented chords
+        if (type === 'diminished') {
             // Lower both third and fifth for diminished
-            const thirdInterval = getThirdNote(root);
-            const fifthInterval = getFifthNote(root);
-            
-            notes = notes.map(note => {
-                const noteName = note.replace(/\d+/, '');
-                if (noteName === thirdInterval || noteName === thirdInterval.replace('s', '#') ||
-                    noteName === fifthInterval || noteName === fifthInterval.replace('s', '#')) {
+            notes = notes.map((note, index) => {
+                // In root position: 0=root, 1=third, 2=fifth
+                // In first inversion: 0=third, 1=fifth, 2=root
+                // In second inversion: 0=fifth, 1=root, 2=third
+                if (inversion === 'root' && (index === 1 || index === 2)) {
+                    return lowerNote(note);
+                } else if (inversion === 'first' && (index === 0 || index === 1)) {
+                    return lowerNote(note);
+                } else if (inversion === 'second' && (index === 0 || index === 2)) {
                     return lowerNote(note);
                 }
                 return note;
             });
         } else if (type === 'augmented') {
             // Raise the fifth for augmented
-            const fifthInterval = getFifthNote(root);
-            
-            notes = notes.map(note => {
-                const noteName = note.replace(/\d+/, '');
-                if (noteName === fifthInterval || noteName === fifthInterval.replace('s', '#')) {
+            notes = notes.map((note, index) => {
+                if (inversion === 'root' && index === 2) {
+                    return raiseNote(note);
+                } else if (inversion === 'first' && index === 1) {
+                    return raiseNote(note);
+                } else if (inversion === 'second' && index === 0) {
                     return raiseNote(note);
                 }
                 return note;

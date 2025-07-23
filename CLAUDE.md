@@ -244,3 +244,54 @@ When asked to work on this codebase:
 - Product-specific files in `.agent-os/product/` override any global standards
 - User's specific instructions override (or amend) instructions found in `.agent-os/specs/...`
 - Always adhere to established patterns, code style, and best practices documented above.
+
+## Chord Progression Guidance
+
+### Chord Progression Reference Tables
+
+The following chord progression tables provide comprehensive guidance for chord inversions across different musical keys and progression types:
+
+#### Progression Tables
+- **I-IV-V (Classic Rock/Blues)**
+- **I-vi-IV-V (Pop Progression / 50s Doo-Wop)**
+- **vi-IV-I-V (Alternative Pop)**
+- **I-vi-ii-V (Jazz Standard)**
+- **ii-V-I (Jazz Cadence)**
+
+Each table includes:
+- Key of the progression
+- Chord names with specific note inversions
+- Recommended voicings for different musical contexts
+
+### Implementation Notes
+
+- Use these tables as a reference for generating chord progressions
+- Consider implementing a system that can dynamically generate chord inversions based on these patterns
+- Validate that chord generation follows the specified note ranges and inversions
+- Ensure that the chord generation logic supports transposition across different keys
+
+## Chord Inversions Reference
+
+### Chord Inversion Table
+Here's a comprehensive reference for chord inversions across different musical keys:
+
+#### Minor Chord Inversions
+| Chord | Root Position | First Inversion | Second Inversion |
+|-------|--------------|----------------|-----------------|
+| Cm    | (C4-E♭4-G4)  | (E♭4-G4-C5)    | (G3-C4-E♭4)     |
+| C♯m   | (C♯4-E4-G♯4) | (E3-G♯3-C♯4)   | (G♯3-C♯4-E4)    |
+| Dm    | (D4-F4-A4)   | (F3-A3-D4)     | (A3-D4-F4)      |
+| D♯m   | (D♯4-F♯4-A♯4)| (F♯3-A♯3-D♯4)  | (A♯3-D♯4-F♯4)   |
+| Em    | (E4-G4-B4)   | (G3-B3-E4)     | (B3-E4-G4)      |
+| Fm    | (F4-A♭4-C5)  | (A♭3-C4-F4)    | (C4-F4-A♭4)     |
+| F♯m   | (F♯3-A3-C♯4) | (A3-C♯4-F♯4)   | (C♯4-F♯4-A4)    |
+| Gm    | (G3-B♭3-D4)  | (B♭3-D4-G4)    | (D4-G4-B♭4)     |
+| G♯m   | (G♯3-B3-D♯4) | (B3-D♯4-G♯4)   | (D♯4-G♯4-B4)    |
+| Am    | (A3-C4-E4)   | (C4-E4-A4)     | (E3-A3-C4)      |
+| A♯m   | (A♯3-C♯4-F4) | (C♯4-F4-A♯4)   | (F3-A♯3-C♯4)    |
+| Bm    | (B3-D4-F♯4)  | (D4-F♯4-B4)    | (F♯3-B3-D4)     |
+
+## Memory Notes
+
+### Misc Clarifications
+- If i mention Playwright I meant Dusk

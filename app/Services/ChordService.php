@@ -476,77 +476,98 @@ class ChordService
      */
     public function getProgressionInversions(string $progression, string $key, string $keyType): array
     {
-        // Define progression-specific inversions
+        // Define progression-specific inversions based on the provided table
+        // Each progression has specific inversions for each key to optimize voice leading
         $progressionInversions = [
             'I-IV-V' => [
+                // Classic Rock/Blues - optimized for smooth voice leading
                 'C' => ['root', 'second', 'first'],  // C, F/C, G/B
-                'C#' => ['root', 'second', 'first'], 
-                'D' => ['root', 'second', 'first'],
-                'D#' => ['root', 'second', 'first'],
-                'E' => ['root', 'second', 'first'],
-                'F' => ['root', 'second', 'first'],
-                'F#' => ['root', 'second', 'first'],
-                'G' => ['root', 'second', 'first'],
-                'G#' => ['root', 'second', 'first'],
-                'A' => ['root', 'second', 'first'],
-                'A#' => ['root', 'second', 'first'],
-                'B' => ['root', 'second', 'first'],
+                'C#' => ['root', 'second', 'first'], // C#, F#/C#, G#/C
+                'D' => ['root', 'second', 'first'],  // D, G/D, A/C#
+                'D#' => ['root', 'second', 'first'], // D#, G#/D#, A#/D
+                'E' => ['root', 'second', 'first'],  // E, A/E, B/D#
+                'F' => ['root', 'second', 'first'],  // F, A#/F, C/E
+                'F#' => ['root', 'second', 'first'], // F#, B/F#, C#/F
+                'G' => ['root', 'second', 'first'],  // G, C/G, D/F#
+                'G#' => ['root', 'second', 'first'], // G#, C#/G#, D#/G
+                'A' => ['root', 'second', 'first'],  // A, D/A, E/G#
+                'A#' => ['root', 'second', 'first'], // A#, D#/A#, F/A
+                'B' => ['root', 'second', 'first'],  // B, E/B, F#/A#
+            ],
+            'I-V-vi-IV' => [
+                // Pop Progression - another common variant, optimized voice leading
+                'C' => ['root', 'first', 'first', 'second'],  // C, G/B, Am/C, F/C
+                'C#' => ['root', 'first', 'first', 'second'], // C#, G#/C, A#m/C#, F#/C#
+                'D' => ['root', 'first', 'first', 'second'],  // D, A/C#, Bm/D, G/D
+                'D#' => ['root', 'first', 'first', 'second'], // D#, A#/D, Cm/D#, G#/D#
+                'E' => ['root', 'first', 'first', 'second'],  // E, B/D#, C#m/E, A/E
+                'F' => ['root', 'first', 'first', 'second'],  // F, C/E, Dm/F, A#/F
+                'F#' => ['root', 'first', 'first', 'second'], // F#, C#/F, D#m/F#, B/F#
+                'G' => ['root', 'first', 'first', 'second'],  // G, D/F#, Em/G, C/G
+                'G#' => ['root', 'first', 'first', 'second'], // G#, D#/G, Fm/G#, C#/G#
+                'A' => ['root', 'first', 'first', 'second'],  // A, E/G#, F#m/A, D/A
+                'A#' => ['root', 'first', 'first', 'second'], // A#, F/A, Gm/A#, D#/A#
+                'B' => ['root', 'first', 'first', 'second'],  // B, F#/A#, G#m/B, E/B
             ],
             'I-vi-IV-V' => [
+                // Pop Progression / 50s Doo-Wop - smooth voice leading through all chords
                 'C' => ['root', 'first', 'second', 'first'],  // C, Am/C, F/C, G/B
-                'C#' => ['root', 'first', 'second', 'first'],
-                'D' => ['root', 'first', 'second', 'first'],
-                'D#' => ['root', 'first', 'second', 'first'],
-                'E' => ['root', 'first', 'second', 'first'],
-                'F' => ['root', 'first', 'second', 'first'],
-                'F#' => ['root', 'first', 'second', 'first'],
-                'G' => ['root', 'first', 'second', 'first'],
-                'G#' => ['root', 'first', 'second', 'first'],
-                'A' => ['root', 'first', 'second', 'first'],
-                'A#' => ['root', 'first', 'second', 'first'],
-                'B' => ['root', 'first', 'second', 'first'],
+                'C#' => ['root', 'first', 'second', 'first'], // C#, A#m/C#, F#/C#, G#/C
+                'D' => ['root', 'first', 'second', 'first'],  // D, Bm/D, G/D, A/C#
+                'D#' => ['root', 'first', 'second', 'first'], // D#, Cm/D#, G#/D#, A#/D
+                'E' => ['root', 'first', 'second', 'first'],  // E, C#m/E, A/E, B/D#
+                'F' => ['root', 'first', 'second', 'first'],  // F, Dm/F, A#/F, C/E
+                'F#' => ['root', 'first', 'second', 'first'], // F#, D#m/F#, B/F#, C#/F
+                'G' => ['root', 'first', 'second', 'first'],  // G, Em/G, C/G, D/F#
+                'G#' => ['root', 'first', 'second', 'first'], // G#, Fm/G#, C#/G#, D#/G
+                'A' => ['root', 'first', 'second', 'first'],  // A, F#m/A, D/A, E/G#
+                'A#' => ['root', 'first', 'second', 'first'], // A#, Gm/A#, D#/A#, F/A
+                'B' => ['root', 'first', 'second', 'first'],  // B, G#m/B, E/B, F#/A#
             ],
             'vi-IV-I-V' => [
+                // Alternative Pop - starting on vi, maintaining smooth bass motion
                 'C' => ['root', 'first', 'second', 'root'],  // Am, F/A, C/G, G
-                'C#' => ['root', 'first', 'second', 'root'],
-                'D' => ['root', 'first', 'second', 'root'],
-                'D#' => ['root', 'first', 'second', 'root'],
-                'E' => ['root', 'first', 'second', 'root'],
-                'F' => ['root', 'first', 'second', 'root'],
-                'F#' => ['root', 'first', 'second', 'root'],
-                'G' => ['root', 'first', 'second', 'root'],
-                'G#' => ['root', 'first', 'second', 'root'],
-                'A' => ['root', 'first', 'second', 'root'],
-                'A#' => ['root', 'first', 'second', 'root'],
-                'B' => ['root', 'first', 'second', 'root'],
+                'C#' => ['root', 'first', 'second', 'root'], // A#m, F#/A#, C#/G#, G#
+                'D' => ['root', 'first', 'second', 'root'],  // Bm, G/B, D/A, A
+                'D#' => ['root', 'first', 'second', 'root'], // Cm, G#/C, D#/A#, A#
+                'E' => ['root', 'first', 'second', 'root'],  // C#m, A/C#, E/B, B
+                'F' => ['root', 'first', 'second', 'root'],  // Dm, A#/D, F/C, C
+                'F#' => ['root', 'first', 'second', 'root'], // D#m, B/D#, F#/C#, C#
+                'G' => ['root', 'first', 'second', 'root'],  // Em, C/E, G/D, D
+                'G#' => ['root', 'first', 'second', 'root'], // Fm, C#/F, G#/D#, D#
+                'A' => ['root', 'first', 'second', 'root'],  // F#m, D/F#, A/E, E
+                'A#' => ['root', 'first', 'second', 'root'], // Gm, D#/G, A#/F, F
+                'B' => ['root', 'first', 'second', 'root'],  // G#m, E/G#, B/F#, F#
             ],
             'I-vi-ii-V' => [
+                // Jazz Standard - sophisticated voice leading
                 'C' => ['root', 'first', 'root', 'first'],  // C, Am/C, Dm, G/B
-                'C#' => ['root', 'first', 'root', 'first'],
-                'D' => ['root', 'first', 'root', 'first'],
-                'D#' => ['root', 'first', 'root', 'first'],
-                'E' => ['root', 'first', 'root', 'first'],
-                'F' => ['root', 'first', 'root', 'first'],
-                'F#' => ['root', 'first', 'root', 'first'],
-                'G' => ['root', 'first', 'root', 'first'],
-                'G#' => ['root', 'first', 'root', 'first'],
-                'A' => ['root', 'first', 'root', 'first'],
-                'A#' => ['root', 'first', 'root', 'first'],
-                'B' => ['root', 'first', 'root', 'first'],
+                'C#' => ['root', 'first', 'root', 'first'], // C#, A#m/C#, D#m, G#/C
+                'D' => ['root', 'first', 'root', 'first'],  // D, Bm/D, Em, A/C#
+                'D#' => ['root', 'first', 'root', 'first'], // D#, Cm/D#, Fm, A#/D
+                'E' => ['root', 'first', 'root', 'first'],  // E, C#m/E, F#m, B/D#
+                'F' => ['root', 'first', 'root', 'first'],  // F, Dm/F, Gm, C/E
+                'F#' => ['root', 'first', 'root', 'first'], // F#, D#m/F#, G#m, C#/F
+                'G' => ['root', 'first', 'root', 'first'],  // G, Em/G, Am, D/F#
+                'G#' => ['root', 'first', 'root', 'first'], // G#, Fm/G#, A#m, D#/G
+                'A' => ['root', 'first', 'root', 'first'],  // A, F#m/A, Bm, E/G#
+                'A#' => ['root', 'first', 'root', 'first'], // A#, Gm/A#, Cm, F/A
+                'B' => ['root', 'first', 'root', 'first'],  // B, G#m/B, C#m, F#/A#
             ],
             'ii-V-I' => [
+                // Jazz Cadence - classic ii-V-I with optimal voice leading
                 'C' => ['second', 'first', 'root'],  // Dm/A, G/B, C
-                'C#' => ['second', 'first', 'root'],
-                'D' => ['second', 'first', 'root'],
-                'D#' => ['second', 'first', 'root'],
-                'E' => ['second', 'first', 'root'],
-                'F' => ['second', 'first', 'root'],
-                'F#' => ['second', 'first', 'root'],
-                'G' => ['second', 'first', 'root'],
-                'G#' => ['second', 'first', 'root'],
-                'A' => ['second', 'first', 'root'],
-                'A#' => ['second', 'first', 'root'],
-                'B' => ['second', 'first', 'root'],
+                'C#' => ['second', 'first', 'root'], // D#m/A#, G#/C, C#
+                'D' => ['second', 'first', 'root'],  // Em/B, A/C#, D
+                'D#' => ['second', 'first', 'root'], // Fm/C, A#/D, D#
+                'E' => ['second', 'first', 'root'],  // F#m/C#, B/D#, E
+                'F' => ['second', 'first', 'root'],  // Gm/D, C/E, F
+                'F#' => ['second', 'first', 'root'], // G#m/D#, C#/F, F#
+                'G' => ['second', 'first', 'root'],  // Am/E, D/F#, G
+                'G#' => ['second', 'first', 'root'], // A#m/F, D#/G, G#
+                'A' => ['second', 'first', 'root'],  // Bm/F#, E/G#, A
+                'A#' => ['second', 'first', 'root'], // Cm/G, F/A, A#
+                'B' => ['second', 'first', 'root'],  // C#m/G#, F#/A#, B
             ],
         ];
 
