@@ -284,24 +284,16 @@ class ChordGrid extends Component
         if (isset($this->chordProgressions[$progressionKey])) {
             $romanNumerals = $this->chordProgressions[$progressionKey];
             $progression = $this->chordService->transposeProgression($this->selectedKey, $this->selectedKeyType, $romanNumerals);
+            
+            // Get the specific inversions for this progression and key
+            $inversions = $this->chordService->getProgressionInversions($progressionKey, $this->selectedKey, $this->selectedKeyType);
 
             foreach ($progression as $index => $chord) {
                 if ($index < 4) {
                     $position = $index + 1;
 
-                    // Determine inversion
-                    $inversion = 'root';
-                    
-                    // Use voice-leading inversions if enabled
-                    if ($this->showVoiceLeading && isset($this->voiceLeadingInversions[$progressionKey][$index])) {
-                        $inversion = $this->voiceLeadingInversions[$progressionKey][$index];
-                    } elseif ($autoInversion && $index > 0) {
-                        // Fall back to calculated optimal inversion
-                        $prevChord = $this->chords[$position - 1];
-                        if (! empty($prevChord['tone'])) {
-                            $inversion = $this->chordService->calculateOptimalInversion($prevChord, $chord);
-                        }
-                    }
+                    // Use the specific inversion for this progression and position
+                    $inversion = $inversions[$index] ?? 'root';
 
                     $this->chords[$position] = [
                         'position' => $position,

@@ -26,43 +26,18 @@ class ChordPiano extends Component
         $this->chordService = app(ChordService::class);
     }
 
-    private function getComfortableOctaves(array $notes, string $inversion): array
-    {
-        // Match the main PianoPlayer component octaves for consistency
-        switch ($inversion) {
-            case 'root':
-                return [4, 4, 4]; // Changed to match PianoPlayer
-            case 'first':
-                return [3, 4, 4]; // Keep as [3, 4, 4] to match expected inversion behavior
-            case 'second':
-                return [3, 3, 4]; // Keep as [3, 3, 4] to match expected inversion behavior
-            default:
-                return [4, 4, 4]; // Changed to match PianoPlayer
-        }
-    }
-
     public function render()
     {
         $pianoKeys = [];
         $activeNotes = [];
 
         if (! empty($this->chord['tone'])) {
-            $notes = $this->chordService->getChordNotes(
+            // Use the service method that returns notes with correct octaves
+            $activeNotes = $this->chordService->getChordNotesForDisplay(
                 $this->chord['tone'],
                 $this->chord['semitone'] ?? 'major',
                 $this->chord['inversion'] ?? 'root'
             );
-
-            // Only take the first 3 notes for triads
-            $notesToDisplay = array_slice($notes, 0, 3);
-
-            // Get comfortable octaves for hand position
-            $octaves = $this->getComfortableOctaves($notesToDisplay, $this->chord['inversion'] ?? 'root');
-
-            // Add octave to each note for display
-            foreach ($notesToDisplay as $index => $note) {
-                $activeNotes[] = $note.$octaves[$index];
-            }
         }
 
         // Create a mini piano (2 octaves centered around middle C)

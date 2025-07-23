@@ -2,7 +2,8 @@
     {{-- Chord Timeline/Grid --}}
     <div class="timeline-grid p-2">
         {{-- Key and Progression Selectors --}}
-        <div class="flex flex-wrap items-center gap-4 mb-3 pb-2 border-b border-zinc-800">
+        <div class="space-y-3 mb-3 pb-2 border-b border-zinc-800">
+            {{-- Key Selection Line --}}
             <div class="flex flex-wrap items-center gap-2">
                 <label class="text-xs font-medium text-secondary mr-2">Key:</label>
                 <div class="flex space-x-1">
@@ -43,13 +44,14 @@
                         Minor
                     </button>
                 </div>
-                
-                <div class="h-4 w-px bg-zinc-700 mx-2"></div>
-                
+            </div>
+            
+            {{-- Progression Selection Line --}}
+            <div class="flex flex-wrap items-center gap-2">
                 <label class="text-xs font-medium text-secondary">Progression:</label>
                 <select
                     wire:change="setProgression($event.target.value)"
-                    class="bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-0.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[150px]"
+                    class="bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-0.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]"
                 >
                     <option value="" @if(!$selectedProgression) selected @endif>Custom</option>
                     @foreach($progressions as $romanNumerals => $progression)
@@ -83,17 +85,17 @@
                 @endif
             </div>
             <div class="flex items-center space-x-3">
-                <button
-                    onclick="printChordSheet()"
-                    class="text-sm bg-zinc-700 text-white px-4 py-2 rounded-lg hover:bg-zinc-600 transition-colors flex items-center space-x-2"
-                    title="Print chord sheet"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                    </svg>
-                    <span>Print Chord Sheet</span>
-                </button>
                 @auth
+                    <button
+                        onclick="printChordSheet()"
+                        class="text-sm bg-zinc-700 text-white px-4 py-2 rounded-lg hover:bg-zinc-600 transition-colors flex items-center space-x-2"
+                        title="Print chord sheet"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        <span>Print Chord Sheet</span>
+                    </button>
                     <button
                         wire:click="$dispatch('show-save-dialog')"
                         class="text-sm bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center space-x-2"
@@ -175,13 +177,13 @@
                                 @endif
                             </div>
                             
-                            {{-- Inversion Controls (only show when chord has content) --}}
+                            {{-- Inversion Controls (centered horizontally) --}}
                             @if($ch['tone'])
                                 <div class="flex justify-center space-x-0.5 mt-0.5" wire:click.stop>
-                                    @foreach(['root' => 'Root', 'first' => '1st', 'second' => '2nd'] as $inv => $label)
+                                    @foreach(['root' => 'R', 'first' => 'I', 'second' => 'II'] as $inv => $label)
                                         <button
                                             wire:click="setChordInversion({{ $pos }}, '{{ $inv }}')"
-                                            class="text-xs px-1 py-0.5 rounded transition-colors {{ $ch['inversion'] === $inv ? 'bg-blue-500 text-white' : 'bg-zinc-700 hover:bg-zinc-600 text-gray-300 hover:text-white' }}"
+                                            class="text-xs w-6 h-6 rounded transition-colors {{ $ch['inversion'] === $inv ? 'bg-blue-500 text-white' : 'bg-zinc-700 hover:bg-zinc-600 text-gray-300 hover:text-white' }}"
                                             title="{{ ucfirst($inv) }} Inversion"
                                         >
                                             {{ $label }}
@@ -193,21 +195,13 @@
                             {{-- Chord Notes --}}
                             @if($ch['tone'])
                                 @php
-                                    $notes = app(\App\Services\ChordService::class)->getChordNotes(
+                                    $chordService = app(\App\Services\ChordService::class);
+                                    // Use a public method to get notes with octaves
+                                    $notesWithOctaves = $chordService->getChordNotesForDisplay(
                                         $ch['tone'],
                                         $ch['semitone'] ?? 'major',
                                         $ch['inversion'] ?? 'root'
                                     );
-                                    $notesDisplay = array_slice($notes, 0, 3);
-                                    // Add octave numbers based on inversion
-                                    $octaves = match($ch['inversion']) {
-                                        'first' => [3, 4, 4],
-                                        'second' => [3, 3, 4],
-                                        default => [4, 4, 4]
-                                    };
-                                    $notesWithOctaves = array_map(function($note, $octave) {
-                                        return $note . $octave;
-                                    }, $notesDisplay, $octaves);
                                 @endphp
                                 <div class="text-center mt-0.5">
                                     <span class="text-xs {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }}">

@@ -125,38 +125,18 @@ class PianoPlayer extends Component
         }
     }
 
-    private function getComfortableOctaves(array $notes, string $inversion): array
-    {
-        switch ($inversion) {
-            case 'root':
-                return [4, 4, 4]; // All octave 4 for consistency
-            case 'first':
-                return [4, 4, 5]; // First inversion: move root up an octave
-            case 'second':
-                return [4, 4, 5]; // Second inversion: maintain octave 4 consistency
-            default:
-                return [4, 4, 4]; // Default to octave 4
-        }
-    }
-
     public function render()
     {
         // Calculate active notes from current chord
         $this->activeNotes = [];
 
         if (! empty($this->currentChord['tone'])) {
-            $notes = $this->chordService->getChordNotes(
+            // Use the service method that returns notes with correct octaves
+            $this->activeNotes = $this->chordService->getChordNotesForDisplay(
                 $this->currentChord['tone'],
                 $this->currentChord['semitone'] ?? 'major',
                 $this->currentChord['inversion'] ?? 'root'
             );
-
-            $notesToDisplay = array_slice($notes, 0, 3);
-            $octaves = $this->getComfortableOctaves($notesToDisplay, $this->currentChord['inversion'] ?? 'root');
-
-            foreach ($notesToDisplay as $index => $note) {
-                $this->activeNotes[] = $note.$octaves[$index];
-            }
         }
 
         return view('livewire.piano-player', [

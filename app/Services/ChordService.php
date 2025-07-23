@@ -66,6 +66,19 @@ class ChordService
         return $notes;
     }
 
+    /**
+     * Get chord notes with octaves for display purposes
+     */
+    public function getChordNotesForDisplay(string $rootNote, ?string $chordType = 'major', ?string $inversion = 'root'): array
+    {
+        $notesWithOctaves = $this->getChordNotesWithOctaves($rootNote, $chordType, $inversion);
+        
+        // Format for display (e.g., "C4", "E4", "G4")
+        return array_map(function($noteData) {
+            return $noteData['note'] . $noteData['octave'];
+        }, $notesWithOctaves);
+    }
+
     private function applyInversion(array $notes, string $inversion): array
     {
         switch ($inversion) {
@@ -142,6 +155,12 @@ class ChordService
      */
     private function getChordNotesWithOctaves(string $rootNote, string $chordType, string $inversion): array
     {
+        // For major chords, use the specific voicings provided
+        if ($chordType === 'major') {
+            return $this->getMajorChordVoicing($rootNote, $inversion);
+        }
+        
+        // For other chord types, calculate based on intervals
         $notes = $this->getChordNotes($rootNote, $chordType, $inversion);
 
         // Apply comfortable octaves based on inversion
@@ -162,6 +181,105 @@ class ChordService
         }
 
         return $notesWithOctaves;
+    }
+
+    /**
+     * Get specific major chord voicings as defined
+     */
+    private function getMajorChordVoicing(string $rootNote, string $inversion): array
+    {
+        $voicings = [
+            'C' => [
+                'root' => [['note' => 'C', 'octave' => 4], ['note' => 'E', 'octave' => 4], ['note' => 'G', 'octave' => 4]],
+                'first' => [['note' => 'E', 'octave' => 4], ['note' => 'G', 'octave' => 4], ['note' => 'C', 'octave' => 5]],
+                'second' => [['note' => 'G', 'octave' => 3], ['note' => 'C', 'octave' => 4], ['note' => 'E', 'octave' => 4]],
+            ],
+            'C#' => [
+                'root' => [['note' => 'C#', 'octave' => 4], ['note' => 'F', 'octave' => 4], ['note' => 'G#', 'octave' => 4]],
+                'first' => [['note' => 'F', 'octave' => 3], ['note' => 'G#', 'octave' => 3], ['note' => 'C#', 'octave' => 4]],
+                'second' => [['note' => 'G#', 'octave' => 3], ['note' => 'C#', 'octave' => 4], ['note' => 'F', 'octave' => 4]],
+            ],
+            'D' => [
+                'root' => [['note' => 'D', 'octave' => 4], ['note' => 'F#', 'octave' => 4], ['note' => 'A', 'octave' => 4]],
+                'first' => [['note' => 'F#', 'octave' => 3], ['note' => 'A', 'octave' => 3], ['note' => 'D', 'octave' => 4]],
+                'second' => [['note' => 'A', 'octave' => 3], ['note' => 'D', 'octave' => 4], ['note' => 'F#', 'octave' => 4]],
+            ],
+            'D#' => [
+                'root' => [['note' => 'D#', 'octave' => 4], ['note' => 'G', 'octave' => 4], ['note' => 'A#', 'octave' => 4]],
+                'first' => [['note' => 'G', 'octave' => 3], ['note' => 'A#', 'octave' => 3], ['note' => 'D#', 'octave' => 4]],
+                'second' => [['note' => 'A#', 'octave' => 3], ['note' => 'D#', 'octave' => 4], ['note' => 'G', 'octave' => 4]],
+            ],
+            'E' => [
+                'root' => [['note' => 'E', 'octave' => 4], ['note' => 'G#', 'octave' => 4], ['note' => 'B', 'octave' => 4]],
+                'first' => [['note' => 'G#', 'octave' => 3], ['note' => 'B', 'octave' => 3], ['note' => 'E', 'octave' => 4]],
+                'second' => [['note' => 'B', 'octave' => 3], ['note' => 'E', 'octave' => 4], ['note' => 'G#', 'octave' => 4]],
+            ],
+            'F' => [
+                'root' => [['note' => 'F', 'octave' => 4], ['note' => 'A', 'octave' => 4], ['note' => 'C', 'octave' => 5]],
+                'first' => [['note' => 'A', 'octave' => 3], ['note' => 'C', 'octave' => 4], ['note' => 'F', 'octave' => 4]],
+                'second' => [['note' => 'C', 'octave' => 4], ['note' => 'F', 'octave' => 4], ['note' => 'A', 'octave' => 4]],
+            ],
+            'F#' => [
+                'root' => [['note' => 'F#', 'octave' => 3], ['note' => 'A#', 'octave' => 3], ['note' => 'C#', 'octave' => 4]],
+                'first' => [['note' => 'A#', 'octave' => 3], ['note' => 'C#', 'octave' => 4], ['note' => 'F#', 'octave' => 4]],
+                'second' => [['note' => 'C#', 'octave' => 4], ['note' => 'F#', 'octave' => 4], ['note' => 'A#', 'octave' => 4]],
+            ],
+            'G' => [
+                'root' => [['note' => 'G', 'octave' => 3], ['note' => 'B', 'octave' => 3], ['note' => 'D', 'octave' => 4]],
+                'first' => [['note' => 'B', 'octave' => 3], ['note' => 'D', 'octave' => 4], ['note' => 'G', 'octave' => 4]],
+                'second' => [['note' => 'D', 'octave' => 4], ['note' => 'G', 'octave' => 4], ['note' => 'B', 'octave' => 4]],
+            ],
+            'G#' => [
+                'root' => [['note' => 'G#', 'octave' => 3], ['note' => 'C', 'octave' => 4], ['note' => 'D#', 'octave' => 4]],
+                'first' => [['note' => 'C', 'octave' => 4], ['note' => 'D#', 'octave' => 4], ['note' => 'G#', 'octave' => 4]],
+                'second' => [['note' => 'D#', 'octave' => 4], ['note' => 'G#', 'octave' => 4], ['note' => 'C', 'octave' => 5]],
+            ],
+            'A' => [
+                'root' => [['note' => 'A', 'octave' => 3], ['note' => 'C#', 'octave' => 4], ['note' => 'E', 'octave' => 4]],
+                'first' => [['note' => 'C#', 'octave' => 4], ['note' => 'E', 'octave' => 4], ['note' => 'A', 'octave' => 4]],
+                'second' => [['note' => 'E', 'octave' => 3], ['note' => 'A', 'octave' => 3], ['note' => 'C#', 'octave' => 4]],
+            ],
+            'A#' => [
+                'root' => [['note' => 'A#', 'octave' => 3], ['note' => 'D', 'octave' => 4], ['note' => 'F', 'octave' => 4]],
+                'first' => [['note' => 'D', 'octave' => 4], ['note' => 'F', 'octave' => 4], ['note' => 'A#', 'octave' => 4]],
+                'second' => [['note' => 'F', 'octave' => 3], ['note' => 'A#', 'octave' => 3], ['note' => 'D', 'octave' => 4]],
+            ],
+            'B' => [
+                'root' => [['note' => 'B', 'octave' => 3], ['note' => 'D#', 'octave' => 4], ['note' => 'F#', 'octave' => 4]],
+                'first' => [['note' => 'D#', 'octave' => 4], ['note' => 'F#', 'octave' => 4], ['note' => 'B', 'octave' => 4]],
+                'second' => [['note' => 'F#', 'octave' => 3], ['note' => 'B', 'octave' => 3], ['note' => 'D#', 'octave' => 4]],
+            ],
+        ];
+
+        if (!isset($voicings[$rootNote][$inversion])) {
+            // Fallback to calculated voicing
+            $notes = $this->getChordNotes($rootNote, 'major', $inversion);
+            $octaves = match ($inversion) {
+                'root' => [4, 4, 4],
+                'first' => [3, 4, 4],
+                'second' => [3, 3, 4],
+                default => [4, 4, 4]
+            };
+
+            $notesWithOctaves = [];
+            foreach ($notes as $index => $note) {
+                $notesWithOctaves[] = [
+                    'note' => $note,
+                    'octave' => $octaves[$index] ?? 4,
+                    'midi' => $this->noteToMidi[$note] + (12 * ($octaves[$index] ?? 4)),
+                ];
+            }
+
+            return $notesWithOctaves;
+        }
+
+        // Add MIDI values to the predefined voicings
+        $voicing = $voicings[$rootNote][$inversion];
+        foreach ($voicing as &$noteData) {
+            $noteData['midi'] = $this->noteToMidi[$noteData['note']] + (12 * $noteData['octave']);
+        }
+
+        return $voicing;
     }
 
     /**
@@ -351,6 +469,94 @@ class ChordService
     public function getAvailableKeys(): array
     {
         return array_keys($this->noteToMidi);
+    }
+
+    /**
+     * Get specific inversions for a progression in a given key
+     */
+    public function getProgressionInversions(string $progression, string $key, string $keyType): array
+    {
+        // Define progression-specific inversions
+        $progressionInversions = [
+            'I-IV-V' => [
+                'C' => ['root', 'second', 'first'],  // C, F/C, G/B
+                'C#' => ['root', 'second', 'first'], 
+                'D' => ['root', 'second', 'first'],
+                'D#' => ['root', 'second', 'first'],
+                'E' => ['root', 'second', 'first'],
+                'F' => ['root', 'second', 'first'],
+                'F#' => ['root', 'second', 'first'],
+                'G' => ['root', 'second', 'first'],
+                'G#' => ['root', 'second', 'first'],
+                'A' => ['root', 'second', 'first'],
+                'A#' => ['root', 'second', 'first'],
+                'B' => ['root', 'second', 'first'],
+            ],
+            'I-vi-IV-V' => [
+                'C' => ['root', 'first', 'second', 'first'],  // C, Am/C, F/C, G/B
+                'C#' => ['root', 'first', 'second', 'first'],
+                'D' => ['root', 'first', 'second', 'first'],
+                'D#' => ['root', 'first', 'second', 'first'],
+                'E' => ['root', 'first', 'second', 'first'],
+                'F' => ['root', 'first', 'second', 'first'],
+                'F#' => ['root', 'first', 'second', 'first'],
+                'G' => ['root', 'first', 'second', 'first'],
+                'G#' => ['root', 'first', 'second', 'first'],
+                'A' => ['root', 'first', 'second', 'first'],
+                'A#' => ['root', 'first', 'second', 'first'],
+                'B' => ['root', 'first', 'second', 'first'],
+            ],
+            'vi-IV-I-V' => [
+                'C' => ['root', 'first', 'second', 'root'],  // Am, F/A, C/G, G
+                'C#' => ['root', 'first', 'second', 'root'],
+                'D' => ['root', 'first', 'second', 'root'],
+                'D#' => ['root', 'first', 'second', 'root'],
+                'E' => ['root', 'first', 'second', 'root'],
+                'F' => ['root', 'first', 'second', 'root'],
+                'F#' => ['root', 'first', 'second', 'root'],
+                'G' => ['root', 'first', 'second', 'root'],
+                'G#' => ['root', 'first', 'second', 'root'],
+                'A' => ['root', 'first', 'second', 'root'],
+                'A#' => ['root', 'first', 'second', 'root'],
+                'B' => ['root', 'first', 'second', 'root'],
+            ],
+            'I-vi-ii-V' => [
+                'C' => ['root', 'first', 'root', 'first'],  // C, Am/C, Dm, G/B
+                'C#' => ['root', 'first', 'root', 'first'],
+                'D' => ['root', 'first', 'root', 'first'],
+                'D#' => ['root', 'first', 'root', 'first'],
+                'E' => ['root', 'first', 'root', 'first'],
+                'F' => ['root', 'first', 'root', 'first'],
+                'F#' => ['root', 'first', 'root', 'first'],
+                'G' => ['root', 'first', 'root', 'first'],
+                'G#' => ['root', 'first', 'root', 'first'],
+                'A' => ['root', 'first', 'root', 'first'],
+                'A#' => ['root', 'first', 'root', 'first'],
+                'B' => ['root', 'first', 'root', 'first'],
+            ],
+            'ii-V-I' => [
+                'C' => ['second', 'first', 'root'],  // Dm/A, G/B, C
+                'C#' => ['second', 'first', 'root'],
+                'D' => ['second', 'first', 'root'],
+                'D#' => ['second', 'first', 'root'],
+                'E' => ['second', 'first', 'root'],
+                'F' => ['second', 'first', 'root'],
+                'F#' => ['second', 'first', 'root'],
+                'G' => ['second', 'first', 'root'],
+                'G#' => ['second', 'first', 'root'],
+                'A' => ['second', 'first', 'root'],
+                'A#' => ['second', 'first', 'root'],
+                'B' => ['second', 'first', 'root'],
+            ],
+        ];
+
+        if (isset($progressionInversions[$progression][$key])) {
+            return $progressionInversions[$progression][$key];
+        }
+
+        // Default to root position for all chords if not specified
+        $chordCount = substr_count($progression, '-') + 1;
+        return array_fill(0, $chordCount, 'root');
     }
 
     /**
