@@ -1,10 +1,10 @@
 <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm p-6 border border-zinc-200 dark:border-zinc-700">
     <div class="text-center mb-6">
         <h2 class="text-lg font-semibold text-orange-600 dark:text-orange-300 mb-2">
-            ❤️ Support ChordHound
+            ❤️ Support <span style="font-family: 'Henny Penny', cursive;">ChordHound</span>
         </h2>
         <p class="text-sm text-zinc-600 dark:text-zinc-300">
-            Help keep ChordHound free and support future development
+            Help keep <span style="font-family: 'Henny Penny', cursive;">ChordHound</span> free and support future development
         </p>
     </div>
 

@@ -7,7 +7,7 @@
                     <x-app-logo-icon class="size-12 fill-current text-white" />
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold">Welcome to ChordHound!</h1>
+                    <h1 class="text-2xl font-bold">Welcome to <span style="font-family: 'Henny Penny', cursive;">ChordHound</span>!</h1>
                     <p class="text-orange-100">Create, save, and play beautiful piano chord progressions</p>
                 </div>
             </div>
@@ -62,7 +62,7 @@
 
         {{-- Recent Activity or Tips --}}
         <div class="relative flex-1 overflow-hidden rounded-xl border border-orange-200 dark:border-orange-700 bg-white dark:bg-gray-800 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🎵 Piano Tips from ChordHound</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🎵 Piano Tips from <span style="font-family: 'Henny Penny', cursive;">ChordHound</span></h2>
             <div class="grid gap-4 md:grid-cols-2">
                 <div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
                     <h3 class="font-medium text-orange-800 dark:text-orange-200 mb-2">🐕 Tip #1: Voice Leading</h3>

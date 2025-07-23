@@ -11,6 +11,9 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&display=swap" rel="stylesheet">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
@@ -38,7 +41,7 @@
                 Thank You! 🎉
             </h1>
             <p class="text-zinc-600 dark:text-zinc-200 mb-6">
-                Your generous support helps keep ChordHound free and enables us to continue developing amazing features for musicians like you!
+                Your generous support helps keep <span style="font-family: 'Henny Penny', cursive;">ChordHound</span> free and enables us to continue developing amazing features for musicians like you!
             </p>
             
             <!-- ChordHound Logo -->
