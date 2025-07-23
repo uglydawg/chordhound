@@ -160,6 +160,11 @@ class ChordService
             return $this->getMajorChordVoicing($rootNote, $inversion);
         }
         
+        // For minor chords, use the specific voicings provided
+        if ($chordType === 'minor') {
+            return $this->getMinorChordVoicing($rootNote, $inversion);
+        }
+        
         // For other chord types, calculate based on intervals
         $notes = $this->getChordNotes($rootNote, $chordType, $inversion);
 
@@ -254,6 +259,105 @@ class ChordService
         if (!isset($voicings[$rootNote][$inversion])) {
             // Fallback to calculated voicing
             $notes = $this->getChordNotes($rootNote, 'major', $inversion);
+            $octaves = match ($inversion) {
+                'root' => [4, 4, 4],
+                'first' => [3, 4, 4],
+                'second' => [3, 3, 4],
+                default => [4, 4, 4]
+            };
+
+            $notesWithOctaves = [];
+            foreach ($notes as $index => $note) {
+                $notesWithOctaves[] = [
+                    'note' => $note,
+                    'octave' => $octaves[$index] ?? 4,
+                    'midi' => $this->noteToMidi[$note] + (12 * ($octaves[$index] ?? 4)),
+                ];
+            }
+
+            return $notesWithOctaves;
+        }
+
+        // Add MIDI values to the predefined voicings
+        $voicing = $voicings[$rootNote][$inversion];
+        foreach ($voicing as &$noteData) {
+            $noteData['midi'] = $this->noteToMidi[$noteData['note']] + (12 * $noteData['octave']);
+        }
+
+        return $voicing;
+    }
+
+    /**
+     * Get specific minor chord voicings as defined
+     */
+    private function getMinorChordVoicing(string $rootNote, string $inversion): array
+    {
+        $voicings = [
+            'C' => [
+                'root' => [['note' => 'C', 'octave' => 4], ['note' => 'D#', 'octave' => 4], ['note' => 'G', 'octave' => 4]], // Eb = D#
+                'first' => [['note' => 'D#', 'octave' => 4], ['note' => 'G', 'octave' => 4], ['note' => 'C', 'octave' => 5]], // Eb = D#
+                'second' => [['note' => 'G', 'octave' => 3], ['note' => 'C', 'octave' => 4], ['note' => 'D#', 'octave' => 4]], // Eb = D#
+            ],
+            'C#' => [
+                'root' => [['note' => 'C#', 'octave' => 4], ['note' => 'E', 'octave' => 4], ['note' => 'G#', 'octave' => 4]],
+                'first' => [['note' => 'E', 'octave' => 3], ['note' => 'G#', 'octave' => 3], ['note' => 'C#', 'octave' => 4]],
+                'second' => [['note' => 'G#', 'octave' => 3], ['note' => 'C#', 'octave' => 4], ['note' => 'E', 'octave' => 4]],
+            ],
+            'D' => [
+                'root' => [['note' => 'D', 'octave' => 4], ['note' => 'F', 'octave' => 4], ['note' => 'A', 'octave' => 4]],
+                'first' => [['note' => 'F', 'octave' => 3], ['note' => 'A', 'octave' => 3], ['note' => 'D', 'octave' => 4]],
+                'second' => [['note' => 'A', 'octave' => 3], ['note' => 'D', 'octave' => 4], ['note' => 'F', 'octave' => 4]],
+            ],
+            'D#' => [
+                'root' => [['note' => 'D#', 'octave' => 4], ['note' => 'F#', 'octave' => 4], ['note' => 'A#', 'octave' => 4]],
+                'first' => [['note' => 'F#', 'octave' => 3], ['note' => 'A#', 'octave' => 3], ['note' => 'D#', 'octave' => 4]],
+                'second' => [['note' => 'A#', 'octave' => 3], ['note' => 'D#', 'octave' => 4], ['note' => 'F#', 'octave' => 4]],
+            ],
+            'E' => [
+                'root' => [['note' => 'E', 'octave' => 4], ['note' => 'G', 'octave' => 4], ['note' => 'B', 'octave' => 4]],
+                'first' => [['note' => 'G', 'octave' => 3], ['note' => 'B', 'octave' => 3], ['note' => 'E', 'octave' => 4]],
+                'second' => [['note' => 'B', 'octave' => 3], ['note' => 'E', 'octave' => 4], ['note' => 'G', 'octave' => 4]],
+            ],
+            'F' => [
+                'root' => [['note' => 'F', 'octave' => 4], ['note' => 'G#', 'octave' => 4], ['note' => 'C', 'octave' => 5]], // Ab = G#
+                'first' => [['note' => 'G#', 'octave' => 3], ['note' => 'C', 'octave' => 4], ['note' => 'F', 'octave' => 4]], // Ab = G#
+                'second' => [['note' => 'C', 'octave' => 4], ['note' => 'F', 'octave' => 4], ['note' => 'G#', 'octave' => 4]], // Ab = G#
+            ],
+            'F#' => [
+                'root' => [['note' => 'F#', 'octave' => 3], ['note' => 'A', 'octave' => 3], ['note' => 'C#', 'octave' => 4]],
+                'first' => [['note' => 'A', 'octave' => 3], ['note' => 'C#', 'octave' => 4], ['note' => 'F#', 'octave' => 4]],
+                'second' => [['note' => 'C#', 'octave' => 4], ['note' => 'F#', 'octave' => 4], ['note' => 'A', 'octave' => 4]],
+            ],
+            'G' => [
+                'root' => [['note' => 'G', 'octave' => 3], ['note' => 'A#', 'octave' => 3], ['note' => 'D', 'octave' => 4]], // Bb = A#
+                'first' => [['note' => 'A#', 'octave' => 3], ['note' => 'D', 'octave' => 4], ['note' => 'G', 'octave' => 4]], // Bb = A#
+                'second' => [['note' => 'D', 'octave' => 4], ['note' => 'G', 'octave' => 4], ['note' => 'A#', 'octave' => 4]], // Bb = A#
+            ],
+            'G#' => [
+                'root' => [['note' => 'G#', 'octave' => 3], ['note' => 'B', 'octave' => 3], ['note' => 'D#', 'octave' => 4]],
+                'first' => [['note' => 'B', 'octave' => 3], ['note' => 'D#', 'octave' => 4], ['note' => 'G#', 'octave' => 4]],
+                'second' => [['note' => 'D#', 'octave' => 4], ['note' => 'G#', 'octave' => 4], ['note' => 'B', 'octave' => 4]],
+            ],
+            'A' => [
+                'root' => [['note' => 'A', 'octave' => 3], ['note' => 'C', 'octave' => 4], ['note' => 'E', 'octave' => 4]],
+                'first' => [['note' => 'C', 'octave' => 4], ['note' => 'E', 'octave' => 4], ['note' => 'A', 'octave' => 4]],
+                'second' => [['note' => 'E', 'octave' => 3], ['note' => 'A', 'octave' => 3], ['note' => 'C', 'octave' => 4]],
+            ],
+            'A#' => [
+                'root' => [['note' => 'A#', 'octave' => 3], ['note' => 'C#', 'octave' => 4], ['note' => 'F', 'octave' => 4]],
+                'first' => [['note' => 'C#', 'octave' => 4], ['note' => 'F', 'octave' => 4], ['note' => 'A#', 'octave' => 4]],
+                'second' => [['note' => 'F', 'octave' => 3], ['note' => 'A#', 'octave' => 3], ['note' => 'C#', 'octave' => 4]],
+            ],
+            'B' => [
+                'root' => [['note' => 'B', 'octave' => 3], ['note' => 'D', 'octave' => 4], ['note' => 'F#', 'octave' => 4]],
+                'first' => [['note' => 'D', 'octave' => 4], ['note' => 'F#', 'octave' => 4], ['note' => 'B', 'octave' => 4]],
+                'second' => [['note' => 'F#', 'octave' => 3], ['note' => 'B', 'octave' => 3], ['note' => 'D', 'octave' => 4]],
+            ],
+        ];
+
+        if (!isset($voicings[$rootNote][$inversion])) {
+            // Fallback to calculated voicing
+            $notes = $this->getChordNotes($rootNote, 'minor', $inversion);
             $octaves = match ($inversion) {
                 'root' => [4, 4, 4],
                 'first' => [3, 4, 4],
