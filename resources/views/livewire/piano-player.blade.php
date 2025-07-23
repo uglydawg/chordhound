@@ -519,52 +519,98 @@ document.addEventListener('livewire:initialized', () => {
     }
 
     function getChordNotes(root, type, inversion) {
-        // Complete chord to notes conversion with all keys - matching ChordService octaves
-        const noteMap = {
-            'C': ['C4', 'E4', 'G4'],
-            'C#': ['C#4', 'F4', 'G#4'],
-            'D': ['D4', 'F#4', 'A4'],
-            'D#': ['D#4', 'G4', 'A#4'],
-            'E': ['E4', 'G#4', 'B4'],
-            'F': ['F4', 'A4', 'C5'],
-            'F#': ['F#3', 'A#3', 'C#4'],
-            'G': ['G3', 'B3', 'D4'],
-            'G#': ['G#3', 'C4', 'D#4'],
-            'A': ['A3', 'C#4', 'E4'],
-            'A#': ['A#3', 'D4', 'F4'],
-            'B': ['B3', 'D#4', 'F#4']
+        // Exact chord voicings matching the provided specification
+        const chordVoicings = {
+            'C': {
+                'root': ['C4', 'E4', 'G4'],
+                'first': ['E4', 'G4', 'C5'],
+                'second': ['G3', 'C4', 'E4']
+            },
+            'C#': {
+                'root': ['C#4', 'F4', 'G#4'],
+                'first': ['F3', 'G#3', 'C#4'],
+                'second': ['G#3', 'C#4', 'F4']
+            },
+            'D': {
+                'root': ['D4', 'F#4', 'A4'],
+                'first': ['F#3', 'A3', 'D4'],
+                'second': ['A3', 'D4', 'F#4']
+            },
+            'D#': {
+                'root': ['D#4', 'G4', 'A#4'],
+                'first': ['G3', 'A#3', 'D#4'],
+                'second': ['A#3', 'D#4', 'G4']
+            },
+            'E': {
+                'root': ['E4', 'G#4', 'B4'],
+                'first': ['G#3', 'B3', 'E4'],
+                'second': ['B3', 'E4', 'G#4']
+            },
+            'F': {
+                'root': ['F4', 'A4', 'C5'],
+                'first': ['A3', 'C4', 'F4'],
+                'second': ['C4', 'F4', 'A4']
+            },
+            'F#': {
+                'root': ['F#3', 'A#3', 'C#4'],
+                'first': ['A#3', 'C#4', 'F#4'],
+                'second': ['C#4', 'F#4', 'A#4']
+            },
+            'G': {
+                'root': ['G3', 'B3', 'D4'],
+                'first': ['B3', 'D4', 'G4'],
+                'second': ['D4', 'G4', 'B4']
+            },
+            'G#': {
+                'root': ['G#3', 'C4', 'D#4'],
+                'first': ['C4', 'D#4', 'G#4'],
+                'second': ['D#4', 'G#4', 'C5']
+            },
+            'A': {
+                'root': ['A3', 'C#4', 'E4'],
+                'first': ['C#4', 'E4', 'A4'],
+                'second': ['E3', 'A3', 'C#4']
+            },
+            'A#': {
+                'root': ['A#3', 'D4', 'F4'],
+                'first': ['D4', 'F4', 'A#4'],
+                'second': ['F3', 'A#3', 'D4']
+            },
+            'B': {
+                'root': ['B3', 'D#4', 'F#4'],
+                'first': ['D#4', 'F#4', 'B4'],
+                'second': ['F#3', 'B3', 'D#4']
+            }
         };
 
-        // Get base notes for root position
-        let notes = noteMap[root] || ['C4', 'E4', 'G4'];
+        // Get the exact voicing for this chord and inversion
+        let notes = chordVoicings[root]?.[inversion] || chordVoicings['C']['root'];
 
-        // Apply chord type modifications first (on root position)
+        // Apply chord type modifications
         if (type === 'minor') {
             // Lower the third by a semitone for minor chords
-            notes[1] = lowerNote(notes[1]);
+            notes = notes.map((note, index) => {
+                if (index === 1) { // Third of the chord
+                    return lowerNote(note);
+                }
+                return note;
+            });
         } else if (type === 'diminished') {
             // Lower both third and fifth for diminished
-            notes[1] = lowerNote(notes[1]);
-            notes[2] = lowerNote(notes[2]);
+            notes = notes.map((note, index) => {
+                if (index === 1 || index === 2) { // Third and fifth
+                    return lowerNote(note);
+                }
+                return note;
+            });
         } else if (type === 'augmented') {
             // Raise the fifth for augmented
-            notes[2] = raiseNote(notes[2]);
-        }
-
-        // Then apply inversion with adjusted chord notes
-        if (inversion === 'first') {
-            // First inversion: move root to top with higher octave
-            const rootNote = notes.shift();
-            const rootWithHigherOctave = rootNote.replace(/(\d)/, (match, octave) => String(parseInt(octave) + 1));
-            notes.push(rootWithHigherOctave);
-        } else if (inversion === 'second') {
-            // Second inversion: move root and third to top with higher octaves
-            const rootNote = notes.shift();
-            const thirdNote = notes.shift();
-            const rootWithHigherOctave = rootNote.replace(/(\d)/, (match, octave) => String(parseInt(octave) + 1));
-            const thirdWithHigherOctave = thirdNote.replace(/(\d)/, (match, octave) => String(parseInt(octave) + 1));
-            notes.push(rootWithHigherOctave);
-            notes.push(thirdWithHigherOctave);
+            notes = notes.map((note, index) => {
+                if (index === 2) { // Fifth of the chord
+                    return raiseNote(note);
+                }
+                return note;
+            });
         }
 
         return notes;
