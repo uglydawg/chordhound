@@ -98,12 +98,29 @@
     </div>
 
     {{-- Transport Controls --}}
-    <div class="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-lg">
-        {{-- Left spacer to maintain layout --}}
-        <div></div>
+    <div class="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+        {{-- Play/Pause Button --}}
+        <button
+            wire:click="togglePlayback"
+            class="flex items-center justify-center w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
+            aria-label="{{ $isPlaying ? 'Pause' : 'Play' }}"
+        >
+            @if($isPlaying)
+                {{-- Pause Icon --}}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            @else
+                {{-- Play Icon --}}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            @endif
+        </button>
 
         {{-- Timeline Progress --}}
-        <div class="flex-1 max-w-md">
+        <div class="flex-1 max-w-md mx-4">
             <div class="relative h-2 bg-zinc-800 rounded-full overflow-hidden">
                 <div
                     class="absolute h-full bg-blue-500 transition-all duration-100"
@@ -112,6 +129,10 @@
             </div>
         </div>
 
+        {{-- Tempo Control (optional - for future enhancement) --}}
+        <div class="text-zinc-400 text-sm">
+            {{ $tempo }} BPM
+        </div>
     </div>
 
     <style>

@@ -93,6 +93,11 @@ class PianoPlayer extends Component
     {
         $this->isPlaying = ! $this->isPlaying;
         $this->dispatch('toggle-playback', isPlaying: $this->isPlaying);
+        
+        // Reset time when stopping
+        if (!$this->isPlaying) {
+            $this->currentTime = 0;
+        }
     }
 
 
