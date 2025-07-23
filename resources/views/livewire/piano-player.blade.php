@@ -1,4 +1,75 @@
 <div class="piano-player">
+    {{-- Play/Pause Button - Moved to top --}}
+    <div class="flex items-center justify-between mb-4 px-6">
+        <div class="flex items-center gap-4">
+            <button
+                wire:click="togglePlayback"
+                class="flex items-center justify-center w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
+                aria-label="{{ $isPlaying ? 'Pause' : 'Play' }}"
+            >
+                @if($isPlaying)
+                    {{-- Pause Icon --}}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                @else
+                    {{-- Play Icon --}}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                @endif
+            </button>
+            
+            {{-- Tempo Control --}}
+            <div class="flex items-center gap-2">
+                <button
+                    wire:click="decrementTempo"
+                    class="w-8 h-8 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900 flex items-center justify-center"
+                    aria-label="Decrease tempo"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                    </svg>
+                </button>
+                
+                <div class="flex items-center gap-1 min-w-[80px] justify-center">
+                    <input
+                        type="number"
+                        wire:model.live="tempo"
+                        wire:change="updateTempo($event.target.value)"
+                        min="60"
+                        max="200"
+                        step="5"
+                        class="w-14 px-2 py-1 bg-zinc-800 border border-zinc-700 text-white rounded text-center text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        aria-label="Tempo in BPM"
+                    />
+                    <span class="text-zinc-400 text-sm">BPM</span>
+                </div>
+                
+                <button
+                    wire:click="incrementTempo"
+                    class="w-8 h-8 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900 flex items-center justify-center"
+                    aria-label="Increase tempo"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        {{-- Timeline Progress --}}
+        <div class="flex-1 max-w-md">
+            <div class="relative h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                    class="absolute h-full bg-blue-500 transition-all duration-100"
+                    style="width: {{ ($currentTime / $duration) * 100 }}%"
+                ></div>
+            </div>
+        </div>
+    </div>
+
     {{-- Piano Display --}}
     <div class="bg-zinc-950 rounded-lg shadow-inner">
 
@@ -94,44 +165,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    {{-- Transport Controls --}}
-    <div class="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-        {{-- Play/Pause Button --}}
-        <button
-            wire:click="togglePlayback"
-            class="flex items-center justify-center w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
-            aria-label="{{ $isPlaying ? 'Pause' : 'Play' }}"
-        >
-            @if($isPlaying)
-                {{-- Pause Icon --}}
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            @else
-                {{-- Play Icon --}}
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            @endif
-        </button>
-
-        {{-- Timeline Progress --}}
-        <div class="flex-1 max-w-md mx-4">
-            <div class="relative h-2 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                    class="absolute h-full bg-blue-500 transition-all duration-100"
-                    style="width: {{ ($currentTime / $duration) * 100 }}%"
-                ></div>
-            </div>
-        </div>
-
-        {{-- Tempo Control (optional - for future enhancement) --}}
-        <div class="text-zinc-400 text-sm">
-            {{ $tempo }} BPM
         </div>
     </div>
 

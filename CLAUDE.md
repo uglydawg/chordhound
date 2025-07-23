@@ -295,3 +295,6 @@ Here's a comprehensive reference for chord inversions across different musical k
 
 ### Misc Clarifications
 - If i mention Playwright I meant Dusk
+
+### Development Server Clarifications
+- Remember I am already running php artisan server, don't try to start another one. The access is at http://localhost:8000/.

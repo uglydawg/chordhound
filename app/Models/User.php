@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -239,5 +243,114 @@ class User extends Authenticatable
         }
 
         return $rules;
+    }
+
+    /**
+     * Get user's lesson progress
+     */
+    public function lessonProgress(): HasMany
+    {
+        return $this->hasMany(LessonProgress::class);
+    }
+
+    /**
+     * Get user's quiz attempts
+     */
+    public function quizAttempts(): HasMany
+    {
+        return $this->hasMany(QuizAttempt::class);
+    }
+
+    /**
+     * Get user's achievements
+     */
+    public function achievements(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Achievement::class,
+            UserAchievement::class,
+            'user_id',
+            'id',
+            'id',
+            'achievement_id'
+        );
+    }
+
+    /**
+     * Get user's achievement records
+     */
+    public function userAchievements(): HasMany
+    {
+        return $this->hasMany(UserAchievement::class);
+    }
+
+    /**
+     * Get user's total achievement points
+     */
+    public function getTotalAchievementPoints(): int
+    {
+        return $this->achievements()->sum('points');
+    }
+
+    /**
+     * Get user's completed lessons count
+     */
+    public function getCompletedLessonsCount(): int
+    {
+        return $this->lessonProgress()
+            ->where('status', 'completed')
+            ->count();
+    }
+
+    /**
+     * Get user's learning streak (days in a row)
+     */
+    public function getLearningStreak(): int
+    {
+        // This would require additional tracking
+        // For now, return 0
+        return 0;
+    }
+
+    /**
+     * Award achievement to user
+     */
+    public function awardAchievement(Achievement $achievement, array $metadata = []): void
+    {
+        if (!$this->hasAchievement($achievement)) {
+            $this->userAchievements()->create([
+                'achievement_id' => $achievement->id,
+                'unlocked_at' => now(),
+                'metadata' => $metadata,
+            ]);
+        }
+    }
+
+    /**
+     * Check if user has achievement
+     */
+    public function hasAchievement(Achievement $achievement): bool
+    {
+        return $this->userAchievements()
+            ->where('achievement_id', $achievement->id)
+            ->exists();
+    }
+
+    /**
+     * Get user's progress percentage across all lessons
+     */
+    public function getOverallProgress(): float
+    {
+        $totalLessons = Lesson::active()->count();
+        
+        if ($totalLessons === 0) {
+            return 0;
+        }
+
+        $completedLessons = $this->lessonProgress()
+            ->where('status', 'completed')
+            ->count();
+
+        return round(($completedLessons / $totalLessons) * 100, 2);
     }
 }

@@ -107,6 +107,18 @@ class PianoPlayer extends Component
         $this->dispatch('tempo-changed', tempo: $this->tempo);
     }
 
+    public function incrementTempo()
+    {
+        $this->tempo = min(200, $this->tempo + 5); // Max 200 BPM
+        $this->dispatch('tempo-changed', tempo: $this->tempo);
+    }
+
+    public function decrementTempo()
+    {
+        $this->tempo = max(60, $this->tempo - 5); // Min 60 BPM
+        $this->dispatch('tempo-changed', tempo: $this->tempo);
+    }
+
     public function updateSound($sound = 'piano')
     {
         if (isset($this->availableSounds[$sound])) {
