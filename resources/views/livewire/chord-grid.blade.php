@@ -264,10 +264,6 @@
                             @endif
                         @endif
                         
-                        {{-- Beat indicator --}}
-                        <div class="text-center text-xs text-tertiary">
-                            Beat {{ ($pos - 1) * 4 + 1 }}-{{ ($pos - 1) * 4 + 4 }}
-                        </div>
                     </div>
                 @endforeach
             </div>
