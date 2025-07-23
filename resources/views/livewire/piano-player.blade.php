@@ -519,7 +519,7 @@ document.addEventListener('livewire:initialized', () => {
     }
 
     function getChordNotes(root, type, inversion) {
-        // Complete chord to notes conversion with all keys
+        // Complete chord to notes conversion with all keys - matching ChordService octaves
         const noteMap = {
             'C': ['C4', 'E4', 'G4'],
             'C#': ['C#4', 'F4', 'G#4'],
@@ -527,29 +527,21 @@ document.addEventListener('livewire:initialized', () => {
             'D#': ['D#4', 'G4', 'A#4'],
             'E': ['E4', 'G#4', 'B4'],
             'F': ['F4', 'A4', 'C5'],
-            'F#': ['F#4', 'A#4', 'C#5'],
-            'G': ['G4', 'B4', 'D5'],
-            'G#': ['G#4', 'C5', 'D#5'],
-            'A': ['A4', 'C#5', 'E5'],
-            'A#': ['A#4', 'D5', 'F5'],
-            'B': ['B4', 'D#5', 'F#5']
+            'F#': ['F#3', 'A#3', 'C#4'],
+            'G': ['G3', 'B3', 'D4'],
+            'G#': ['G#3', 'C4', 'D#4'],
+            'A': ['A3', 'C#4', 'E4'],
+            'A#': ['A#3', 'D4', 'F4'],
+            'B': ['B3', 'D#4', 'F#4']
         };
 
+        // Get base notes for root position
         let notes = noteMap[root] || ['C4', 'E4', 'G4'];
 
-        // Apply chord type modifications
+        // Apply chord type modifications first (on root position)
         if (type === 'minor') {
             // Lower the third by a semitone for minor chords
-            const note = notes[1].replace(/([A-G]#?)([0-9])/, (match, pitch, octave) => {
-                const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-                let idx = noteOrder.indexOf(pitch);
-                idx = (idx - 1 + 12) % 12;
-                if (idx === 11 && pitch === 'C') {
-                    octave = String(parseInt(octave) - 1);
-                }
-                return noteOrder[idx] + octave;
-            });
-            notes[1] = note;
+            notes[1] = lowerNote(notes[1]);
         } else if (type === 'diminished') {
             // Lower both third and fifth for diminished
             notes[1] = lowerNote(notes[1]);
@@ -559,14 +551,14 @@ document.addEventListener('livewire:initialized', () => {
             notes[2] = raiseNote(notes[2]);
         }
 
-        // Apply inversion with proper octave handling
+        // Then apply inversion with adjusted chord notes
         if (inversion === 'first') {
-            // First inversion: move root to top (E, G, C)
+            // First inversion: move root to top with higher octave
             const rootNote = notes.shift();
             const rootWithHigherOctave = rootNote.replace(/(\d)/, (match, octave) => String(parseInt(octave) + 1));
             notes.push(rootWithHigherOctave);
         } else if (inversion === 'second') {
-            // Second inversion: move root and third to top (G, C, E) 
+            // Second inversion: move root and third to top with higher octaves
             const rootNote = notes.shift();
             const thirdNote = notes.shift();
             const rootWithHigherOctave = rootNote.replace(/(\d)/, (match, octave) => String(parseInt(octave) + 1));
