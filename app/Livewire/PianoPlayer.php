@@ -71,6 +71,18 @@ class PianoPlayer extends Component
         $this->currentChord = [];
         $this->activeNotes = [];
     }
+
+    #[On('play-chord')]
+    public function playChord($chord)
+    {
+        \Log::info('PianoPlayer received play-chord event:', ['chord' => $chord]);
+        
+        // Set the current chord to display on piano
+        $this->currentChord = $chord;
+        
+        // The activeNotes will be calculated in the render method
+        // This will cause the piano to highlight the correct keys
+    }
     
     public function setCurrentChord(array $chord)
     {
@@ -128,13 +140,13 @@ class PianoPlayer extends Component
     {
         switch ($inversion) {
             case 'root':
-                return [3, 3, 3];
+                return [4, 4, 4]; // All octave 4 for consistency
             case 'first':
-                return [2, 3, 3];
+                return [4, 4, 5]; // First inversion: move root up an octave
             case 'second':
-                return [2, 2, 3];
+                return [4, 4, 5]; // Second inversion: maintain octave 4 consistency
             default:
-                return [3, 3, 3];
+                return [4, 4, 4]; // Default to octave 4
         }
     }
 

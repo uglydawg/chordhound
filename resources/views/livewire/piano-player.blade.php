@@ -441,12 +441,14 @@ document.addEventListener('livewire:initialized', () => {
         if (pianoPlayer && pianoPlayer.isLoaded) {
             pianoPlayer.stopAll(); // Stop previous chord
             setTimeout(() => {
-                pianoPlayer.playChordWithSostenuto(notes); // Play with sostenuto pedal behavior
+                pianoPlayer.playChordWithSostenuto(notes, 1.0); // Play with sostenuto for 1 second
                 console.log('Playing chord with sostenuto:', notes);
+                // Update the piano display with the correct notes
+                updateActiveKeys(notes);
             }, 50); // Brief delay for smooth transition
         }
         
-        // Update the piano player's current chord display
+        // Update the piano player's current chord display (for UI text only, not piano keys)
         @this.call('setCurrentChord', chord);
     });
 
@@ -647,12 +649,20 @@ document.addEventListener('livewire:initialized', () => {
             notes[2] = raiseNote(notes[2]);
         }
 
-        // Apply inversion
+        // Apply inversion with proper octave handling
         if (inversion === 'first') {
-            notes.push(notes.shift());
+            // First inversion: move root to top (E, G, C)
+            const rootNote = notes.shift();
+            const rootWithHigherOctave = rootNote.replace(/(\d)/, (match, octave) => String(parseInt(octave) + 1));
+            notes.push(rootWithHigherOctave);
         } else if (inversion === 'second') {
-            notes.push(notes.shift());
-            notes.push(notes.shift());
+            // Second inversion: move root and third to top (G, C, E) 
+            const rootNote = notes.shift();
+            const thirdNote = notes.shift();
+            const rootWithHigherOctave = rootNote.replace(/(\d)/, (match, octave) => String(parseInt(octave) + 1));
+            const thirdWithHigherOctave = thirdNote.replace(/(\d)/, (match, octave) => String(parseInt(octave) + 1));
+            notes.push(rootWithHigherOctave);
+            notes.push(thirdWithHigherOctave);
         }
 
         return notes;
@@ -691,11 +701,11 @@ document.addEventListener('livewire:initialized', () => {
         await initializeAudio();
         if (!pianoPlayer || !audioInitialized) return;
 
-        // Map keyboard keys to piano notes
+        // Map keyboard keys to piano notes - using octave 4 for consistency
         const keyMap = {
-            'a': 'C3', 'w': 'C#3', 's': 'D3', 'e': 'D#3', 'd': 'E3',
-            'f': 'F3', 't': 'F#3', 'g': 'G3', 'y': 'G#3', 'h': 'A3',
-            'u': 'A#3', 'j': 'B3', 'k': 'C4'
+            'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4',
+            'f': 'F4', 't': 'F#4', 'g': 'G4', 'y': 'G#4', 'h': 'A4',
+            'u': 'A#4', 'j': 'B4', 'k': 'C5'
         };
 
         const note = keyMap[e.key.toLowerCase()];
