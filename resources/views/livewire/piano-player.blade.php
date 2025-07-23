@@ -1,27 +1,13 @@
-<div class="piano-player space-y-4">
+<div class="piano-player">
     {{-- Piano Display --}}
-    <div class="bg-zinc-950 rounded-lg p-4 shadow-inner">
+    <div class="bg-zinc-950 rounded-lg shadow-inner">
+
 
         {{-- Full Piano Layout (C1 - C5) --}}
-        <div class="bg-zinc-900 rounded-lg p-4">
-            <div class="flex items-center justify-between mb-3">
-                <div class="inline-flex items-center gap-2">
-                    <span class="text-sm text-zinc-400">Now Playing:</span>
-                    @if(!empty($currentChord['tone']))
-                        <span class="text-lg font-bold text-white">
-                            {{ $currentChord['tone'] }}{{ $currentChord['semitone'] === 'minor' ? 'm' : ($currentChord['semitone'] === 'diminished' ? 'dim' : '') }}
-                            @if($currentChord['inversion'] !== 'root')
-                                <span class="text-sm text-zinc-400">/ {{ ucfirst($currentChord['inversion']) }} inv.</span>
-                            @endif
-                        </span>
-                    @else
-                        <span class="text-lg font-medium text-zinc-500">No chord selected</span>
-                    @endif
-                </div>
-            </div>
+        <div class="bg-zinc-900 rounded-lg">
 
             {{-- Piano Keyboard - Realistic Layout --}}
-            <div class="piano-container bg-zinc-800 rounded-lg p-4 overflow-x-auto" id="piano-keyboard">
+            <div class="piano-container bg-zinc-800 rounded-lg overflow-x-auto" id="piano-keyboard">
                 <div class="piano-keys relative" style="height: 150px; width: 100%; min-width: 600px; max-width: 900px; margin: 0 auto;">
                     {{-- White Keys Container (Full height, will be overlapped by black keys) --}}
                     <div class="white-keys-container absolute inset-0 flex gap-0">
@@ -112,39 +98,9 @@
     </div>
 
     {{-- Transport Controls --}}
-    <div class="flex items-center justify-between space-x-4 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-        {{-- Play/Pause/Stop Controls --}}
-        <div class="flex items-center space-x-2">
-            {{-- Play/Pause Button --}}
-            <button
-                wire:click="togglePlayback"
-                class="transport-button group flex items-center justify-center"
-                title="{{ $isPlaying ? 'Pause' : 'Play' }}"
-                onclick="initializeAudio()"
-            >
-                @if($isPlaying)
-                    <svg class="w-6 h-6 text-secondary group-hover:text-primary" fill="currentColor" viewBox="0 0 24 24">
-                        <rect x="6" y="4" width="4" height="16" />
-                        <rect x="14" y="4" width="4" height="16" />
-                    </svg>
-                @else
-                    <svg class="w-6 h-6 text-secondary group-hover:text-primary" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                    </svg>
-                @endif
-            </button>
-
-            {{-- Stop Button --}}
-            <button
-                wire:click="stop"
-                class="transport-button group flex items-center justify-center"
-                title="Stop"
-            >
-                <svg class="w-6 h-6 text-secondary group-hover:text-primary" fill="currentColor" viewBox="0 0 24 24">
-                    <rect x="6" y="6" width="12" height="12" />
-                </svg>
-            </button>
-        </div>
+    <div class="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-lg">
+        {{-- Left spacer to maintain layout --}}
+        <div></div>
 
         {{-- Timeline Progress --}}
         <div class="flex-1 max-w-md">
@@ -156,52 +112,6 @@
             </div>
         </div>
 
-        {{-- Controls Group --}}
-        <div class="flex items-center space-x-4">
-            {{-- Labels Toggle --}}
-            <button
-                wire:click="toggleLabels"
-                class="transport-button group flex items-center space-x-1 {{ $showLabels ? 'bg-blue-600' : '' }}"
-                title="{{ $showLabels ? 'Hide Labels' : 'Show Labels' }}"
-            >
-                <svg class="w-4 h-4 text-secondary group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2.001 2.001 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                </svg>
-                <span class="text-xs text-secondary group-hover:text-primary">Labels</span>
-            </button>
-
-            {{-- Tempo Control --}}
-            <div class="flex items-center space-x-2">
-                <label class="text-sm text-secondary">BPM</label>
-                <input
-                    type="number"
-                    wire:model.lazy="tempo"
-                    wire:change="updateTempo($event.target.value)"
-                    min="60"
-                    max="200"
-                    class="w-16 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm text-primary focus:border-blue-500 focus:outline-none"
-                >
-            </div>
-
-            {{-- Piano Sound Selector --}}
-            <div class="flex items-center space-x-2">
-                <span class="text-sm text-secondary">Sound</span>
-                <select
-                    wire:model.live="selectedSound"
-                    wire:change="updateSound($event.target.value)"
-                    class="bg-zinc-800 border border-zinc-700 rounded px-3 py-1 text-sm text-primary focus:border-blue-500 focus:outline-none"
-                >
-                    @foreach($availableSounds as $value => $label)
-                        <option value="{{ $value }}">
-                            {{ $label }}
-                            @if(str_contains($label, '(Sample)'))
-                                🎵
-                            @endif
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
     </div>
 
     <style>
@@ -276,7 +186,7 @@
 /* Piano container styling */
 .piano-container {
     background: #1f2937;
-    padding: 16px;
+    padding: 8px;
     border-radius: 8px;
 }
 
@@ -437,12 +347,12 @@ document.addEventListener('livewire:initialized', () => {
         // Get the chord notes
         const notes = getChordNotes(chord.tone, chord.semitone, chord.inversion);
         
-        // Stop any currently playing notes and play the new chord with sostenuto
+        // Stop any currently playing notes and play the new chord for 1.5 seconds
         if (pianoPlayer && pianoPlayer.isLoaded) {
             pianoPlayer.stopAll(); // Stop previous chord
             setTimeout(() => {
-                pianoPlayer.playChordWithSostenuto(notes, 1.0); // Play with sostenuto for 1 second
-                console.log('Playing chord with sostenuto:', notes);
+                pianoPlayer.playChord(notes, 1.5); // Play chord for 1.5 seconds
+                console.log('Playing chord for 1.5 seconds:', notes);
                 // Update the piano display with the correct notes
                 updateActiveKeys(notes);
             }, 50); // Brief delay for smooth transition

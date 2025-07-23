@@ -95,17 +95,6 @@ class PianoPlayer extends Component
         $this->dispatch('toggle-playback', isPlaying: $this->isPlaying);
     }
 
-    public function stop()
-    {
-        $this->isPlaying = false;
-        $this->currentTime = 0;
-        $this->currentChordIndex = 0;
-        // Reset to first chord
-        if (! empty($this->chords)) {
-            $this->currentChord = array_values($this->chords)[0] ?? [];
-        }
-        $this->dispatch('stop-playback');
-    }
 
     public function updateTempo($tempo = 120)
     {
