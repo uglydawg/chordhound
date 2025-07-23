@@ -1,12 +1,12 @@
 <x-layouts.app :title="__('Piano Chords')">
     <div class="min-h-screen">
         <div class="p-6">
-            <div class="max-w-7xl mx-auto space-y-6">
+            <div class="max-w-7xl mx-auto">
                 {{-- Chord Grid Editor (includes Chord Palette) --}}
                 <livewire:chord-grid :chord-set-id="$chordSetId ?? null" />
                 
-                {{-- Chords Display (2x2 Grid) --}}
-                <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 chords-section">
+                {{-- Chords Display (2x2 Grid) - Hidden from view but available for printing --}}
+                <div class="hidden print:block bg-zinc-900 border border-zinc-800 rounded-lg p-6 chords-section">
                     <livewire:chord-display wire:key="chord-display-main" />
                 </div>
             </div>

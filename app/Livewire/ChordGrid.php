@@ -206,6 +206,14 @@ class ChordGrid extends Component
         }
     }
 
+    public function setChordInversion($position, $inversion)
+    {
+        if (isset($this->chords[$position]) && $this->chords[$position]['tone']) {
+            $this->chords[$position]['inversion'] = $inversion;
+            $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
+        }
+    }
+
     public function clearChord($position)
     {
         $this->chords[$position] = [
