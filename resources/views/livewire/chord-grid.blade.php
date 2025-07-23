@@ -148,38 +148,61 @@
                         {{-- Chord Button --}}
                         <div 
                             wire:click="selectChord({{ $pos }})"
-                            class="relative rounded border-2 {{ $playingPosition === $pos ? 'border-orange-500 bg-orange-600 animate-pulse' : ($activePosition === $pos ? 'border-blue-500 bg-blue-600' : ($ch['is_blue_note'] ? 'border-purple-500 bg-zinc-800' : 'border-zinc-700 bg-zinc-800')) }} hover:border-blue-400 transition-all cursor-pointer p-2 min-h-[80px] flex flex-col justify-between group"
+                            class="relative rounded border-2 {{ $playingPosition === $pos ? 'border-orange-500 bg-orange-600 animate-pulse' : ($activePosition === $pos ? 'border-blue-500 bg-blue-600' : ($ch['is_blue_note'] ? 'border-purple-500 bg-zinc-800' : 'border-zinc-700 bg-zinc-800')) }} hover:border-blue-400 transition-all cursor-pointer p-2 min-h-[80px] flex group"
                         >
-                            {{-- Roman Numeral --}}
-                            @if($ch['tone'] && $showRomanNumerals && isset($romanNumerals[$pos]))
-                                <div class="text-center mb-0.5">
-                                    <span class="text-xs font-medium {{ $activePosition === $pos ? 'text-blue-200' : 'text-blue-400' }}">
-                                        {{ $romanNumerals[$pos] }}
-                                    </span>
-                                </div>
-                            @else
-                                <div class="mb-0.5">&nbsp;</div>
-                            @endif
-                            
-                            {{-- Chord Name --}}
-                            <div class="flex-1 flex items-center justify-center">
-                                @if($ch['tone'])
-                                    <div class="text-center">
-                                        <div class="text-lg font-bold {{ $activePosition === $pos ? 'text-white' : 'text-white' }}">
-                                            {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
-                                        </div>
-                                        <div class="text-xs {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }} mt-0.5">
-                                            {{ ucfirst($ch['inversion']) }} Inversion
-                                        </div>
+                            {{-- Left side content --}}
+                            <div class="flex-1 flex flex-col justify-between">
+                                {{-- Roman Numeral --}}
+                                @if($ch['tone'] && $showRomanNumerals && isset($romanNumerals[$pos]))
+                                    <div class="text-center mb-0.5">
+                                        <span class="text-xs font-medium {{ $activePosition === $pos ? 'text-blue-200' : 'text-blue-400' }}">
+                                            {{ $romanNumerals[$pos] }}
+                                        </span>
                                     </div>
                                 @else
-                                    <div class="text-lg text-zinc-600">+</div>
+                                    <div class="mb-0.5">&nbsp;</div>
+                                @endif
+                                
+                                {{-- Chord Name --}}
+                                <div class="flex-1 flex items-center justify-center">
+                                    @if($ch['tone'])
+                                        <div class="text-center">
+                                            <div class="text-lg font-bold {{ $activePosition === $pos ? 'text-white' : 'text-white' }}">
+                                                {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
+                                            </div>
+                                            <div class="text-xs {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }} mt-0.5">
+                                                {{ ucfirst($ch['inversion']) }} Inversion
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="text-lg text-zinc-600">+</div>
+                                    @endif
+                                </div>
+                                
+                                {{-- Chord Notes --}}
+                                @if($ch['tone'])
+                                    @php
+                                        $chordService = app(\App\Services\ChordService::class);
+                                        // Use a public method to get notes with octaves
+                                        $notesWithOctaves = $chordService->getChordNotesForDisplay(
+                                            $ch['tone'],
+                                            $ch['semitone'] ?? 'major',
+                                            $ch['inversion'] ?? 'root'
+                                        );
+                                    @endphp
+                                    <div class="text-center mt-0.5">
+                                        <span class="text-xs {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }}">
+                                            {{ implode(', ', $notesWithOctaves) }}
+                                        </span>
+                                    </div>
+                                @else
+                                    <div class="mt-0.5">&nbsp;</div>
                                 @endif
                             </div>
                             
-                            {{-- Inversion Controls (centered horizontally) --}}
+                            {{-- Inversion Controls (vertically stacked on the right) --}}
                             @if($ch['tone'])
-                                <div class="flex justify-center space-x-0.5 mt-0.5" wire:click.stop>
+                                <div class="flex flex-col justify-center space-y-0.5 ml-2" wire:click.stop>
                                     @foreach(['root' => 'R', 'first' => 'I', 'second' => 'II'] as $inv => $label)
                                         <button
                                             wire:click="setChordInversion({{ $pos }}, '{{ $inv }}')"
@@ -190,26 +213,6 @@
                                         </button>
                                     @endforeach
                                 </div>
-                            @endif
-                            
-                            {{-- Chord Notes --}}
-                            @if($ch['tone'])
-                                @php
-                                    $chordService = app(\App\Services\ChordService::class);
-                                    // Use a public method to get notes with octaves
-                                    $notesWithOctaves = $chordService->getChordNotesForDisplay(
-                                        $ch['tone'],
-                                        $ch['semitone'] ?? 'major',
-                                        $ch['inversion'] ?? 'root'
-                                    );
-                                @endphp
-                                <div class="text-center mt-0.5">
-                                    <span class="text-xs {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }}">
-                                        {{ implode(', ', $notesWithOctaves) }}
-                                    </span>
-                                </div>
-                            @else
-                                <div class="mt-0.5">&nbsp;</div>
                             @endif
                             
                             {{-- Clear button --}}
