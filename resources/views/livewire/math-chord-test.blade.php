@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="mathChordPlayer">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Mathematical Chord Calculator Test</h1>
         <p class="mt-2 text-gray-600 dark:text-gray-400">Test the new mathematical chord calculation engine</p>
@@ -386,60 +386,61 @@
     </div>
 </div>
 
-@script
 <script>
-    // Initialize piano player
-    let pianoPlayer = null;
-    let progressionTimer = null;
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        // Import the MultiInstrumentPlayer
-        if (window.MultiInstrumentPlayer) {
-            pianoPlayer = new window.MultiInstrumentPlayer();
-            console.log('MultiInstrumentPlayer initialized');
+document.addEventListener('alpine:init', () => {
+    Alpine.data('mathChordPlayer', () => ({
+        pianoPlayer: null,
+        progressionTimer: null,
+        
+        init() {
+            // Initialize the piano player
+            if (window.MultiInstrumentPlayer) {
+                this.pianoPlayer = new window.MultiInstrumentPlayer();
+                console.log('MultiInstrumentPlayer initialized');
+                
+                // Try to resume audio context on first user interaction
+                document.addEventListener('click', () => {
+                    if (this.pianoPlayer && this.pianoPlayer.context && this.pianoPlayer.context.state === 'suspended') {
+                        this.pianoPlayer.context.resume().then(() => {
+                            console.log('Audio context resumed');
+                        });
+                    }
+                }, { once: true });
+            } else {
+                console.error('MultiInstrumentPlayer not found');
+            }
             
-            // Try to resume audio context on first user interaction
-            document.addEventListener('click', function() {
-                if (pianoPlayer && pianoPlayer.context && pianoPlayer.context.state === 'suspended') {
-                    pianoPlayer.context.resume().then(() => {
-                        console.log('Audio context resumed');
-                    });
+            // Listen for play chord events
+            this.$wire.on('play-math-chord', (event) => {
+                console.log('Play chord event received:', event);
+                if (this.pianoPlayer && event.detail && event.detail.notes) {
+                    console.log('Playing chord:', event.detail.notes);
+                    this.pianoPlayer.playChord(event.detail.notes, 1.5);
+                } else if (this.pianoPlayer && event.notes) {
+                    console.log('Playing chord (direct):', event.notes);
+                    this.pianoPlayer.playChord(event.notes, 1.5);
+                } else {
+                    console.error('No notes found in event:', event);
                 }
-            }, { once: true });
-        } else {
-            console.error('MultiInstrumentPlayer not found');
+            });
+            
+            // Listen for progression timing events
+            this.$wire.on('schedule-next-chord', (event) => {
+                console.log('Schedule next chord event:', event);
+                if (this.progressionTimer) {
+                    clearTimeout(this.progressionTimer);
+                }
+                const delay = event.detail?.delay || event.delay || 1000;
+                this.progressionTimer = setTimeout(() => {
+                    this.$wire.playNextChord();
+                }, delay);
+            });
+            
+            // Listen for progression chord changes
+            this.$wire.on('progression-chord-changed', (event) => {
+                console.log('Progression chord:', event.index, event.roman, event.root, event.type);
+            });
         }
-    });
-
-    // Listen for play chord events
-    $wire.on('play-math-chord', (event) => {
-        console.log('Play chord event received:', event);
-        if (pianoPlayer && event.detail && event.detail.notes) {
-            console.log('Playing chord:', event.detail.notes);
-            pianoPlayer.playChord(event.detail.notes, 1.5);
-        } else if (pianoPlayer && event.notes) {
-            console.log('Playing chord (direct):', event.notes);
-            pianoPlayer.playChord(event.notes, 1.5);
-        } else {
-            console.error('No notes found in event:', event);
-        }
-    });
-    
-    // Listen for progression timing events
-    $wire.on('schedule-next-chord', (event) => {
-        console.log('Schedule next chord event:', event);
-        if (progressionTimer) {
-            clearTimeout(progressionTimer);
-        }
-        const delay = event.detail?.delay || event.delay || 1000;
-        progressionTimer = setTimeout(() => {
-            $wire.playNextChord();
-        }, delay);
-    });
-    
-    // Listen for progression chord changes
-    $wire.on('progression-chord-changed', (event) => {
-        console.log('Progression chord:', event.index, event.roman, event.root, event.type);
-    });
+    }));
+});
 </script>
-@endscript
