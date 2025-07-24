@@ -396,25 +396,45 @@
         // Import the MultiInstrumentPlayer
         if (window.MultiInstrumentPlayer) {
             pianoPlayer = new window.MultiInstrumentPlayer();
+            console.log('MultiInstrumentPlayer initialized');
+            
+            // Try to resume audio context on first user interaction
+            document.addEventListener('click', function() {
+                if (pianoPlayer && pianoPlayer.context && pianoPlayer.context.state === 'suspended') {
+                    pianoPlayer.context.resume().then(() => {
+                        console.log('Audio context resumed');
+                    });
+                }
+            }, { once: true });
+        } else {
+            console.error('MultiInstrumentPlayer not found');
         }
     });
 
     // Listen for play chord events
     $wire.on('play-math-chord', (event) => {
-        if (pianoPlayer && event.notes) {
-            console.log('Playing chord:', event.notes);
+        console.log('Play chord event received:', event);
+        if (pianoPlayer && event.detail && event.detail.notes) {
+            console.log('Playing chord:', event.detail.notes);
+            pianoPlayer.playChord(event.detail.notes, 1.5);
+        } else if (pianoPlayer && event.notes) {
+            console.log('Playing chord (direct):', event.notes);
             pianoPlayer.playChord(event.notes, 1.5);
+        } else {
+            console.error('No notes found in event:', event);
         }
     });
     
     // Listen for progression timing events
     $wire.on('schedule-next-chord', (event) => {
+        console.log('Schedule next chord event:', event);
         if (progressionTimer) {
             clearTimeout(progressionTimer);
         }
+        const delay = event.detail?.delay || event.delay || 1000;
         progressionTimer = setTimeout(() => {
             $wire.playNextChord();
-        }, event.delay);
+        }, delay);
     });
     
     // Listen for progression chord changes
