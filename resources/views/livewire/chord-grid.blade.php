@@ -152,14 +152,20 @@
                         {{-- Chord Button --}}
                         <div 
                             wire:click="selectChord({{ $pos }})"
-                            class="relative rounded border-2 {{ $playingPosition === $pos ? 'border-orange-500 bg-orange-600 animate-pulse' : ($activePosition === $pos ? 'border-blue-500 bg-blue-600' : ($ch['is_blue_note'] ? 'border-purple-500 bg-zinc-800' : 'border-zinc-700 bg-zinc-800')) }} hover:border-blue-400 transition-all cursor-pointer p-2 min-h-[80px] flex group"
+                            role="button"
+                            tabindex="0"
+                            aria-label="Select {{ $ch['tone'] ? $ch['tone'] . ' ' . ($ch['semitone'] === 'minor' ? 'minor' : ($ch['semitone'] === 'diminished' ? 'diminished' : 'major')) . ' chord, ' . $ch['inversion'] . ' position' : 'empty chord slot' }}"
+                            aria-pressed="{{ $activePosition === $pos ? 'true' : 'false' }}"
+                            @keydown.enter="$wire.selectChord({{ $pos }})"
+                            @keydown.space.prevent="$wire.selectChord({{ $pos }})"
+                            class="relative rounded border-2 {{ $playingPosition === $pos ? 'border-orange-500 bg-orange-600 animate-pulse' : ($activePosition === $pos ? 'border-blue-500 bg-blue-600' : ($ch['is_blue_note'] ? 'border-purple-500 bg-zinc-800' : 'border-zinc-700 bg-zinc-800')) }} hover:border-blue-400 transition-all cursor-pointer p-2 min-h-[80px] flex group select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
                         >
                             {{-- Left side content --}}
                             <div class="flex-1 flex flex-col justify-between">
                                 {{-- Roman Numeral --}}
                                 @if($ch['tone'] && $showRomanNumerals && isset($romanNumerals[$pos]))
                                     <div class="text-center mb-0.5">
-                                        <span class="text-xs font-medium {{ $activePosition === $pos ? 'text-blue-200' : 'text-blue-400' }}">
+                                        <span class="text-xs font-medium select-none {{ $activePosition === $pos ? 'text-blue-200' : 'text-blue-400' }}">
                                             {{ $romanNumerals[$pos] }}
                                         </span>
                                     </div>
@@ -171,10 +177,10 @@
                                 <div class="flex-1 flex items-center justify-center">
                                     @if($ch['tone'])
                                         <div class="text-center">
-                                            <div class="text-lg font-bold {{ $activePosition === $pos ? 'text-white' : 'text-white' }}">
+                                            <div class="text-lg font-bold select-none {{ $activePosition === $pos ? 'text-white' : 'text-white' }}">
                                                 {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
                                             </div>
-                                            <div class="text-xs {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }} mt-0.5">
+                                            <div class="text-xs select-none {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }} mt-0.5">
                                                 {{ ucfirst($ch['inversion']) }} Inversion
                                             </div>
                                         </div>
@@ -195,7 +201,7 @@
                                         );
                                     @endphp
                                     <div class="text-center mt-0.5">
-                                        <span class="text-xs {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }}">
+                                        <span class="text-xs select-none {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }}">
                                             {{ implode(', ', $notesWithOctaves) }}
                                         </span>
                                     </div>
