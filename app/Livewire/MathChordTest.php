@@ -68,9 +68,8 @@ class MathChordTest extends Component
                 $this->inversion
             );
             
-            // Dispatch events
+            // Dispatch event to play the chord
             $this->dispatch('play-math-chord', notes: $this->calculatedNotes);
-            $this->dispatch('chord-notes-updated', notes: $this->calculatedNotes);
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
             $this->calculatedNotes = [];
@@ -99,6 +98,12 @@ class MathChordTest extends Component
     public function updated($property)
     {
         if (in_array($property, ['root', 'type', 'startPosition', 'inversion'])) {
+            $this->calculateChord();
+        }
+        
+        // When key changes, update the root note to the new key
+        if ($property === 'selectedKey') {
+            $this->root = $this->selectedKey;
             $this->calculateChord();
         }
     }
@@ -166,7 +171,6 @@ class MathChordTest extends Component
         
         // Dispatch events
         $this->dispatch('play-math-chord', notes: $notes);
-        $this->dispatch('chord-notes-updated', notes: $notes); // Update piano visualization
         $this->dispatch('progression-chord-changed', 
             index: $this->currentChordIndex, 
             roman: $roman,
