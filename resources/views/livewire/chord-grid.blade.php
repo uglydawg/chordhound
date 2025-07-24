@@ -212,14 +212,16 @@
                             
                             {{-- Inversion Controls (vertically stacked on the right) --}}
                             @if($ch['tone'])
-                                <div class="flex flex-col justify-center space-y-0.5 ml-2" wire:click.stop>
+                                <div class="flex flex-col justify-center space-y-1 ml-2" wire:click.stop>
                                     @foreach(['root' => 'R', 'first' => 'I', 'second' => 'II'] as $inv => $label)
                                         <button
                                             wire:click="setChordInversion({{ $pos }}, '{{ $inv }}')"
-                                            class="text-xs w-6 h-6 rounded transition-colors {{ $ch['inversion'] === $inv ? 'bg-blue-500 text-white' : 'bg-zinc-700 hover:bg-zinc-600 text-gray-300 hover:text-white' }}"
+                                            class="relative text-xs w-6 h-6 min-w-[44px] min-h-[44px] -m-2.5 p-2.5 flex items-center justify-center rounded transition-colors {{ $ch['inversion'] === $inv ? 'bg-blue-500 text-white font-semibold shadow-sm' : 'bg-zinc-700 hover:bg-zinc-600 text-gray-300 hover:text-white' }} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-zinc-900"
                                             title="{{ ucfirst($inv) }} Inversion"
+                                            aria-label="{{ ucfirst($inv) }} inversion"
+                                            aria-pressed="{{ $ch['inversion'] === $inv ? 'true' : 'false' }}"
                                         >
-                                            {{ $label }}
+                                            <span class="absolute inset-2.5 flex items-center justify-center">{{ $label }}</span>
                                         </button>
                                     @endforeach
                                 </div>
