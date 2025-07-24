@@ -10,6 +10,7 @@
                     @foreach($availableKeys as $key)
                         <button
                             wire:click="setKey('{{ $key }}')"
+                            dusk="key-{{ $key }}"
                             class="px-2 py-0.5 text-xs font-medium rounded transition-all
                                 {{ $selectedKey === $key 
                                     ? 'bg-blue-600 text-white border border-blue-500 shadow-lg' 
@@ -27,6 +28,7 @@
                 <div class="flex space-x-1">
                     <button
                         wire:click="setKeyType('major')"
+                        dusk="key-type-major"
                         class="px-2 py-0.5 text-xs font-medium rounded transition-all
                             {{ $selectedKeyType === 'major' 
                                 ? 'bg-blue-600 text-white border border-blue-500' 
@@ -36,6 +38,7 @@
                     </button>
                     <button
                         wire:click="setKeyType('minor')"
+                        dusk="key-type-minor"
                         class="px-2 py-0.5 text-xs font-medium rounded transition-all
                             {{ $selectedKeyType === 'minor' 
                                 ? 'bg-blue-600 text-white border border-blue-500' 
@@ -51,11 +54,12 @@
                 <label class="text-xs font-medium text-secondary">Progression:</label>
                 <select
                     wire:change="setProgression($event.target.value)"
+                    dusk="progression-selector"
                     class="bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-0.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]"
                 >
                     <option value="" @if(!$selectedProgression) selected @endif>Custom</option>
                     @foreach($progressions as $romanNumerals => $progression)
-                        <option value="{{ $romanNumerals }}" @if($selectedProgression === $romanNumerals) selected @endif>
+                        <option value="{{ $romanNumerals }}" dusk="progression-{{ $romanNumerals }}" @if($selectedProgression === $romanNumerals) selected @endif>
                             {{ $romanNumerals }}
                             @if(isset($progressionDescriptions[$romanNumerals]))
                                 - {{ $progressionDescriptions[$romanNumerals] }}
@@ -123,6 +127,7 @@
                 </button>
                 <button
                     wire:click="toggleVoiceLeading"
+                    dusk="voice-leading-toggle"
                     class="text-sm {{ $showVoiceLeading ? 'text-green-500' : 'text-secondary' }} hover:text-primary transition-colors flex items-center space-x-2"
                     title="Show voice leading animations"
                 >
@@ -148,10 +153,11 @@
             {{-- First row: all four chords with voice leading animations below each --}}
             <div class="grid grid-cols-4 gap-3">
                 @foreach($chords as $pos => $ch)
-                    <div class="space-y-2" data-chord-position="{{ $pos }}">
+                    <div class="space-y-2" data-chord-position="{{ $pos }}" dusk="chord-{{ $pos }}">
                         {{-- Chord Button --}}
                         <div 
                             wire:click="selectChord({{ $pos }})"
+                            dusk="chord-button-{{ $pos }}"
                             role="button"
                             tabindex="0"
                             aria-label="Select {{ $ch['tone'] ? $ch['tone'] . ' ' . ($ch['semitone'] === 'minor' ? 'minor' : ($ch['semitone'] === 'diminished' ? 'diminished' : 'major')) . ' chord, ' . $ch['inversion'] . ' position' : 'empty chord slot' }}"
@@ -182,10 +188,10 @@
                                 <div class="flex-1 flex items-center justify-center">
                                     @if($ch['tone'])
                                         <div class="text-center">
-                                            <div class="text-lg font-bold select-none text-white">
+                                            <div class="text-lg font-bold select-none text-white" dusk="chord-{{ $pos }}-display">
                                                 {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
                                             </div>
-                                            <div class="text-xs select-none {{ $playingPosition === $pos || $activePosition === $pos || $ch['is_blue_note'] ? 'text-white/70' : 'text-gray-300' }} mt-0.5">
+                                            <div class="text-xs select-none {{ $playingPosition === $pos || $activePosition === $pos || $ch['is_blue_note'] ? 'text-white/70' : 'text-gray-300' }} mt-0.5" dusk="chord-{{ $pos }}-inversion">
                                                 {{ ucfirst($ch['inversion']) }} Inversion
                                             </div>
                                         </div>
@@ -221,6 +227,7 @@
                                     @foreach(['root' => 'R', 'first' => 'I', 'second' => 'II'] as $inv => $label)
                                         <button
                                             wire:click="setChordInversion({{ $pos }}, '{{ $inv }}')"
+                                            dusk="inversion-{{ $inv }}"
                                             class="relative text-xs w-8 h-8 flex items-center justify-center rounded transition-all transform {{ $ch['inversion'] === $inv ? 'bg-gradient-to-b from-blue-400 to-blue-600 text-white font-bold shadow-lg scale-105 border-b-4 border-blue-700' : 'bg-gradient-to-b from-zinc-600 to-zinc-700 text-gray-200 hover:from-zinc-500 hover:to-zinc-600 hover:text-white border-b-4 border-zinc-800 hover:translate-y-[1px] hover:border-b-2' }} active:translate-y-[2px] active:border-b-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-zinc-900"
                                             title="{{ ucfirst($inv) }} Inversion"
                                             aria-label="{{ ucfirst($inv) }} inversion"
