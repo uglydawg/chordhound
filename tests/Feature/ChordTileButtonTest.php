@@ -16,11 +16,16 @@ it('chord tiles have button role and proper ARIA attributes', function () {
         ->assertSeeHtml('aria-label=');
 });
 
-it('chord tiles prevent text selection with CSS', function () {
-    $component = Livewire::test(ChordGrid::class);
+it('chord tiles have 3D appearance with gradient and border', function () {
+    $component = Livewire::test(ChordGrid::class)
+        ->call('setKey', 'C')
+        ->call('setProgression', 'I-IV-V');
     
-    // Check for user-select CSS classes or inline styles
-    $component->assertSee('select-none'); // Tailwind's user-select: none
+    // Check for 3D styling
+    $component->assertSee('bg-gradient-to-b') // Gradient background
+        ->assertSee('border-b-4') // 3D border
+        ->assertSee('shadow-md') // Shadow for depth
+        ->assertSee('select-none'); // Prevent text selection
 });
 
 it('chord tiles respond to keyboard events', function () {
@@ -52,4 +57,18 @@ it('chord tile aria-label includes chord name and inversion', function () {
     $component->assertSeeHtml('aria-label="Select C major chord, root position"')
         ->assertSeeHtml('aria-label="Select F major chord, root position"')
         ->assertSeeHtml('aria-label="Select G major chord, root position"');
+});
+
+it('chord tiles have depression animation on click', function () {
+    $component = Livewire::test(ChordGrid::class)
+        ->call('setKey', 'C')
+        ->call('setProgression', 'I-IV-V');
+    
+    // Check for mouse and touch event handlers for depression
+    $component->assertSeeHtml('@mousedown')
+        ->assertSeeHtml('@mouseup')
+        ->assertSeeHtml('@touchstart')
+        ->assertSeeHtml('@touchend')
+        ->assertSee('active:translate-y-1')
+        ->assertSee('active:border-b-2');
 });

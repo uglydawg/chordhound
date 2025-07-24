@@ -158,14 +158,19 @@
                             aria-pressed="{{ $activePosition === $pos ? 'true' : 'false' }}"
                             @keydown.enter="$wire.selectChord({{ $pos }})"
                             @keydown.space.prevent="$wire.selectChord({{ $pos }})"
-                            class="relative rounded border-2 {{ $playingPosition === $pos ? 'border-orange-500 bg-orange-600 animate-pulse' : ($activePosition === $pos ? 'border-blue-500 bg-blue-600' : ($ch['is_blue_note'] ? 'border-purple-500 bg-zinc-800' : 'border-zinc-700 bg-zinc-800')) }} hover:border-blue-400 transition-all cursor-pointer p-2 min-h-[80px] flex group select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
+                            @mousedown="$el.classList.add('translate-y-1', 'border-b-2')"
+                            @mouseup="$el.classList.remove('translate-y-1', 'border-b-2')"
+                            @mouseleave="$el.classList.remove('translate-y-1', 'border-b-2')"
+                            @touchstart="$el.classList.add('translate-y-1', 'border-b-2')"
+                            @touchend="$el.classList.remove('translate-y-1', 'border-b-2')"
+                            class="relative rounded-lg transform transition-all cursor-pointer p-2 min-h-[80px] flex group select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900 {{ $playingPosition === $pos ? 'bg-gradient-to-b from-orange-400 to-orange-600 border-b-4 border-orange-700 text-white shadow-lg animate-pulse' : ($activePosition === $pos ? 'bg-gradient-to-b from-blue-400 to-blue-600 border-b-4 border-blue-700 text-white shadow-lg' : ($ch['is_blue_note'] ? 'bg-gradient-to-b from-purple-600 to-purple-800 border-b-4 border-purple-900 text-white shadow-md' : 'bg-gradient-to-b from-zinc-600 to-zinc-700 border-b-4 border-zinc-800 text-gray-200 shadow-md hover:from-zinc-500 hover:to-zinc-600')) }} active:translate-y-1 active:border-b-2"
                         >
                             {{-- Left side content --}}
                             <div class="flex-1 flex flex-col justify-between">
                                 {{-- Roman Numeral --}}
                                 @if($ch['tone'] && $showRomanNumerals && isset($romanNumerals[$pos]))
                                     <div class="text-center mb-0.5">
-                                        <span class="text-xs font-medium select-none {{ $activePosition === $pos ? 'text-blue-200' : 'text-blue-400' }}">
+                                        <span class="text-xs font-medium select-none {{ $playingPosition === $pos || $activePosition === $pos || $ch['is_blue_note'] ? 'text-white/80' : 'text-gray-300' }}">
                                             {{ $romanNumerals[$pos] }}
                                         </span>
                                     </div>
@@ -177,15 +182,15 @@
                                 <div class="flex-1 flex items-center justify-center">
                                     @if($ch['tone'])
                                         <div class="text-center">
-                                            <div class="text-lg font-bold select-none {{ $activePosition === $pos ? 'text-white' : 'text-white' }}">
+                                            <div class="text-lg font-bold select-none text-white">
                                                 {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
                                             </div>
-                                            <div class="text-xs select-none {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }} mt-0.5">
+                                            <div class="text-xs select-none {{ $playingPosition === $pos || $activePosition === $pos || $ch['is_blue_note'] ? 'text-white/70' : 'text-gray-300' }} mt-0.5">
                                                 {{ ucfirst($ch['inversion']) }} Inversion
                                             </div>
                                         </div>
                                     @else
-                                        <div class="text-lg text-zinc-600">+</div>
+                                        <div class="text-lg text-gray-400">+</div>
                                     @endif
                                 </div>
                                 
@@ -201,7 +206,7 @@
                                         );
                                     @endphp
                                     <div class="text-center mt-0.5">
-                                        <span class="text-xs select-none {{ $activePosition === $pos ? 'text-blue-200' : 'text-zinc-400' }}">
+                                        <span class="text-xs select-none {{ $playingPosition === $pos || $activePosition === $pos || $ch['is_blue_note'] ? 'text-white/70' : 'text-gray-300' }}">
                                             {{ implode(', ', $notesWithOctaves) }}
                                         </span>
                                     </div>
