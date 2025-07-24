@@ -6,9 +6,7 @@ namespace App\Livewire;
 
 use App\Services\MathematicalChordService;
 use Livewire\Component;
-use Livewire\Attributes\Layout;
 
-#[Layout('layouts.app')]
 class MathChordTest extends Component
 {
     public string $root = 'C';

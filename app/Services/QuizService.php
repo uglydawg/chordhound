@@ -96,7 +96,7 @@ class QuizService
         return $quiz->questions()
             ->ordered()
             ->get()
-            ->map(function ($question) {
+            ->map(function ($question) use ($quiz) {
                 $data = [
                     'id' => $question->id,
                     'question' => $question->question,

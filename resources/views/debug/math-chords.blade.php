@@ -1,9 +1,7 @@
-@extends('layouts.app')
-
-@section('content')
+<x-layouts.app>
     <livewire:math-chord-test />
-@endsection
-
-@push('scripts')
-    <script src="{{ asset('js/multi-instrument-player.js') }}"></script>
-@endpush
+    
+    @push('scripts')
+        <script src="{{ asset('js/multi-instrument-player.js') }}"></script>
+    @endpush
+</x-layouts.app>
