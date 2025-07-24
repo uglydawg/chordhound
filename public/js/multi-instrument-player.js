@@ -56,15 +56,57 @@ class MultiInstrumentPlayer {
             return;
         }
 
+        // Check if already loading to prevent duplicate requests
+        if (this.loadingPromises && this.loadingPromises[instrumentKey]) {
+            console.log(`Already loading ${instrumentKey}, waiting...`);
+            return this.loadingPromises[instrumentKey];
+        }
+
+        if (!this.loadingPromises) {
+            this.loadingPromises = {};
+        }
+
+        // Create a loading promise
+        this.loadingPromises[instrumentKey] = this._loadInstrumentData(instrumentKey, instrument);
+        
+        try {
+            await this.loadingPromises[instrumentKey];
+        } finally {
+            delete this.loadingPromises[instrumentKey];
+        }
+    }
+    
+    async _loadInstrumentData(instrumentKey, instrument) {
         try {
             console.log(`Loading instrument: ${instrument.name} from ${instrument.path}`);
             
-            // Load metadata
-            const metaResponse = await fetch(instrument.meta);
-            const metadata = await metaResponse.json();
+            // Try to use cached data first
+            const cacheAvailable = 'caches' in window;
+            let metaResponse, audioResponse;
             
-            // Load audio file
-            const audioResponse = await fetch(instrument.path);
+            if (cacheAvailable) {
+                const cache = await caches.open('chordhound-audio-v1');
+                
+                // Try cache first for metadata
+                const cachedMeta = await cache.match(instrument.meta);
+                metaResponse = cachedMeta || await fetch(instrument.meta);
+                if (!cachedMeta && metaResponse.ok) {
+                    cache.put(instrument.meta, metaResponse.clone());
+                }
+                
+                // Try cache first for audio
+                const cachedAudio = await cache.match(instrument.path);
+                audioResponse = cachedAudio || await fetch(instrument.path);
+                if (!cachedAudio && audioResponse.ok) {
+                    cache.put(instrument.path, audioResponse.clone());
+                }
+            } else {
+                // Fallback to regular fetch if cache API not available
+                metaResponse = await fetch(instrument.meta);
+                audioResponse = await fetch(instrument.path);
+            }
+            
+            const metadata = await metaResponse.json();
             const arrayBuffer = await audioResponse.arrayBuffer();
             const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
             

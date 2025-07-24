@@ -30,8 +30,5 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
 
-{{-- Tone.js for audio synthesis --}}
-<script src="https://unpkg.com/tone@15.0.4/build/Tone.js"></script>
-
-{{-- Multi-instrument player --}}
+{{-- Multi-instrument player (loaded after Tone.js from app.js) --}}
 <script src="{{ asset('js/multi-instrument-player.js') }}" defer></script>

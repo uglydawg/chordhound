@@ -1,0 +1,25 @@
+{
+    "name": "ChordHound - Piano Chord Generator",
+    "short_name": "ChordHound",
+    "description": "Dog-themed piano chord generator with voice leading and progression tools",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#f97316",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "categories": ["music", "education", "productivity"],
+    "screenshots": [],
+    "prefer_related_applications": false
+}

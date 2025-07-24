@@ -97,16 +97,16 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Controls -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Chord Parameters</h2>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Chord Parameters</h2>
             
-            <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
                 <!-- Root Note -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Root Note
                     </label>
-                    <select wire:model.live="root" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                    <select wire:model.live="root" class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                         @foreach($roots as $rootNote)
                             <option value="{{ $rootNote }}">{{ $rootNote }}</option>
                         @endforeach
@@ -115,10 +115,10 @@
 
                 <!-- Chord Type -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Chord Type
                     </label>
-                    <select wire:model.live="type" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                    <select wire:model.live="type" class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                         @foreach($types as $chordType)
                             <option value="{{ $chordType }}">{{ ucfirst($chordType) }}</option>
                         @endforeach
@@ -127,90 +127,84 @@
 
                 <!-- Starting Position -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Starting Position
                     </label>
                     <input 
                         type="text" 
                         wire:model.live="startPosition" 
-                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        placeholder="e.g., C4, G5"
+                        class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        placeholder="e.g., C4"
                     >
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Enter a note with octave (e.g., C4, E5, G3)</p>
                 </div>
 
                 <!-- Inversion -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Inversion
                     </label>
-                    <select wire:model.live="inversion" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                    <select wire:model.live="inversion" class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                         @foreach($inversions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
+            </div>
 
-                <!-- Play Button -->
-                <div class="pt-4">
-                    <button 
-                        wire:click="playChord"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition"
-                    >
-                        Play Chord
-                    </button>
-                </div>
+            <!-- Buttons -->
+            <div class="mt-3 grid grid-cols-1 gap-2">
+                <button 
+                    wire:click="playChord"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded text-sm transition"
+                >
+                    Play Chord
+                </button>
 
-                <!-- Voice Leading Test -->
                 @if($root === 'C' && $type === 'major')
-                <div class="pt-2">
-                    <button 
-                        wire:click="compareWithHardcoded"
-                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md transition"
-                    >
-                        Calculate Voice Leading to F Major
-                    </button>
-                </div>
+                <button 
+                    wire:click="compareWithHardcoded"
+                    class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-1.5 px-3 rounded text-sm transition"
+                >
+                    Voice Leading to F Major
+                </button>
                 @endif
             </div>
         </div>
 
         <!-- Results -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Calculated Notes</h2>
-            
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             @if($error)
-                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4 mb-4">
-                    <p class="text-red-600 dark:text-red-400">{{ $error }}</p>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-2 mb-2">
+                    <p class="text-red-600 dark:text-red-400 text-sm">{{ $error }}</p>
                 </div>
             @endif
 
             @if(!empty($calculatedNotes))
-                <div class="space-y-4">
-                    <!-- Note Display -->
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
-                            {{ $root }} {{ ucfirst($type) }} - {{ $inversions[$inversion] }}
-                        </h3>
-                        <div class="flex flex-wrap gap-3">
+                <div class="space-y-3">
+                    <!-- Compact Note Display -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ $root }} {{ ucfirst($type) }} 
+                                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                    {{ $inversions[$inversion] }}
+                                </span>
+                            </h2>
+                            <span class="text-sm font-mono text-gray-600 dark:text-gray-300">
+                                {{ implode(' - ', $calculatedNotes) }}
+                            </span>
+                        </div>
+                        <div class="flex gap-2">
                             @foreach($calculatedNotes as $index => $note)
-                                <div class="bg-white dark:bg-gray-600 rounded-lg px-4 py-2 shadow-sm hover:shadow-md transition-all cursor-pointer hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded px-3 py-1.5 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all cursor-pointer"
                                      x-data
                                      @mouseenter="$wire.dispatchTo('math-chord-piano', 'highlight-note', { note: '{{ $note }}' })"
                                      @mouseleave="$wire.dispatchTo('math-chord-piano', 'highlight-note', { note: null })">
                                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                                        {{ $index === 0 ? 'Root/Bass' : ($index === 1 ? 'Third' : ($index === 2 ? 'Fifth' : 'Note ' . $index)) }}
+                                        {{ $index === 0 ? 'Bass' : ($index === 1 ? '3rd' : ($index === 2 ? '5th' : 'N' . $index)) }}
                                     </div>
-                                    <div class="text-lg font-bold text-gray-900 dark:text-white">
+                                    <div class="text-base font-bold text-gray-900 dark:text-white">
                                         {{ $note }}
-                                    </div>
-                                    <div class="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                                        @php
-                                            $noteOnly = preg_replace('/\d+$/', '', $note);
-                                            $octave = preg_replace('/^[A-G]#?/', '', $note);
-                                        @endphp
-                                        <span class="font-mono">{{ $noteOnly }}</span>
-                                        <span class="text-gray-400">{{ $octave }}</span>
                                     </div>
                                 </div>
                             @endforeach
