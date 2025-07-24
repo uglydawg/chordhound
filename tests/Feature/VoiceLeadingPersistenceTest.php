@@ -47,26 +47,21 @@ class VoiceLeadingPersistenceTest extends TestCase
     }
 
     /**
-     * Test that enabling voice leading applies inversions
+     * Test that preset progressions always apply recommended inversions
      */
-    public function test_enabling_voice_leading_applies_inversions(): void
+    public function test_preset_progressions_apply_inversions(): void
     {
         $component = Livewire::test(ChordGrid::class)
             ->set('selectedKey', 'C')
             ->call('setProgression', 'I-IV-V');
 
-        // Initially voice leading is off, so all inversions should be root
-        $component->assertSet('chords.1.inversion', 'root')
-            ->assertSet('chords.2.inversion', 'root')
-            ->assertSet('chords.3.inversion', 'root');
-
-        // Enable voice leading
-        $component->call('toggleVoiceLeading')
-            ->assertSet('showVoiceLeading', true);
-
-        // Should re-apply progression with voice-leading inversions
+        // Preset progressions should always use recommended inversions
+        // regardless of voice leading toggle state
         $component->assertSet('chords.1.inversion', 'root')
             ->assertSet('chords.2.inversion', 'second')
             ->assertSet('chords.3.inversion', 'first');
+
+        // Verify voice leading is still off by default
+        $component->assertSet('showVoiceLeading', false);
     }
 }
