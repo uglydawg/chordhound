@@ -188,10 +188,10 @@
                                 <div class="flex-1 flex items-center justify-center">
                                     @if($ch['tone'])
                                         <div class="text-center">
-                                            <div class="text-lg font-bold select-none text-white" dusk="chord-{{ $pos }}-display">
+                                            <div class="text-lg font-bold select-none text-white">
                                                 {{ $ch['tone'] }}{{ $ch['semitone'] === 'minor' ? 'm' : ($ch['semitone'] === 'diminished' ? 'dim' : '') }}
                                             </div>
-                                            <div class="text-xs select-none {{ $playingPosition === $pos || $activePosition === $pos || $ch['is_blue_note'] ? 'text-white/70' : 'text-gray-300' }} mt-0.5" dusk="chord-{{ $pos }}-inversion">
+                                            <div class="text-xs select-none {{ $playingPosition === $pos || $activePosition === $pos || $ch['is_blue_note'] ? 'text-white/70' : 'text-gray-300' }} mt-0.5">
                                                 {{ ucfirst($ch['inversion']) }} Inversion
                                             </div>
                                         </div>
