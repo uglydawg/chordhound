@@ -212,16 +212,16 @@
                             
                             {{-- Inversion Controls (vertically stacked on the right) --}}
                             @if($ch['tone'])
-                                <div class="flex flex-col justify-center space-y-1 ml-2" wire:click.stop>
+                                <div class="flex flex-col justify-center space-y-2 ml-2" wire:click.stop>
                                     @foreach(['root' => 'R', 'first' => 'I', 'second' => 'II'] as $inv => $label)
                                         <button
                                             wire:click="setChordInversion({{ $pos }}, '{{ $inv }}')"
-                                            class="relative text-xs w-6 h-6 min-w-[44px] min-h-[44px] -m-2.5 p-2.5 flex items-center justify-center rounded transition-colors {{ $ch['inversion'] === $inv ? 'bg-blue-500 text-white font-semibold shadow-sm' : 'bg-zinc-700 hover:bg-zinc-600 text-gray-300 hover:text-white' }} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-zinc-900"
+                                            class="relative text-xs w-8 h-8 flex items-center justify-center rounded transition-all transform {{ $ch['inversion'] === $inv ? 'bg-gradient-to-b from-blue-400 to-blue-600 text-white font-bold shadow-lg scale-105 border-b-4 border-blue-700' : 'bg-gradient-to-b from-zinc-600 to-zinc-700 text-gray-200 hover:from-zinc-500 hover:to-zinc-600 hover:text-white border-b-4 border-zinc-800 hover:translate-y-[1px] hover:border-b-2' }} active:translate-y-[2px] active:border-b-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-zinc-900"
                                             title="{{ ucfirst($inv) }} Inversion"
                                             aria-label="{{ ucfirst($inv) }} inversion"
                                             aria-pressed="{{ $ch['inversion'] === $inv ? 'true' : 'false' }}"
                                         >
-                                            <span class="absolute inset-2.5 flex items-center justify-center">{{ $label }}</span>
+                                            {{ $label }}
                                         </button>
                                     @endforeach
                                 </div>
