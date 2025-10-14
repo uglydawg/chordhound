@@ -1,0 +1,225 @@
+# Page snapshot
+
+```yaml
+- link "ChordHound ChordHound Logo":
+  - /url: http://localhost:8000
+  - text: ChordHound
+  - img "ChordHound Logo"
+- navigation:
+  - text: Platform
+  - link "Piano Chords":
+    - /url: http://localhost:8000/chords
+- navigation:
+  - link "Support ChordHound":
+    - /url: http://localhost:8000/donate
+- text: Theme
+- button "Toggle dark mode":
+  - img
+- link "Login":
+  - /url: http://localhost:8000/login
+- heading "Mathematical Chord Calculator Test" [level=1]
+- paragraph: Test the new mathematical chord calculation engine
+- heading "Chord Progressions" [level=2]
+- text: Key
+- combobox:
+  - option "C Major" [selected]
+  - option "C# Major"
+  - option "D Major"
+  - option "D# Major"
+  - option "E Major"
+  - option "F Major"
+  - option "F# Major"
+  - option "G Major"
+  - option "G# Major"
+  - option "A Major"
+  - option "A# Major"
+  - option "B Major"
+- text: Progression
+- combobox:
+  - option "I-IV-V-I" [selected]
+  - option "I-V-vi-IV"
+  - option "I-vi-IV-V"
+  - option "ii-V-I"
+  - option "I-IV-I-V"
+  - option "vi-IV-I-V"
+  - option "I-iv-I-II"
+- text: Rhythm
+- combobox:
+  - option "Block Chords"
+  - option "Alberti Bass"
+  - option "Waltz Pattern"
+  - option "Broken Chords"
+  - option "Arpeggiated"
+  - option "March"
+  - option "Ballad Style" [selected]
+  - option "Ragtime"
+- text: Time
+- combobox:
+  - option "4/4 (Common)" [selected]
+  - option "3/4 (Waltz)"
+  - option "6/8 (Compound)"
+  - option "2/4 (March)"
+  - option "5/4 (Irregular)"
+  - option "7/8 (Complex)"
+- text: BPM
+- combobox:
+  - option "60 (Slow)"
+  - option "80 (Relaxed)" [selected]
+  - option "100 (Moderate)"
+  - option "120 (Standard)"
+  - option "140 (Upbeat)"
+  - option "160 (Fast)"
+  - option "180 (Very Fast)"
+- text: Start Inv
+- combobox:
+  - option "Root" [selected]
+  - option "1st"
+  - option "2nd"
+- button "Play":
+  - img
+  - text: Play
+- text: "Playing: Ballad Style in 4/4 @ 80 BPM"
+- heading "Current Progression in C Major" [level=3]
+- button "I Cmaj"
+- button "IV Fmaj"
+- button "V Gmaj"
+- button "I Cmaj"
+- heading "Chord Parameters" [level=2]
+- text: Root Note
+- combobox:
+  - option "C"
+  - option "C#"
+  - option "D"
+  - option "D#"
+  - option "E"
+  - option "F" [selected]
+  - option "F#"
+  - option "G"
+  - option "G#"
+  - option "A"
+  - option "A#"
+  - option "B"
+- text: Chord Type
+- combobox:
+  - option "Major" [selected]
+  - option "Minor"
+  - option "Diminished"
+  - option "Augmented"
+- text: Starting Octave
+- combobox:
+  - option "Octave 3"
+  - option "Octave 4" [selected]
+  - option "Octave 5"
+  - option "Octave 6"
+- text: Inversion
+- combobox:
+  - option "Root Position" [selected]
+  - option "First Inversion"
+  - option "Second Inversion"
+- button "Play Chord"
+- heading "F Major Root Position" [level=2]
+- text: F3 - F4 - A4 - C5 Bass F3 3rd F4 5th A4 N3 C5
+- heading "Technical Details" [level=3]
+- term: "Chord Formula:"
+- definition: F3 - F4 - A4 - C5
+- term: "Note Count:"
+- definition: "4"
+- term: "Bass Note:"
+- definition: F3
+- term: "Chord Type:"
+- definition: Major Root Position
+- term: "Intervals from Root:"
+- definition: Root, Major 3rd, Perfect 5th
+- button "Play":
+  - img
+- button "Decrease tempo":
+  - img
+- spinbutton "Tempo in BPM": "80"
+- text: BPM
+- button "Increase tempo":
+  - img
+- button "C2 C2"
+- button "D2"
+- button "E2"
+- button "F2"
+- button "G2"
+- button "A2"
+- button "B2"
+- button "C3 C3"
+- button "D3"
+- button "E3"
+- button "F3"
+- button "G3"
+- button "A3"
+- button "B3"
+- button "C4 C4"
+- button "D4"
+- button "E4"
+- button "F4"
+- button "G4"
+- button "A4"
+- button "B4"
+- button "C5 C5"
+- button "D5"
+- button "E5"
+- button "F5"
+- button "G5"
+- button "A5"
+- button "B5"
+- button "C#2"
+- button "D#2"
+- button "F#2"
+- button "G#2"
+- button "A#2"
+- button "C#3"
+- button "D#3"
+- button "F#3"
+- button "G#3"
+- button "A#3"
+- button "C#4"
+- button "D#4"
+- button "F#4"
+- button "G#4"
+- button "A#4"
+- button "C#5"
+- button "D#5"
+- button "F#5"
+- button "G#5"
+- button "A#5"
+- heading "Voice Leading Analysis" [level=2]
+- paragraph: Optimal inversions for smooth voice leading in C Major - I-IV-V-I
+- heading "Starting with Root Position" [level=3]
+- text: "OPTIMAL Total Distance: 24 semitones I Cmaj Root Position"
+- img
+- text: IV Fmaj Root Position ↔ 15
+- img
+- text: V Gmaj Root Position ↔ 6
+- img
+- text: I Cmaj Second Inversion ↔ 3
+- group: View note sequences
+- heading "Starting with First Inversion" [level=3]
+- text: "Total Distance: 24 semitones I Cmaj First Inversion"
+- img
+- text: IV Fmaj First Inversion ↔ 15
+- img
+- text: V Gmaj Root Position ↔ 6
+- img
+- text: I Cmaj Second Inversion ↔ 3
+- group: View note sequences
+- heading "Starting with Second Inversion" [level=3]
+- text: "Total Distance: 24 semitones I Cmaj Second Inversion"
+- img
+- text: IV Fmaj Second Inversion ↔ 15
+- img
+- text: V Gmaj First Inversion ↔ 6
+- img
+- text: I Cmaj Root Position ↔ 3
+- group: View note sequences
+- heading "Quick Progression Examples" [level=2]
+- 'button "Classic (I-IV-V-I) C Major: C - F - G - C"'
+- 'button "Pop (I-V-vi-IV) G Major: G - D - Em - C"'
+- 'button "50s (I-vi-IV-V) F Major: F - Dm - Bb - C"'
+- 'button "Alternative (vi-IV-I-V) D Major: Bm - G - D - A"'
+- 'button "Jazz (ii-V-I) A Major: Bm - E - A"'
+- 'button "Modal Mix (I-iv-I-II) E Major: E - Am - E - F#"'
+```
