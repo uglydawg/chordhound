@@ -53,7 +53,7 @@ composer install
 
 3. Install Node dependencies:
 ```bash
-npm install
+pnpm install
 ```
 
 4. Copy environment file and generate app key:
@@ -104,8 +104,8 @@ php artisan migrate:fresh  # Reset and re-run migrations
 
 ### Build Assets
 ```bash
-npm run dev    # Start Vite dev server
-npm run build  # Build for production
+pnpm run dev    # Start Vite dev server
+pnpm run build  # Build for production
 ```
 
 ## Laravel Package Features

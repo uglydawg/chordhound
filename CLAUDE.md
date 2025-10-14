@@ -15,8 +15,8 @@ composer dev  # Runs Laravel server, queue, logs, and Vite concurrently
 
 ### Building Assets
 ```bash
-npm run dev    # Start Vite dev server
-npm run build  # Build for production
+pnpm run dev    # Start Vite dev server
+pnpm run build  # Build for production
 ```
 
 ### Testing
