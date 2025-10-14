@@ -14,10 +14,10 @@
                         <g>
                             <rect 
                                 x="{{ $key['x'] }}" 
-                                y="0" 
+                                y="{{ $key['isPressed'] ? '2' : '0' }}" 
                                 width="{{ $key['width'] - 1 }}" 
-                                height="{{ $larger ? 118 : 98 }}"
-                                fill="{{ $key['isHighlighted'] ? '#FBBF24' : ($key['isActive'] ? '#34D399' : '#FAFAFA') }}"
+                                height="{{ $key['isPressed'] ? ($larger ? 116 : 96) : ($larger ? 118 : 98) }}"
+                                fill="{{ $key['isPressed'] ? '#DC2626' : ($key['isHighlighted'] ? '#FBBF24' : ($key['isActive'] ? '#34D399' : '#FAFAFA')) }}"
                                 stroke="#333333"
                                 stroke-width="0.5"
                                 rx="2"
@@ -25,10 +25,10 @@
                             {{-- Key shadow/3D effect --}}
                             <rect 
                                 x="{{ $key['x'] }}" 
-                                y="{{ $larger ? 114 : 94 }}" 
+                                y="{{ $key['isPressed'] ? ($larger ? 116 : 96) : ($larger ? 114 : 94) }}" 
                                 width="{{ $key['width'] - 1 }}" 
-                                height="4"
-                                fill="{{ $key['isHighlighted'] ? '#F59E0B' : ($key['isActive'] ? '#10B981' : '#E5E5E5') }}"
+                                height="{{ $key['isPressed'] ? '2' : '4' }}"
+                                fill="{{ $key['isPressed'] ? '#B91C1C' : ($key['isHighlighted'] ? '#F59E0B' : ($key['isActive'] ? '#10B981' : '#E5E5E5')) }}"
                                 rx="1"
                             />
                         </g>
@@ -41,10 +41,10 @@
                         <g>
                             <rect 
                                 x="{{ $key['x'] }}" 
-                                y="0" 
+                                y="{{ $key['isPressed'] ? '1' : '0' }}" 
                                 width="{{ $key['width'] }}" 
-                                height="{{ $larger ? 75 : 60 }}"
-                                fill="{{ $key['isHighlighted'] ? '#DC2626' : ($key['isActive'] ? '#059669' : '#171717') }}"
+                                height="{{ $key['isPressed'] ? ($larger ? 74 : 59) : ($larger ? 75 : 60) }}"
+                                fill="{{ $key['isPressed'] ? '#7F1D1D' : ($key['isHighlighted'] ? '#DC2626' : ($key['isActive'] ? '#059669' : '#171717')) }}"
                                 stroke="#000000"
                                 stroke-width="1"
                                 rx="2"
@@ -52,10 +52,10 @@
                             {{-- Black key highlight --}}
                             <rect 
                                 x="{{ $key['x'] + 2 }}" 
-                                y="2" 
+                                y="{{ $key['isPressed'] ? '3' : '2' }}" 
                                 width="{{ $key['width'] - 4 }}" 
                                 height="{{ $larger ? 10 : 8 }}"
-                                fill="{{ $key['isHighlighted'] ? '#EF4444' : ($key['isActive'] ? '#10B981' : '#262626') }}"
+                                fill="{{ $key['isPressed'] ? '#450A0A' : ($key['isHighlighted'] ? '#EF4444' : ($key['isActive'] ? '#10B981' : '#262626')) }}"
                                 rx="1"
                                 opacity="0.6"
                             />

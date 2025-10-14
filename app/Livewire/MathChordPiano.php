@@ -20,11 +20,27 @@ class MathChordPiano extends Component
     public bool $larger = false;
     
     public ?string $highlightedNote = null;
+    
+    public array $pressedKeys = [];
 
     #[On('highlight-note')]
     public function highlightNote($note): void
     {
         $this->highlightedNote = $note;
+    }
+    
+    #[On('press-key')]
+    public function pressKey($note): void
+    {
+        if (!in_array($note, $this->pressedKeys)) {
+            $this->pressedKeys[] = $note;
+        }
+    }
+    
+    #[On('release-key')]
+    public function releaseKey($note): void
+    {
+        $this->pressedKeys = array_filter($this->pressedKeys, fn($key) => $key !== $note);
     }
 
     public function render()
@@ -51,6 +67,7 @@ class MathChordPiano extends Component
                 $fullNote = $note.$octave;
                 $isActive = in_array($fullNote, $activeNotes);
                 $isHighlighted = $this->highlightedNote === $fullNote;
+                $isPressed = in_array($fullNote, $this->pressedKeys);
 
                 if (strpos($note, '#') === false) {
                     // White key
@@ -62,6 +79,7 @@ class MathChordPiano extends Component
                         'width' => $whiteKeyWidth,
                         'isActive' => $isActive,
                         'isHighlighted' => $isHighlighted,
+                        'isPressed' => $isPressed,
                     ];
                 }
             }
@@ -71,6 +89,7 @@ class MathChordPiano extends Component
                 $fullNote = $note.$octave;
                 $isActive = in_array($fullNote, $activeNotes);
                 $isHighlighted = $this->highlightedNote === $fullNote;
+                $isPressed = in_array($fullNote, $this->pressedKeys);
 
                 $pianoKeys[] = [
                     'type' => 'black',
@@ -80,6 +99,7 @@ class MathChordPiano extends Component
                     'width' => $blackKeyWidth,
                     'isActive' => $isActive,
                     'isHighlighted' => $isHighlighted,
+                    'isPressed' => $isPressed,
                 ];
             }
 

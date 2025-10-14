@@ -184,10 +184,15 @@ class MultiInstrumentPlayer {
         const envelope = instrument.metadata.envelope || { attack: 0.01, release: 0.5 };
         const volume = (instrument.metadata.volume || 1) / 10; // Scale down volume
         
+        // Ensure all time values are positive and properly ordered
+        const attackTime = now + envelope.attack;
+        const sustainTime = Math.max(attackTime + 0.01, now + duration - envelope.release);
+        const endTime = now + duration;
+        
         noteGain.gain.setValueAtTime(0, now);
-        noteGain.gain.linearRampToValueAtTime(volume, now + envelope.attack);
-        noteGain.gain.setValueAtTime(volume * 0.8, now + duration - envelope.release);
-        noteGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        noteGain.gain.linearRampToValueAtTime(volume, attackTime);
+        noteGain.gain.setValueAtTime(volume * 0.8, sustainTime);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, endTime);
         
         // Connect
         source.connect(noteGain);
@@ -219,12 +224,17 @@ class MultiInstrumentPlayer {
         oscillator.type = 'sine';
         oscillator.frequency.setValueAtTime(freq, now);
         
-        // ADSR envelope
+        // ADSR envelope with safe time calculations
+        const attackTime = now + 0.01;
+        const decayTime = now + 0.1;
+        const sustainTime = Math.max(decayTime + 0.01, now + duration - 0.1);
+        const endTime = now + duration;
+        
         noteGain.gain.setValueAtTime(0, now);
-        noteGain.gain.linearRampToValueAtTime(0.3, now + 0.01);
-        noteGain.gain.exponentialRampToValueAtTime(0.2, now + 0.1);
-        noteGain.gain.setValueAtTime(0.2, now + duration - 0.1);
-        noteGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+        noteGain.gain.linearRampToValueAtTime(0.3, attackTime);
+        noteGain.gain.exponentialRampToValueAtTime(0.2, decayTime);
+        noteGain.gain.setValueAtTime(0.2, sustainTime);
+        noteGain.gain.exponentialRampToValueAtTime(0.01, endTime);
         
         oscillator.connect(noteGain);
         noteGain.connect(this.gainNode);
