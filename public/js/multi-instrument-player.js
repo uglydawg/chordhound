@@ -155,12 +155,18 @@ class MultiInstrumentPlayer {
         if (!this.sampler) return;
 
         try {
-            // Release all notes
+            // Immediately release all notes with 0 time for instant cutoff
             const uniqueNotes = new Set(this.activeNotes.values());
             uniqueNotes.forEach(note => {
-                this.sampler.triggerRelease(note);
+                // Use immediate release (0 time) to stop sound instantly
+                this.sampler.triggerRelease(note, Tone.now());
             });
             this.activeNotes.clear();
+
+            // Also disconnect and reconnect the sampler to ensure clean cutoff
+            if (this.sampler && this.audioContext) {
+                this.sampler.releaseAll();
+            }
 
         } catch (error) {
             console.error('Error stopping all notes:', error);

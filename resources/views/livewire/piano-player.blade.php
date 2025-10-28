@@ -309,22 +309,11 @@ window.startChordSustain = async function(position, chord) {
     const notes = getChordNotes(chord.tone, chord.semitone, chord.inversion);
     console.log('Starting sustained chord with notes:', notes);
 
-    // Play the chord immediately
-    console.log('Playing chord...');
-    pianoPlayer.playChord(notes, 3.0); // 3 second duration
+    // Play the chord with sostenuto (indefinite sustain until stopAll is called)
+    console.log('Playing chord with sostenuto...');
+    pianoPlayer.playChordWithSostenuto(notes);
     console.log('Updating active keys...');
     updateActiveKeys(notes);
-
-    // Set up interval to retrigger the chord every 2.5 seconds (before it fades out)
-    // This creates a sustained sound while the button is held
-    sustainInterval = setInterval(() => {
-        if (currentSustainedChord && pianoPlayer && pianoPlayer.isLoaded) {
-            pianoPlayer.playChord(notes, 3.0);
-            // Keep the keys highlighted during retriggering
-            updateActiveKeys(notes);
-            console.log('Re-triggering sustained chord');
-        }
-    }, 2500);
 };
 
 window.stopChordSustain = function() {
