@@ -30,7 +30,7 @@ class ChordGrid extends Component
 
     public string $selectedProgression = '';
 
-    public bool $showVoiceLeading = true; // Default to optimized voice leading
+    public bool $showVoiceLeading = false; // Default to hidden for beginners
 
     public ?int $playingPosition = null;
 
@@ -103,7 +103,7 @@ class ChordGrid extends Component
         $this->selectedKeyType = session('chord_grid.selected_key_type', 'major');
         $this->selectedProgression = session('chord_grid.selected_progression', 'I-V-vi-IV');
         $this->showRomanNumerals = session('chord_grid.show_roman_numerals', false);
-        $this->showVoiceLeading = session('chord_grid.show_voice_leading', true);
+        $this->showVoiceLeading = session('chord_grid.show_voice_leading', false);
 
         // Initialize with 4 chord slots
         for ($i = 1; $i <= 4; $i++) {
@@ -244,9 +244,12 @@ class ChordGrid extends Component
         if ($this->selectedProgression) {
             $this->applySelectedProgression();
         }
+
+        $this->calculateBlueNotes();
         if ($this->showRomanNumerals) {
             $this->updateRomanNumerals();
         }
+        $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
     }
 
     public function setKeyType($keyType)
@@ -257,9 +260,12 @@ class ChordGrid extends Component
         if ($this->selectedProgression) {
             $this->applySelectedProgression();
         }
+
+        $this->calculateBlueNotes();
         if ($this->showRomanNumerals) {
             $this->updateRomanNumerals();
         }
+        $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
     }
 
     public function setProgression($progressionKey)
@@ -285,15 +291,16 @@ class ChordGrid extends Component
             $romanNumerals = $this->chordProgressions[$progressionKey];
             $progression = $this->chordService->transposeProgression($this->selectedKey, $this->selectedKeyType, $romanNumerals);
             
-            // Get the specific inversions for this progression and key
+            // Always get the recommended inversions for preset progressions
+            // These are musically optimized and should be applied regardless of voice leading toggle
             $inversions = $this->chordService->getProgressionInversions($progressionKey, $this->selectedKey, $this->selectedKeyType);
 
             foreach ($progression as $index => $chord) {
                 if ($index < 4) {
                     $position = $index + 1;
 
-                    // Use the specific inversion for this progression and position
-                    $inversion = $inversions[$index] ?? 'root';
+                    // Always use the recommended inversion for preset progressions
+                    $inversion = isset($inversions[$index]) ? $inversions[$index] : 'root';
 
                     $this->chords[$position] = [
                         'position' => $position,

@@ -29,6 +29,10 @@ class PianoPlayer extends Component
     public int $currentChordIndex = 0;
 
     public array $activeNotes = []; // Currently active/highlighted notes
+
+    // Rhythm and timing options
+    public string $selectedRhythm = 'block';
+    public string $timeSignature = '4/4';
     
     // Piano display configuration
     public array $octaves = [2, 3, 4, 5]; // Default to C2, C3, C4 and C5
@@ -38,6 +42,39 @@ class PianoPlayer extends Component
     // Available piano sounds
     public array $availableSounds = [
         'piano' => 'Piano',
+    ];
+
+    // Piano rhythm patterns
+    public array $rhythmPatterns = [
+        'block' => 'Block Chords',
+        'alberti' => 'Alberti Bass',
+        'waltz' => 'Waltz Pattern',
+        'broken' => 'Broken Chords',
+        'arpeggio' => 'Arpeggiated',
+        'march' => 'March',
+        'ballad' => 'Ballad Style',
+        'ragtime' => 'Ragtime'
+    ];
+
+    // Time signatures
+    public array $timeSignatures = [
+        '4/4' => '4/4 (Common)',
+        '3/4' => '3/4 (Waltz)',
+        '6/8' => '6/8 (Compound)',
+        '2/4' => '2/4 (March)',
+        '5/4' => '5/4 (Irregular)',
+        '7/8' => '7/8 (Complex)'
+    ];
+
+    // BPM presets
+    public array $bpmPresets = [
+        60 => '60 (Slow)',
+        80 => '80 (Relaxed)',
+        100 => '100 (Moderate)',
+        120 => '120 (Standard)',
+        140 => '140 (Upbeat)',
+        160 => '160 (Fast)',
+        180 => '180 (Very Fast)'
     ];
 
     private ChordService $chordService;
@@ -130,6 +167,33 @@ class PianoPlayer extends Component
     public function toggleLabels()
     {
         $this->showLabels = ! $this->showLabels;
+    }
+
+    public function updatedSelectedRhythm()
+    {
+        // Auto-adjust time signature for certain rhythms
+        if ($this->selectedRhythm === 'waltz' && $this->timeSignature !== '3/4') {
+            $this->timeSignature = '3/4';
+            $this->dispatch('time-signature-changed', timeSignature: $this->timeSignature);
+        }
+
+        $this->dispatch('rhythm-changed', rhythm: $this->selectedRhythm);
+    }
+
+    public function updatedTimeSignature()
+    {
+        // Auto-adjust rhythm for certain time signatures
+        if ($this->timeSignature === '3/4' && $this->selectedRhythm !== 'waltz') {
+            $this->selectedRhythm = 'waltz';
+            $this->dispatch('rhythm-changed', rhythm: $this->selectedRhythm);
+        }
+
+        $this->dispatch('time-signature-changed', timeSignature: $this->timeSignature);
+    }
+
+    public function updatedTempo()
+    {
+        $this->dispatch('tempo-changed', tempo: $this->tempo);
     }
 
     // Method to update current chord during playback

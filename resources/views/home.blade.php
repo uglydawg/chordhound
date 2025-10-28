@@ -25,6 +25,9 @@
                             Visit Learning Hub
                         </flux:button>
                     @endauth
+                    <flux:button size="base" variant="outline" href="/debug/math-chords" wire:navigate>
+                        Test Math Chords
+                    </flux:button>
                 </div>
                 <div class="mt-8 flex items-center justify-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
                     <div class="flex items-center">

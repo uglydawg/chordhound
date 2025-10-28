@@ -7,22 +7,22 @@ use Livewire\Livewire;
 
 it('toggles voice leading display', function () {
     Livewire::test(ChordGrid::class)
-        ->assertSet('showVoiceLeading', true) // Default is true
+        ->assertSet('showVoiceLeading', false) // Default is false
         ->call('toggleVoiceLeading')
-        ->assertSet('showVoiceLeading', false)
+        ->assertSet('showVoiceLeading', true)
         ->call('toggleVoiceLeading')
-        ->assertSet('showVoiceLeading', true);
+        ->assertSet('showVoiceLeading', false);
 });
 
 it('remembers voice leading toggle state in session', function () {
-    // Toggle voice leading off
+    // Toggle voice leading on
     Livewire::test(ChordGrid::class)
         ->call('toggleVoiceLeading')
-        ->assertSet('showVoiceLeading', false);
+        ->assertSet('showVoiceLeading', true);
 
     // New instance should remember the toggle state
     Livewire::test(ChordGrid::class)
-        ->assertSet('showVoiceLeading', false);
+        ->assertSet('showVoiceLeading', true);
 });
 
 it('shows voice leading animations when enabled', function () {
@@ -30,26 +30,26 @@ it('shows voice leading animations when enabled', function () {
     Livewire::test(ChordGrid::class)
         ->call('setKey', 'C')
         ->call('setProgression', 'I-IV-V')
-        ->assertSet('showVoiceLeading', true)
+        ->assertSet('showVoiceLeading', false)
         ->assertSee('Voice Leading'); // Should see the voice leading toggle button
 });
 
 it('persists voice leading preference in new sessions', function () {
-    // Set voice leading to false
+    // Default is false, toggle to true
     Livewire::test(ChordGrid::class)
         ->call('toggleVoiceLeading')
-        ->assertSet('showVoiceLeading', false);
+        ->assertSet('showVoiceLeading', true);
 
     // Create new component - should restore from session
     Livewire::test(ChordGrid::class)
-        ->assertSet('showVoiceLeading', false);
+        ->assertSet('showVoiceLeading', true);
 
-    // Toggle back on
+    // Toggle back off
     Livewire::test(ChordGrid::class)
         ->call('toggleVoiceLeading')
-        ->assertSet('showVoiceLeading', true);
+        ->assertSet('showVoiceLeading', false);
 
-    // New component should remember it's on
+    // New component should remember it's off
     Livewire::test(ChordGrid::class)
-        ->assertSet('showVoiceLeading', true);
+        ->assertSet('showVoiceLeading', false);
 });

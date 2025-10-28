@@ -16,6 +16,14 @@ Route::get('/piano-test', function () {
     return view('piano-test');
 })->name('piano.test');
 
+Route::get('/debug/math-chords', function () {
+    return view('debug.math-chords');
+})->name('debug.math-chords');
+
+Route::get('/debug/piano-direct', function () {
+    return view('debug.piano-test');
+})->name('debug.piano-direct');
+
 Route::get('/', function () {
     return view('home');
 })->name('home');

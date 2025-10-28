@@ -6,11 +6,18 @@ namespace App\Services;
 
 class ChordService
 {
+    private MathematicalChordService $mathService;
+
     private array $noteToMidi = [
         'C' => 0, 'C#' => 1, 'D' => 2, 'D#' => 3,
         'E' => 4, 'F' => 5, 'F#' => 6, 'G' => 7,
         'G#' => 8, 'A' => 9, 'A#' => 10, 'B' => 11,
     ];
+
+    public function __construct(?MathematicalChordService $mathService = null)
+    {
+        $this->mathService = $mathService ?? new MathematicalChordService();
+    }
 
     private array $chordIntervals = [
         'major' => [0, 4, 7],
@@ -155,16 +162,22 @@ class ChordService
      */
     private function getChordNotesWithOctaves(string $rootNote, string $chordType, string $inversion): array
     {
+        // Check if we should use the mathematical engine
+        if (config('chord.calculation_engine') === 'mathematical') {
+            return $this->getChordNotesWithOctavesMathematical($rootNote, $chordType, $inversion);
+        }
+
+        // Legacy implementation using hardcoded voicings
         // For major chords, use the specific voicings provided
         if ($chordType === 'major') {
             return $this->getMajorChordVoicing($rootNote, $inversion);
         }
-        
+
         // For minor chords, use the specific voicings provided
         if ($chordType === 'minor') {
             return $this->getMinorChordVoicing($rootNote, $inversion);
         }
-        
+
         // For other chord types, calculate based on intervals
         $notes = $this->getChordNotes($rootNote, $chordType, $inversion);
 
@@ -186,6 +199,58 @@ class ChordService
         }
 
         return $notesWithOctaves;
+    }
+
+    /**
+     * Get chord notes with octaves using mathematical calculation
+     */
+    private function getChordNotesWithOctavesMathematical(string $rootNote, string $chordType, string $inversion): array
+    {
+        // Convert inversion name to number
+        $inversionNum = match ($inversion) {
+            'first' => 1,
+            'second' => 2,
+            'third' => 2, // Treat 'third' as second inversion for 3-note chords
+            default => 0, // 'root' or anything else
+        };
+
+        // Use mathematical service to calculate chord
+        $startPosition = $rootNote . '4'; // Default starting position
+        $notesWithOctaves = $this->mathService->calculateChord($rootNote, $chordType, $startPosition, $inversionNum);
+
+        // Skip bass note (first element) and convert remaining notes to ChordService format
+        $chordNotes = array_slice($notesWithOctaves, 1);
+
+        $result = [];
+        foreach ($chordNotes as $noteStr) {
+            // Parse note string (e.g., "C4" -> note: "C", octave: 4)
+            $note = preg_replace('/\d+$/', '', $noteStr);
+            $octave = (int) preg_replace('/^[A-G]#?b?/', '', $noteStr);
+
+            $result[] = [
+                'note' => $note,
+                'octave' => $octave,
+                'midi' => $this->noteToMidi[$this->normalizeNote($note)] + (12 * $octave),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Normalize note name (convert flats to sharps for MIDI calculation)
+     */
+    private function normalizeNote(string $note): string
+    {
+        $flatToSharp = [
+            'Db' => 'C#',
+            'Eb' => 'D#',
+            'Gb' => 'F#',
+            'Ab' => 'G#',
+            'Bb' => 'A#',
+        ];
+
+        return $flatToSharp[$note] ?? $note;
     }
 
     /**
