@@ -155,21 +155,20 @@
                 @foreach($chords as $pos => $ch)
                     <div class="space-y-2" data-chord-position="{{ $pos }}" dusk="chord-{{ $pos }}">
                         {{-- Chord Button --}}
-                        <div 
-                            wire:click="selectChord({{ $pos }})"
+                        <div
                             dusk="chord-button-{{ $pos }}"
+                            data-chord-pos="{{ $pos }}"
+                            data-chord-tone="{{ $ch['tone'] ?? '' }}"
+                            data-chord-semitone="{{ $ch['semitone'] ?? 'major' }}"
+                            data-chord-inversion="{{ $ch['inversion'] ?? 'root' }}"
                             role="button"
                             tabindex="0"
                             aria-label="Select {{ $ch['tone'] ? $ch['tone'] . ' ' . ($ch['semitone'] === 'minor' ? 'minor' : ($ch['semitone'] === 'diminished' ? 'diminished' : 'major')) . ' chord, ' . $ch['inversion'] . ' position' : 'empty chord slot' }}"
                             aria-pressed="{{ $activePosition === $pos ? 'true' : 'false' }}"
                             @keydown.enter="$wire.selectChord({{ $pos }})"
                             @keydown.space.prevent="$wire.selectChord({{ $pos }})"
-                            @mousedown="$el.classList.add('translate-y-1', 'border-b-2')"
-                            @mouseup="$el.classList.remove('translate-y-1', 'border-b-2')"
-                            @mouseleave="$el.classList.remove('translate-y-1', 'border-b-2')"
-                            @touchstart="$el.classList.add('translate-y-1', 'border-b-2')"
-                            @touchend="$el.classList.remove('translate-y-1', 'border-b-2')"
-                            class="relative rounded-lg transform transition-all cursor-pointer p-2 min-h-[80px] flex group select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900 {{ $playingPosition === $pos ? 'bg-gradient-to-b from-orange-400 to-orange-600 border-b-4 border-orange-700 text-white shadow-lg animate-pulse' : ($activePosition === $pos ? 'bg-gradient-to-b from-blue-400 to-blue-600 border-b-4 border-blue-700 text-white shadow-lg' : ($ch['is_blue_note'] ? 'bg-gradient-to-b from-purple-600 to-purple-800 border-b-4 border-purple-900 text-white shadow-md' : 'bg-gradient-to-b from-zinc-600 to-zinc-700 border-b-4 border-zinc-800 text-gray-200 shadow-md hover:from-zinc-500 hover:to-zinc-600')) }} active:translate-y-1 active:border-b-2"
+                            title="Click and hold to sustain this chord"
+                            class="chord-sustain-button relative rounded-lg transform transition-all cursor-pointer p-2 min-h-[80px] flex group select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900 {{ $playingPosition === $pos ? 'bg-gradient-to-b from-orange-400 to-orange-600 border-b-4 border-orange-700 text-white shadow-lg animate-pulse' : ($activePosition === $pos ? 'bg-gradient-to-b from-blue-400 to-blue-600 border-b-4 border-blue-700 text-white shadow-lg' : ($ch['is_blue_note'] ? 'bg-gradient-to-b from-purple-600 to-purple-800 border-b-4 border-purple-900 text-white shadow-md' : 'bg-gradient-to-b from-zinc-600 to-zinc-700 border-b-4 border-zinc-800 text-gray-200 shadow-md hover:from-zinc-500 hover:to-zinc-600')) }} active:translate-y-1 active:border-b-2"
                         >
                             {{-- Left side content --}}
                             <div class="flex-1 flex flex-col justify-between">

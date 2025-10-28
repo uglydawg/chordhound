@@ -244,9 +244,12 @@ class ChordGrid extends Component
         if ($this->selectedProgression) {
             $this->applySelectedProgression();
         }
+
+        $this->calculateBlueNotes();
         if ($this->showRomanNumerals) {
             $this->updateRomanNumerals();
         }
+        $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
     }
 
     public function setKeyType($keyType)
@@ -257,9 +260,12 @@ class ChordGrid extends Component
         if ($this->selectedProgression) {
             $this->applySelectedProgression();
         }
+
+        $this->calculateBlueNotes();
         if ($this->showRomanNumerals) {
             $this->updateRomanNumerals();
         }
+        $this->dispatch('chordsUpdated', ['chords' => $this->chords, 'blueNotes' => $this->blueNotes]);
     }
 
     public function setProgression($progressionKey)
