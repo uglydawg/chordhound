@@ -1,166 +1,22 @@
-# Version control
 .git
-.gitignore
-.gitattributes
-
-# IDE and editor files
+.github
+.env
+.env.*
+node_modules
+vendor
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+.phpunit.result.cache
+tests
 .vscode
 .idea
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Laravel specific
-/node_modules
-/public/hot
-/public/storage
-/storage/*.key
-/vendor
-/.env
-/.env.backup
-.phpunit.result.cache
-Homestead.json
-Homestead.yaml
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-/storage/logs/*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage
-
-# nyc test coverage
-.nyc_output
-
-# Grunt intermediate storage
-.grunt
-
-# Bower dependency directory
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons
-build/Release
-
-# Dependency directories
-node_modules/
-jspm_packages/
-
-# TypeScript v1 declaration files
-typings/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional REPL history
-.node_repl_history
-
-# Output directory
-dist
-
-# Yarn Integrity file
-.yarn-integrity
-
-# Environment files
-.env*
-!.env.example
-
-# Laravel Mix
-/public/mix-manifest.json
-
-# Testing
-/tests/Browser/screenshots/
-/tests/Browser/console/
-/tests/Browser/source/
-/tests/coverage/
-/tests/dusk.php
-phpunit.dusk.xml
-
-# Development tools
-/.agent-os/
-/.serena/
-
-# Storage files (keep structure, ignore content)
-/storage/app/public/*
-/storage/framework/cache/*
-/storage/framework/sessions/*
-/storage/framework/testing/*
-/storage/framework/views/*
-/storage/logs/*
-!/storage/app/public/.gitignore
-!/storage/framework/cache/.gitignore
-!/storage/framework/sessions/.gitignore
-!/storage/framework/testing/.gitignore
-!/storage/framework/views/.gitignore
-!/storage/logs/.gitignore
-
-# Database files (handled separately in volumes)
-/database/database.sqlite
-/database/dusk.sqlite
-
-# Documentation
-/documentation/
-README.md
-CLAUDE.md
 *.md
-
-# Certificate files
-/certs/
-
-# Temporary files
-*.tmp
-*.temp
-
-# Backup files
-*.backup
-*.bak
-
-# Build artifacts
-public/build/
-
-# Cache
-bootstrap/cache/*
-!bootstrap/cache/.gitignore
-
-# Sessions
-storage/framework/sessions/*
-!storage/framework/sessions/.gitignore
-
-# Cache
-storage/framework/cache/*
-!storage/framework/cache/.gitignore
-!storage/framework/cache/data/.gitignore
-
-# Docker files (avoid recursive Docker builds)
-Dockerfile*
-docker-compose*.yml
-
-# Misc development files
-*.png
-*.jpg
-*.jpeg
-*.gif
-check-login.cjs
-run-*.sh
+!README.md
+.editorconfig
+.gitignore
+.gitattributes
+phpunit.xml
+.php-cs-fixer.php
