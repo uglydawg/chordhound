@@ -320,6 +320,8 @@ window.startChordSustain = async function(position, chord) {
     sustainInterval = setInterval(() => {
         if (currentSustainedChord && pianoPlayer && pianoPlayer.isLoaded) {
             pianoPlayer.playChord(notes, 3.0);
+            // Keep the keys highlighted during retriggering
+            updateActiveKeys(notes);
             console.log('Re-triggering sustained chord');
         }
     }, 2500);
@@ -1109,16 +1111,17 @@ document.addEventListener('livewire:initialized', () => {
             const note = target.getAttribute('data-note');
             if (note) {
                 // Use MultiInstrumentPlayer for note playback
+                const duration = 0.5; // seconds
                 if (pianoPlayer && pianoPlayer.isLoaded) {
-                    pianoPlayer.playNote(note, 0.5);
+                    pianoPlayer.playNote(note, duration);
                     console.log('Playing note with multi-instrument player:', note);
                 }
 
-                // Visual feedback
+                // Visual feedback - keep key highlighted for duration of sound
                 target.classList.add('pressed', 'active');
                 setTimeout(() => {
                     target.classList.remove('pressed', 'active');
-                }, 200);
+                }, duration * 1000); // Convert to milliseconds
             }
         }
     });
