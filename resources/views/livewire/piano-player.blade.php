@@ -1122,6 +1122,13 @@ document.addEventListener('livewire:initialized', () => {
     console.log('Setting up chord sustain mousedown listener');
     document.addEventListener('mousedown', async (e) => {
         console.log('Global mousedown detected on:', e.target);
+
+        // Don't trigger sustain if clicking on inversion buttons or clear button
+        if (e.target.matches('button') && !e.target.classList.contains('chord-sustain-button')) {
+            console.log('Clicked on internal button (inversion/clear), ignoring');
+            return;
+        }
+
         const chordButton = e.target.closest('.chord-sustain-button');
         console.log('Found chord button:', chordButton);
 
