@@ -227,7 +227,6 @@
                                     @foreach(['root' => 'R', 'first' => 'I', 'second' => 'II'] as $inv => $label)
                                         <button
                                             wire:click="setChordInversion({{ $pos }}, '{{ $inv }}')"
-                                            dusk="inversion-{{ $inv }}"
                                             class="relative text-xs w-8 h-8 flex items-center justify-center rounded transition-all transform {{ $ch['inversion'] === $inv ? 'bg-gradient-to-b from-blue-400 to-blue-600 text-white font-bold shadow-lg scale-105 border-b-4 border-blue-700' : 'bg-gradient-to-b from-zinc-600 to-zinc-700 text-gray-200 hover:from-zinc-500 hover:to-zinc-600 hover:text-white border-b-4 border-zinc-800 hover:translate-y-[1px] hover:border-b-2' }} active:translate-y-[2px] active:border-b-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-zinc-900"
                                             title="{{ ucfirst($inv) }} Inversion"
                                             aria-label="{{ ucfirst($inv) }} inversion"

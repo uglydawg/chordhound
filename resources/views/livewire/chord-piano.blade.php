@@ -1,18 +1,19 @@
-<div class="w-full">
+<div class="w-full space-y-4">
+    {{-- Piano Keyboard Visualization --}}
     @if(!empty($chord['tone']))
         <div class="bg-zinc-950 rounded-lg p-3 shadow-inner">
             <svg viewBox="0 0 {{ $totalWidth }} {{ $larger ? 120 : 100 }}" class="w-full h-auto" style="max-height: {{ $larger ? '150px' : '100px' }}">
                 {{-- Piano background --}}
                 <rect x="0" y="0" width="{{ $totalWidth }}" height="{{ $larger ? 120 : 100 }}" fill="#1a1a1a" />
-                
+
                 {{-- Draw white keys first --}}
                 @foreach($pianoKeys as $key)
                     @if($key['type'] === 'white')
                         <g>
-                            <rect 
-                                x="{{ $key['x'] }}" 
-                                y="0" 
-                                width="{{ $key['width'] - 1 }}" 
+                            <rect
+                                x="{{ $key['x'] }}"
+                                y="0"
+                                width="{{ $key['width'] - 1 }}"
                                 height="{{ $larger ? 118 : 98 }}"
                                 fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#60A5FA' : '#34D399') : '#FAFAFA' }}"
                                 stroke="#333333"
@@ -20,10 +21,10 @@
                                 rx="2"
                             />
                             {{-- Key shadow/3D effect --}}
-                            <rect 
-                                x="{{ $key['x'] }}" 
-                                y="{{ $larger ? 114 : 94 }}" 
-                                width="{{ $key['width'] - 1 }}" 
+                            <rect
+                                x="{{ $key['x'] }}"
+                                y="{{ $larger ? 114 : 94 }}"
+                                width="{{ $key['width'] - 1 }}"
                                 height="4"
                                 fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#3B82F6' : '#10B981') : '#E5E5E5' }}"
                                 rx="1"
@@ -31,15 +32,15 @@
                         </g>
                     @endif
                 @endforeach
-                
+
                 {{-- Draw black keys on top --}}
                 @foreach($pianoKeys as $key)
                     @if($key['type'] === 'black')
                         <g>
-                            <rect 
-                                x="{{ $key['x'] }}" 
-                                y="0" 
-                                width="{{ $key['width'] }}" 
+                            <rect
+                                x="{{ $key['x'] }}"
+                                y="0"
+                                width="{{ $key['width'] }}"
                                 height="{{ $larger ? 75 : 60 }}"
                                 fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#2563EB' : '#059669') : '#171717' }}"
                                 stroke="#000000"
@@ -47,10 +48,10 @@
                                 rx="2"
                             />
                             {{-- Black key highlight --}}
-                            <rect 
-                                x="{{ $key['x'] + 2 }}" 
-                                y="2" 
-                                width="{{ $key['width'] - 4 }}" 
+                            <rect
+                                x="{{ $key['x'] + 2 }}"
+                                y="2"
+                                width="{{ $key['width'] - 4 }}"
                                 height="{{ $larger ? 10 : 8 }}"
                                 fill="{{ $key['isActive'] ? ($key['isBlueNote'] ? '#3B82F6' : '#10B981') : '#262626' }}"
                                 rx="1"
@@ -59,7 +60,7 @@
                         </g>
                     @endif
                 @endforeach
-                
+
                 {{-- Active note indicators --}}
                 @foreach($pianoKeys as $key)
                     @if($key['isActive'])
@@ -72,14 +73,14 @@
                         />
                     @endif
                 @endforeach
-                
+
                 {{-- Note labels if enabled --}}
                 @if($showLabels)
                     @foreach($pianoKeys as $key)
                         @if($key['isActive'])
-                            <text 
-                                x="{{ $key['x'] + $key['width'] / 2 }}" 
-                                y="{{ $key['type'] === 'white' ? ($larger ? 105 : 88) : ($larger ? 65 : 50) }}" 
+                            <text
+                                x="{{ $key['x'] + $key['width'] / 2 }}"
+                                y="{{ $key['type'] === 'white' ? ($larger ? 105 : 88) : ($larger ? 65 : 50) }}"
                                 text-anchor="middle"
                                 font-size="8"
                                 font-weight="bold"
@@ -92,6 +93,20 @@
                 @endif
             </svg>
         </div>
+
+        {{-- Note Display Component --}}
+        @php
+            $activeNotes = [];
+            if (!empty($chord['tone'])) {
+                $chordService = app(\App\Services\ChordService::class);
+                $activeNotes = $chordService->getChordNotesForDisplay(
+                    $chord['tone'],
+                    $chord['semitone'] ?? 'major',
+                    $chord['inversion'] ?? 'root'
+                );
+            }
+        @endphp
+        <livewire:note-display :activeNotes="$activeNotes" :highlightAccidentals="true" />
     @else
         <div class="bg-zinc-950 rounded-lg p-3 shadow-inner">
             <div class="text-center text-zinc-600 text-sm py-4">

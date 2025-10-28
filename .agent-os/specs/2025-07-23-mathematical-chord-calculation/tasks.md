@@ -16,20 +16,20 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.6 Implement voice leading optimization
   - [x] 1.7 Verify all tests pass
 
-- [ ] 2. Integrate Mathematical Service with Existing ChordService
-  - [ ] 2.1 Write integration tests for backward compatibility
-  - [ ] 2.2 Add feature flag for gradual rollout
-  - [ ] 2.3 Update getChordNotes() to use new service
+- [x] 2. Integrate Mathematical Service with Existing ChordService
+  - [x] 2.1 Write integration tests for backward compatibility
+  - [x] 2.2 Add feature flag for gradual rollout
+  - [x] 2.3 Update getChordNotes() to use new service
   - [ ] 2.4 Remove hardcoded voicing methods
-  - [ ] 2.5 Verify all existing tests still pass
+  - [x] 2.5 Verify all existing tests still pass
 
-- [ ] 3. Add Note Display Component
-  - [ ] 3.1 Write tests for note display behavior
-  - [ ] 3.2 Create Livewire NoteDisplay component
-  - [ ] 3.3 Style note display with Tailwind CSS
-  - [ ] 3.4 Integrate with ChordPiano component
-  - [ ] 3.5 Add Alpine.js interactions for show/hide
-  - [ ] 3.6 Verify visual tests pass
+- [x] 3. Add Note Display Component
+  - [x] 3.1 Write tests for note display behavior
+  - [x] 3.2 Create Livewire NoteDisplay component
+  - [x] 3.3 Style note display with Tailwind CSS
+  - [x] 3.4 Integrate with ChordPiano component
+  - [x] 3.5 Add Alpine.js interactions for show/hide
+  - [x] 3.6 Verify visual tests pass
 
 - [ ] 4. Audio Integration Updates
   - [ ] 4.1 Write tests for bass note playback

@@ -1,4 +1,15 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="mathChordPlayer">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+     x-data="mathChordPlayer"
+     x-init="window.handleRhythmPatternGlobal = (data) => handleRhythmPattern(data)"
+     @play-rhythm-pattern.window="
+         console.log('@ directive received full event:', $event);
+         console.log('Event keys:', Object.keys($event));
+         console.log('Event detail:', $event.detail);
+         console.log('Event params:', $event.params);
+         const eventData = $event.detail || $event.params || $event || {};
+         console.log('Using data:', eventData);
+         handleRhythmPattern(eventData)
+     ">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Mathematical Chord Calculator Test</h1>
         <p class="mt-2 text-gray-600 dark:text-gray-400">Test the new mathematical chord calculation engine</p>
@@ -460,9 +471,12 @@ document.addEventListener('alpine:init', () => {
         pressedKeys: new Map(), // Track pressed keys with reference counting
         
         init() {
+            console.log('=== ALPINE: mathChordPlayer init() called ===');
+            console.log('$wire available:', !!this.$wire);
+
             // Initialize the piano player with retry mechanism
             this.initializePianoPlayer();
-            
+
             // Try to resume audio context on first user interaction
             document.addEventListener('click', () => {
                 if (this.pianoPlayer && this.pianoPlayer.context && this.pianoPlayer.context.state === 'suspended') {
@@ -471,7 +485,21 @@ document.addEventListener('alpine:init', () => {
                     });
                 }
             }, { once: true });
-            
+
+            // DEBUGGING: Add window-level event listener
+            window.addEventListener('play-rhythm-pattern', (event) => {
+                console.log('=== WINDOW: play-rhythm-pattern event received ===', event);
+            });
+
+            // DEBUGGING: Add Livewire hook
+            if (window.Livewire) {
+                window.Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
+                    succeed(({ snapshot, effect }) => {
+                        console.log('=== LIVEWIRE HOOK: commit succeeded ===', { component, snapshot, effect });
+                    });
+                });
+            }
+
             // Listen for play chord events
             this.$wire.on('play-math-chord', (event) => {
                 console.log('Play chord event received:', event);
@@ -497,42 +525,34 @@ document.addEventListener('alpine:init', () => {
             
             // Listen for rhythm pattern events
             this.$wire.on('play-rhythm-pattern', (event) => {
-                console.log('Play rhythm pattern:', event);
+                console.log('=== ALPINE: play-rhythm-pattern event received ===', event);
                 const data = event.detail || event;
-                if (this.pianoPlayer && data.notes && data.pattern) {
-                    console.log('BPM:', data.bpm, 'Time signature:', data.timeSignature, 'Pattern duration:', data.pattern.duration, 'Measure duration:', data.measureDuration);
-                    
-                    // Check if piano player is loaded
-                    if (!this.pianoPlayer.isLoaded) {
-                        console.warn('Piano samples still loading for rhythm pattern, trying to play anyway...');
+                console.log('Event data:', data);
+
+                // Handle both single chord and progression playback
+                if (this.pianoPlayer && data.pattern) {
+                    // Check if we have a chord progression or single chord
+                    if (data.chords && Array.isArray(data.chords) && data.chords.length > 0) {
+                        // Chord progression playback
+                        console.log('Starting progression:', data.chords.length, 'chords');
+                        this.playProgression(data.chords, data.pattern, data.rhythm, data.bpm, data.timeSignature, data.measureDuration);
+                    } else if (data.notes) {
+                        // Single chord playback (legacy)
+                        if (!this.pianoPlayer.isLoaded) {
+                            console.warn('Piano samples still loading, trying anyway...');
+                        }
+
+                        this.playRhythmPattern(data.notes, data.pattern, data.rhythm, data.measureDuration || 2.0);
+                    } else {
+                        console.error('No chords or notes found in playback data');
                     }
-                    
-                    this.playRhythmPattern(data.notes, data.pattern, data.rhythm, data.measureDuration || 2.0);
                 } else {
-                    console.error('Rhythm pattern failed to start:', {
+                    console.error('Cannot start playback: missing piano player or pattern', {
                         hasPianoPlayer: !!this.pianoPlayer,
-                        hasNotes: !!data.notes,
                         hasPattern: !!data.pattern,
                         data: data
                     });
                 }
-            });
-            
-            // Listen for progression timing events
-            this.$wire.on('schedule-next-chord', (event) => {
-                console.log('Schedule next chord event:', event);
-                if (this.progressionTimer) {
-                    clearTimeout(this.progressionTimer);
-                }
-                const delay = event.detail?.delay || event.delay || 1000;
-                this.progressionTimer = setTimeout(() => {
-                    this.$wire.playNextChord();
-                }, delay);
-            });
-            
-            // Listen for progression chord changes
-            this.$wire.on('progression-chord-changed', (event) => {
-                console.log('Progression chord:', event.index, event.roman, event.root, event.type);
             });
         },
         
@@ -574,12 +594,112 @@ document.addEventListener('alpine:init', () => {
             }
         },
         
+        handleRhythmPattern(data) {
+            console.log('=== ALPINE: handleRhythmPattern() called via @ directive ===');
+            console.log('Raw data:', data);
+            console.log('Data type:', typeof data);
+
+            if (data && typeof data === 'object') {
+                console.log('Data keys:', Object.keys(data));
+                console.log('data.chords:', data.chords);
+                console.log('Has chords:', !!data.chords);
+                console.log('Is array:', Array.isArray(data.chords));
+                console.log('Chords length:', data.chords?.length);
+            } else {
+                console.error('Data is not an object!', data);
+                return;
+            }
+
+            // Handle both single chord and progression playback
+            if (this.pianoPlayer && data.pattern) {
+                // Check if we have a chord progression or single chord
+                if (data.chords && Array.isArray(data.chords) && data.chords.length > 0) {
+                    // Chord progression playback
+                    console.log('Starting progression from @ directive:', data.chords.length, 'chords');
+                    this.playProgression(data.chords, data.pattern, data.rhythm, data.bpm, data.timeSignature, data.measureDuration);
+                } else if (data.notes) {
+                    // Single chord playback (legacy)
+                    if (!this.pianoPlayer.isLoaded) {
+                        console.warn('Piano samples still loading, trying anyway...');
+                    }
+
+                    this.playRhythmPattern(data.notes, data.pattern, data.rhythm, data.measureDuration || 2.0);
+                } else {
+                    console.error('No chords or notes found in playback data', {
+                        data: data,
+                        hasChords: !!data.chords,
+                        isArray: Array.isArray(data.chords),
+                        chordsLength: data.chords?.length,
+                        chordsValue: data.chords
+                    });
+                }
+            } else {
+                console.error('Cannot start playback: missing piano player or pattern', {
+                    hasPianoPlayer: !!this.pianoPlayer,
+                    hasPattern: !!data.pattern,
+                    data: data
+                });
+            }
+        },
+
+        playProgression(chords, pattern, rhythm, bpm, timeSignature, measureDuration) {
+            console.log('=== ALPINE: playProgression() called ===', {
+                chords: chords,
+                pattern: pattern,
+                rhythm: rhythm,
+                bpm: bpm,
+                timeSignature: timeSignature,
+                measureDuration: measureDuration
+            });
+
+            if (!chords || chords.length === 0) {
+                console.error('Cannot start playback:', {
+                    hasChords: !!chords && chords.length > 0,
+                    hasPianoPlayer: !!this.pianoPlayer
+                });
+                return;
+            }
+
+            console.log('Playing progression with', chords.length, 'chords at', bpm, 'BPM in', timeSignature, 'using', rhythm, 'rhythm');
+
+            let currentChordIndex = 0;
+
+            const playNextChord = () => {
+                if (currentChordIndex >= chords.length) {
+                    // Loop back to start
+                    currentChordIndex = 0;
+                }
+
+                const chord = chords[currentChordIndex];
+                console.log('Playing chord', currentChordIndex + 1, '/', chords.length, ':', chord.roman, chord.notes);
+
+                // Play this chord with the rhythm pattern
+                this.playRhythmPattern(chord.notes, pattern, rhythm, measureDuration);
+
+                currentChordIndex++;
+
+                // Schedule next chord
+                setTimeout(playNextChord, measureDuration * 1000);
+            };
+
+            // Start playing
+            console.log('=== ALPINE: Starting playback ===');
+            playNextChord();
+        },
+
         playRhythmPattern(notes, pattern, rhythm, measureDuration) {
+            console.log('=== ALPINE: playRhythmPattern() called ===', {
+                notes: notes,
+                pattern: pattern,
+                rhythm: rhythm,
+                measureDuration: measureDuration
+            });
+
             if (!this.pianoPlayer) {
                 console.error('Piano player not initialized for rhythm pattern');
                 return;
             }
-            
+
             if (!notes || notes.length === 0) {
                 console.error('No notes provided for rhythm pattern');
                 return;
@@ -677,15 +797,15 @@ document.addEventListener('alpine:init', () => {
             setTimeout(() => {
                 // Play the audio
                 this.pianoPlayer.playNote(note, noteDuration);
-                
+
                 // Show key press on piano
                 this.pressKey(note);
-                
+
                 // Release key after note duration
                 setTimeout(() => {
                     this.releaseKey(note);
                 }, noteDuration * 1000);
-            }, delay);
+            }, delay * 1000); // Convert delay from seconds to milliseconds
         },
         
         playChordWithVisualization(notes, chordDuration, delay, isSustained = false) {
@@ -696,19 +816,19 @@ document.addEventListener('alpine:init', () => {
                 } else {
                     this.pianoPlayer.playChord(notes, chordDuration);
                 }
-                
+
                 // Show keys press on piano
                 notes.forEach(note => {
                     this.pressKey(note);
                 });
-                
+
                 // Release keys after chord duration
                 setTimeout(() => {
                     notes.forEach(note => {
                         this.releaseKey(note);
                     });
                 }, chordDuration * 1000);
-            }, delay);
+            }, delay * 1000); // Convert delay from seconds to milliseconds
         },
         
         pressKey(note) {

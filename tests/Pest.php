@@ -1,7 +1,8 @@
 <?php
 
-pest()->extend(Tests\DuskTestCase::class)
-//  ->use(Illuminate\Foundation\Testing\DatabaseMigrations::class)
+use Symfony\Component\Panther\PantherTestCase;
+
+pest()->extend(PantherTestCase::class)
     ->in('Browser');
 
 /*
@@ -18,6 +19,9 @@ pest()->extend(Tests\DuskTestCase::class)
 pest()->extend(Tests\TestCase::class)
     ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
+
+pest()->extend(Tests\TestCase::class)
+    ->in('Integration', 'Unit');
 
 /*
 |--------------------------------------------------------------------------

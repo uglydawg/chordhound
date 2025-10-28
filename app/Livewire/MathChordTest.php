@@ -226,9 +226,8 @@ class MathChordTest extends Component
     
     public function playProgression()
     {
-        $this->isPlaying = true;
-        $this->currentChordIndex = 0;
-        $this->playNextChord();
+        // Use the new playRhythm() method which handles the entire progression
+        $this->playRhythm();
     }
     
     public function stopProgression()
@@ -332,9 +331,73 @@ class MathChordTest extends Component
     
     public function playRhythm()
     {
-        if (!$this->isPlaying) {
-            $this->playProgression();
+        \Log::debug('playRhythm() called', [
+            'selectedKey' => $this->selectedKey,
+            'selectedProgression' => $this->selectedProgression,
+            'selectedRhythm' => $this->selectedRhythm,
+            'bpm' => $this->bpm
+        ]);
+
+        // Build the chord progression array for the rhythm player
+        $progression = $this->progressions[$this->selectedProgression];
+        $chords = [];
+
+        foreach ($progression as $index => $roman) {
+            [$chordRoot, $chordType] = $this->romanToRoot($roman, $this->selectedKey);
+
+            // Get octave from startPosition
+            $octave = preg_match('/(\d)$/', $this->startPosition, $matches) ? $matches[1] : '4';
+            $position = $chordRoot . $octave;
+
+            // Use starting inversion for first chord
+            $inversion = $index === 0 ? $this->startingInversion : 0;
+
+            // Calculate optimal inversion based on voice leading
+            if ($index > 0 && !empty($this->voiceLeadingAnalysis)) {
+                foreach ($this->voiceLeadingAnalysis as $analysis) {
+                    if ($analysis['startingInversion'] === $this->startingInversion) {
+                        $inversion = $analysis['sequence'][$index]['inversion'] ?? 0;
+                        break;
+                    }
+                }
+            }
+
+            // Calculate chord notes
+            $notes = $this->chordService->calculateChord($chordRoot, $chordType, $position, $inversion);
+
+            $chords[] = [
+                'notes' => $notes,
+                'root' => $chordRoot,
+                'type' => $chordType,
+                'roman' => $roman
+            ];
         }
+
+        // Get rhythm pattern
+        $pattern = $this->getRhythmPattern();
+        $measureDuration = $this->getMeasureDuration();
+
+        // Ensure chords is a proper array (not associative)
+        $chords = array_values($chords);
+
+        \Log::info('About to dispatch play-rhythm-pattern event', [
+            'chords_count' => count($chords),
+            'chords_json' => json_encode($chords),
+            'pattern' => $pattern,
+            'rhythm' => $this->selectedRhythm
+        ]);
+
+        // Dispatch to Alpine.js rhythm player using named parameters
+        $this->dispatch('play-rhythm-pattern',
+            chords: $chords,
+            pattern: $pattern,
+            rhythm: $this->selectedRhythm,
+            bpm: $this->bpm,
+            timeSignature: $this->timeSignature,
+            measureDuration: $measureDuration
+        );
+
+        \Log::info('Event dispatched successfully');
     }
     
     private function getMeasureDuration(): float
