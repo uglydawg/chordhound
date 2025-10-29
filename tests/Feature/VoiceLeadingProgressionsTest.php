@@ -66,7 +66,8 @@ class VoiceLeadingProgressionsTest extends TestCase
     }
 
     /**
-     * Test voice leading can be toggled off
+     * Test voice leading toggle does not affect preset progression inversions
+     * Voice leading toggle only affects visual lines, not the inversions themselves
      */
     public function test_voice_leading_toggle_switches_inversions(): void
     {
@@ -74,10 +75,10 @@ class VoiceLeadingProgressionsTest extends TestCase
             ->set('selectedKey', 'C')
             ->set('showVoiceLeading', true)
             ->call('setProgression', 'I-IV-V')
-            ->assertSet('chords.2.inversion', 'second')    // IV with voice leading
+            ->assertSet('chords.2.inversion', 'second')    // IV inversion
             ->call('toggleVoiceLeading')
             ->assertSet('showVoiceLeading', false)
-            ->assertSet('chords.2.inversion', 'root');      // IV without voice leading
+            ->assertSet('chords.2.inversion', 'second');    // IV inversion remains the same
     }
 
     /**

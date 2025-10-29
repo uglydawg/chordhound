@@ -132,16 +132,18 @@ class VoiceLeadingInversionsTest extends TestCase
     }
 
     /**
-     * Test that inversions are not applied when voice leading is disabled
+     * Test that preset progressions always use recommended inversions
+     * The showVoiceLeading toggle only affects visual voice leading lines, not inversions
      */
-    public function test_inversions_not_applied_when_voice_leading_disabled(): void
+    public function test_preset_progressions_use_inversions_regardless_of_toggle(): void
     {
         Livewire::test(ChordGrid::class)
             ->set('showVoiceLeading', false)
             ->set('selectedKey', 'C')
             ->call('setProgression', 'I-IV-V')
+            // Preset progressions should always use recommended inversions for good sound
             ->assertSet('chords.1.inversion', 'root')
-            ->assertSet('chords.2.inversion', 'root')
-            ->assertSet('chords.3.inversion', 'root');
+            ->assertSet('chords.2.inversion', 'second')
+            ->assertSet('chords.3.inversion', 'first');
     }
 }
