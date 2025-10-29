@@ -39,9 +39,20 @@ jobs:
             --gvc ${{ env.CPLN_GVC }}
           cpln profile set-default default
 
-      - name: Login to Control Plane Registry
+      - name: Get Control Plane Registry Token
+        id: cpln-token
         run: |
-          cpln image docker-login --org ${{ env.CPLN_ORG }}
+          # Get the Docker registry token from cpln
+          TOKEN=$(cpln image get-token --org ${{ env.CPLN_ORG }})
+          echo "::add-mask::${TOKEN}"
+          echo "token=${TOKEN}" >> $GITHUB_OUTPUT
+
+      - name: Login to Control Plane Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: token
+          password: ${{ steps.cpln-token.outputs.token }}
 
       - name: Generate Image Tag
         id: image-tag
@@ -63,6 +74,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
 
       - name: Deploy to Control Plane
         run: |
