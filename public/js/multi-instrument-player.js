@@ -3,8 +3,10 @@
 class MultiInstrumentPlayer {
     constructor() {
         this.sampler = null;
+        this.gainNode = null;
         this.isLoaded = false;
         this.activeNotes = new Map();
+        this.volume = 0.7; // Default 70% volume
 
         this.init();
     }
@@ -44,14 +46,17 @@ class MultiInstrumentPlayer {
                 }
             }
 
-            // Create Tone.js Sampler with all piano samples
+            // Create a gain node for volume control
+            this.gainNode = new Tone.Gain(this.volume).toDestination();
+
+            // Create Tone.js Sampler with all piano samples, connect to gain node
             this.sampler = new Tone.Sampler({
                 urls: sampleMap,
                 onload: () => {
                     this.isLoaded = true;
                     console.log('Piano samples loaded successfully!');
                 }
-            }).toDestination();
+            }).connect(this.gainNode);
 
         } catch (error) {
             console.error('Failed to initialize Multi-Instrument Player:', error);
@@ -171,6 +176,28 @@ class MultiInstrumentPlayer {
         } catch (error) {
             console.error('Error stopping all notes:', error);
         }
+    }
+
+    /**
+     * Set volume with x-squared curve for better perception
+     * @param {number} value - Linear volume value from 0 to 1
+     */
+    setVolume(value) {
+        // Clamp value between 0 and 1
+        const linearValue = Math.max(0, Math.min(1, value));
+
+        // Apply x-squared curve for better perceived volume
+        const curvedValue = linearValue * linearValue;
+
+        if (this.gainNode) {
+            this.gainNode.gain.value = curvedValue;
+            this.volume = linearValue;
+            console.log(`🔊 Volume set to ${Math.round(linearValue * 100)}% (gain: ${curvedValue.toFixed(2)})`);
+        }
+    }
+
+    getVolume() {
+        return this.volume;
     }
 
     // Get current player status

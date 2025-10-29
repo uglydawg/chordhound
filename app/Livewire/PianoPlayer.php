@@ -44,6 +44,18 @@ class PianoPlayer extends Component
         'piano' => 'Piano',
     ];
 
+    // Bass line patterns
+    public string $selectedBassLine = 'root-fifth';
+
+    public array $bassLinePatterns = [
+        'root-only' => 'Root Only',
+        'root-octave' => 'Root + Octave',
+        'root-fifth' => 'Root-Fifth (Most Common)',
+        'root-fifth-alt' => 'Root-Fifth Alternating',
+        'walking' => 'Walking Bass',
+        'none' => 'No Bass'
+    ];
+
     // Piano rhythm patterns
     public array $rhythmPatterns = [
         'block' => 'Block Chords',
@@ -219,6 +231,9 @@ class PianoPlayer extends Component
                 $this->currentChord['inversion'] ?? 'root'
             );
         }
+
+        // Dispatch event to update Canvas piano
+        $this->dispatch('update-active-notes', notes: $this->activeNotes);
 
         return view('livewire.piano-player', [
             'activeNotes' => $this->activeNotes,

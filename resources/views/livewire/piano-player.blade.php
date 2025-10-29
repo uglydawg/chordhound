@@ -1,13 +1,23 @@
 <div class="piano-player">
     {{-- Play Controls Section --}}
     <div class="mb-4 px-6 space-y-4">
-        {{-- Rhythm, Time, and BPM Dropdowns --}}
-        <div class="grid grid-cols-3 gap-4">
+        {{-- Rhythm, Time, BPM, and Bass Line Dropdowns --}}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             {{-- Rhythm Control --}}
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-1">Rhythm</label>
                 <select wire:model.live="selectedRhythm" class="w-full rounded-md border-gray-600 bg-zinc-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     @foreach($rhythmPatterns as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Bass Line Control --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Bass Line</label>
+                <select wire:model.live="selectedBassLine" class="w-full rounded-md border-gray-600 bg-zinc-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    @foreach($bassLinePatterns as $key => $label)
                         <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
                 </select>
@@ -73,98 +83,47 @@
         </div>
     </div>
 
-    {{-- Piano Display --}}
+    {{-- Piano Display - Canvas 2D (High Performance) --}}
     <div class="bg-zinc-950 rounded-lg shadow-inner space-y-4">
-        {{-- Full Piano Layout (C1 - C5) --}}
-        <div class="bg-zinc-900 rounded-lg">
+        {{-- Canvas Piano Layout (C2 - C6) --}}
+        <div class="bg-zinc-900 rounded-lg p-6">
+            {{-- Volume Control --}}
+            <div class="flex items-center gap-4 mb-4" x-data="{ volumeValue: 70 }">
+                <label for="volume-slider" class="text-sm font-medium text-gray-300 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
+                    Volume
+                </label>
+                <input
+                    type="range"
+                    id="volume-slider"
+                    min="0"
+                    max="100"
+                    x-model="volumeValue"
+                    class="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                    @input="
+                        const volume = volumeValue / 100;
+                        if (window.pianoPlayer) {
+                            window.pianoPlayer.setVolume(volume);
+                        }
+                        if (window.pianoAudio) {
+                            window.pianoAudio.setVolume(volume);
+                        }
+                    "
+                >
+                <span class="text-sm text-gray-400 min-w-[3rem] text-right" x-text="volumeValue + '%'">70%</span>
+            </div>
 
-            {{-- Piano Keyboard - Realistic Layout --}}
-            <div class="piano-container bg-zinc-800 rounded-lg overflow-x-auto" id="piano-keyboard">
-                <div class="piano-keys relative" style="height: 150px; width: 100%; min-width: 600px; max-width: 900px; margin: 0 auto;">
-                    {{-- White Keys Container (Full height, will be overlapped by black keys) --}}
-                    <div class="white-keys-container absolute inset-0 flex gap-0">
-                        @php
-                            $whiteKeyPattern = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-                            $totalWhiteKeys = count($octaves) * count($whiteKeyPattern);
-                            $whiteKeyIndex = 0;
-                        @endphp
-
-                        @foreach($octaves as $octave)
-                            @foreach($whiteKeyPattern as $note)
-                                @php
-                                    $noteWithOctave = $note . $octave;
-                                    $isC = $note === 'C';
-                                    $isActive = isset($activeNotes) && in_array($noteWithOctave, $activeNotes);
-                                    $whiteKeyIndex++;
-                                @endphp
-                                <button
-                                    class="piano-key white-key relative {{ $isActive ? 'pressed active' : '' }}"
-                                    data-note="{{ $noteWithOctave }}"
-                                    id="key-{{ $noteWithOctave }}"
-                                    style="flex: 1; height: 100%; position: relative;"
-                                >
-                                    <div class="h-full flex flex-col justify-between items-center p-1">
-                                        @if($isC)
-                                            <span class="octave-marker text-blue-600 font-bold text-xs">C{{ $octave }}</span>
-                                        @endif
-                                        <div class="flex-1"></div>
-                                        @if($showLabels || $isC)
-                                            <span class="key-label text-xs text-gray-600 font-medium">{{ $noteWithOctave }}</span>
-                                        @endif
-                                    </div>
-                                </button>
-                            @endforeach
-                        @endforeach
-                    </div>
-
-                    {{-- Black Keys Container (Overlaps white keys) --}}
-                    <div class="black-keys-container absolute top-0 w-full" style="height: 70%;">
-                        @php
-                            // Calculate positions based on white key width
-                            $whiteKeyWidth = 100 / $totalWhiteKeys; // percentage width of each white key
-                            $blackKeyWidth = $whiteKeyWidth * 0.65; // Black keys are 65% width of white keys for better visibility
-                            
-                            // Black keys with their positions relative to white keys
-                            // The number represents which white key they come after (0-based)
-                            $blackKeys = [
-                                ['note' => 'C#', 'afterWhiteKey' => 0],  // After C
-                                ['note' => 'D#', 'afterWhiteKey' => 1],  // After D
-                                ['note' => 'F#', 'afterWhiteKey' => 3],  // After F
-                                ['note' => 'G#', 'afterWhiteKey' => 4],  // After G
-                                ['note' => 'A#', 'afterWhiteKey' => 5],  // After A
-                            ];
-                        @endphp
-
-                        @foreach($octaves as $octaveIndex => $octave)
-                            @foreach($blackKeys as $blackKey)
-                                @php
-                                    $note = $blackKey['note'];
-                                    $noteWithOctave = $note . $octave;
-                                    $isActive = isset($activeNotes) && in_array($noteWithOctave, $activeNotes);
-                                    
-                                    // Calculate which white key this comes after in the full keyboard
-                                    $whiteKeyIndex = ($octaveIndex * 7) + $blackKey['afterWhiteKey'];
-                                    
-                                    // Position the black key between this white key and the next
-                                    // Black keys are positioned at the right edge of their "after" white key
-                                    $leftPosition = ($whiteKeyIndex + 1) * $whiteKeyWidth - ($blackKeyWidth * 0.5);
-                                @endphp
-                                <button
-                                    class="piano-key black-key absolute {{ $isActive ? 'pressed active' : '' }}"
-                                    data-note="{{ $noteWithOctave }}"
-                                    id="key-{{ $noteWithOctave }}"
-                                    style="width: {{ $blackKeyWidth }}%; height: 100%; left: {{ $leftPosition }}%; z-index: 20;"
-                                >
-                                        @if($showLabels)
-                                            <div class="h-full flex items-end justify-center pb-1">
-                                                <span class="key-label text-xs text-gray-300 font-medium">{{ $noteWithOctave }}</span>
-                                            </div>
-                                        @endif
-                                    </button>
-                            @endforeach
-                        @endforeach
-                    </div>
-                </div>
+            <div class="piano-container bg-zinc-800 rounded-lg p-4" id="piano-keyboard">
+                <canvas
+                    id="piano-canvas"
+                    class="w-full"
+                    style="height: 180px;"
+                    x-data="pianoPlayerCanvas()"
+                    x-init="init()"
+                    wire:ignore
+                ></canvas>
             </div>
         </div>
 
@@ -173,6 +132,58 @@
             <livewire:note-display :activeNotes="$activeNotes" :highlightAccidentals="true" />
         </div>
     </div>
+
+    @script
+    <script>
+        Alpine.data('pianoPlayerCanvas', () => ({
+            piano: null,
+
+            init() {
+                console.log('🎹 Initializing Canvas Piano...');
+
+                // Initialize Canvas piano
+                this.piano = new window.PianoCanvas(this.$el, {
+                    startNote: 'C2',
+                    endNote: 'C6',
+                    whiteKeyWidth: 40,
+                    whiteKeyHeight: 150,
+                    blackKeyWidth: 24,
+                    blackKeyHeight: 100,
+                    activeColor: '#60A5FA',
+                    activeBlackColor: '#3B82F6',
+                });
+
+                console.log('✅ Canvas Piano initialized');
+
+                // Listen for active notes updates from Livewire
+                Livewire.on('update-active-notes', (event) => {
+                    console.log('🎵 update-active-notes event received:', event);
+                    const notes = event.notes || [];
+                    console.log('Setting active notes:', notes);
+                    this.piano.setActiveNotes(notes);
+                });
+
+                console.log('✅ Listening for update-active-notes events');
+
+                // Handle piano key clicks - dispatch to Livewire
+                this.$el.addEventListener('piano-key-click', (e) => {
+                    const note = e.detail.note;
+                    console.log('🎹 Piano key clicked:', note);
+                    // Play the note using existing piano audio
+                    if (window.pianoAudio) {
+                        window.pianoAudio.playNote(note);
+                    }
+                });
+            },
+
+            destroy() {
+                if (this.piano) {
+                    this.piano.destroy();
+                }
+            }
+        }));
+    </script>
+    @endscript
 
     <style>
 /* Piano key styling to match reference */
@@ -309,11 +320,77 @@ window.startChordSustain = async function(position, chord) {
     const notes = getChordNotes(chord.tone, chord.semitone, chord.inversion);
     console.log('Starting sustained chord with notes:', notes);
 
+    // Get the selected bass line pattern from Livewire
+    let bassLine = 'root-fifth'; // Default
+    if (typeof @this !== 'undefined' && @this) {
+        try {
+            bassLine = await @this.get('selectedBassLine');
+        } catch (e) {
+            console.log('Could not get bass line setting, using default:', e);
+        }
+    }
+
+    // Calculate bass notes based on bass line pattern
+    const rootNote = notes[0];
+    const noteMatch = rootNote.match(/([A-G]#?)(\d+)/);
+    let allNotes = [...notes];
+
+    if (noteMatch && bassLine !== 'none') {
+        const [, noteName] = noteMatch;
+        const bassNote = noteName + '2';
+
+        // Add bass notes based on pattern
+        switch (bassLine) {
+            case 'root-only':
+                allNotes = [bassNote, ...notes];
+                break;
+
+            case 'root-octave':
+                const bassOctaveUp = noteName + '3';
+                allNotes = [bassNote, bassOctaveUp, ...notes];
+                break;
+
+            case 'root-fifth':
+            case 'root-fifth-alt':
+                // Calculate fifth
+                const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const rootIndex = noteOrder.indexOf(noteName);
+                const fifthIndex = (rootIndex + 7) % 12;
+                const fifthNoteName = noteOrder[fifthIndex];
+                let fifthOctave = 2;
+                if (fifthIndex < rootIndex) {
+                    fifthOctave = 3;
+                }
+                const fifthNote = fifthNoteName + fifthOctave;
+                allNotes = [bassNote, fifthNote, ...notes];
+                break;
+
+            case 'walking':
+                // For walking bass on sustain, just play root and fifth
+                const noteOrder2 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const rootIndex2 = noteOrder2.indexOf(noteName);
+                const fifthIndex2 = (rootIndex2 + 7) % 12;
+                const fifthNoteName2 = noteOrder2[fifthIndex2];
+                let fifthOctave2 = 2;
+                if (fifthIndex2 < rootIndex2) {
+                    fifthOctave2 = 3;
+                }
+                const fifthNote2 = fifthNoteName2 + fifthOctave2;
+                allNotes = [bassNote, fifthNote2, ...notes];
+                break;
+
+            default:
+                allNotes = [bassNote, ...notes];
+        }
+    }
+
+    console.log('Playing sustained chord with bass line:', bassLine, 'Notes:', allNotes);
+
     // Play the chord with sostenuto (indefinite sustain until stopAll is called)
     console.log('Playing chord with sostenuto...');
-    pianoPlayer.playChordWithSostenuto(notes);
+    pianoPlayer.playChordWithSostenuto(allNotes);
     console.log('Updating active keys...');
-    updateActiveKeys(notes);
+    updateActiveKeys(allNotes);
 };
 
 window.stopChordSustain = function() {
@@ -337,12 +414,9 @@ window.stopChordSustain = function() {
         console.error('pianoPlayer or stopAll method not available');
     }
 
-    // Clear piano key highlights
-    const activeKeys = document.querySelectorAll('.piano-key.active');
-    console.log('Clearing', activeKeys.length, 'active piano keys');
-    activeKeys.forEach(key => {
-        key.classList.remove('active', 'pressed');
-    });
+    // Clear Canvas piano key highlights
+    console.log('🎹 Clearing Canvas piano active notes');
+    Livewire.dispatch('update-active-notes', { notes: [] });
 
     console.log('stopChordSustain completed');
 };
@@ -559,6 +633,7 @@ document.addEventListener('livewire:initialized', () => {
         const tempo = await @this.get('tempo');
         const rhythm = await @this.get('selectedRhythm');
         const timeSignature = await @this.get('timeSignature');
+        const bassLine = await @this.get('selectedBassLine');
 
         console.log('Starting playback with chords:', chords);
         console.log('Chords object keys:', Object.keys(chords));
@@ -566,6 +641,7 @@ document.addEventListener('livewire:initialized', () => {
         console.log('Tempo:', tempo);
         console.log('Rhythm:', rhythm);
         console.log('Time Signature:', timeSignature);
+        console.log('Bass Line:', bassLine);
 
         // Create chord progression sequence
         const chordNotes = [];
@@ -590,11 +666,105 @@ document.addEventListener('livewire:initialized', () => {
             const [beatsPerMeasure] = timeSignature.split('/').map(Number);
             const measureDuration = beatDuration * beatsPerMeasure; // Full measure in ms
 
-            function playRhythmPattern(originalChordNotes, bassNote, rhythm) {
+            function playRhythmPattern(originalChordNotes, bassNote, rhythm, fifthNote, bassOctaveUp, chordIndex) {
                 // Don't transpose - use the original chord notes as-is
                 const chordNotes = originalChordNotes;
 
-                console.log('Rhythm pattern - Playing:', rhythm, 'Bass:', bassNote, 'Chord:', chordNotes);
+                console.log('Rhythm pattern - Playing:', rhythm, 'Bass:', bassNote, 'Fifth:', fifthNote, 'Chord:', chordNotes, 'BassLine:', bassLine);
+
+                // Apply bass line pattern based on selectedBassLine
+                const playBassPattern = () => {
+                    switch (bassLine) {
+                        case 'root-only':
+                            // Just root on beat 1
+                            if (bassNote) {
+                                pianoPlayer.playNote(bassNote, measureDuration / 1000);
+                                updateActiveKeysInternal([bassNote, ...chordNotes]);
+                            }
+                            break;
+
+                        case 'root-octave':
+                            // Root on 1, octave on 3
+                            if (bassNote) {
+                                pianoPlayer.playNote(bassNote, measureDuration / 1000);
+                                updateActiveKeysInternal([bassNote, ...chordNotes]);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(bassOctaveUp, 0.5);
+                                    updateActiveKeysInternal([bassOctaveUp, ...chordNotes]);
+                                }, beatDuration * 2);
+                            }
+                            break;
+
+                        case 'root-fifth':
+                            // Root on 1, fifth on 3 (most common)
+                            if (bassNote) {
+                                pianoPlayer.playNote(bassNote, measureDuration / 1000);
+                                updateActiveKeysInternal([bassNote, ...chordNotes]);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(fifthNote, 0.5);
+                                    updateActiveKeysInternal([fifthNote, ...chordNotes]);
+                                }, beatDuration * 2);
+                            }
+                            break;
+
+                        case 'root-fifth-alt':
+                            // Root on 1&3, fifth on 2&4 (alternating)
+                            if (bassNote) {
+                                pianoPlayer.playNote(bassNote, 0.5);
+                                updateActiveKeysInternal([bassNote, ...chordNotes]);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(fifthNote, 0.5);
+                                    updateActiveKeysInternal([fifthNote, ...chordNotes]);
+                                }, beatDuration);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(bassNote, 0.5);
+                                    updateActiveKeysInternal([bassNote, ...chordNotes]);
+                                }, beatDuration * 2);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(fifthNote, 0.5);
+                                    updateActiveKeysInternal([fifthNote, ...chordNotes]);
+                                }, beatDuration * 3);
+                            }
+                            break;
+
+                        case 'walking':
+                            // Walking bass: root, third, fifth, approach note to next chord
+                            if (bassNote) {
+                                pianoPlayer.playNote(bassNote, 0.5);
+                                updateActiveKeysInternal([bassNote, ...chordNotes]);
+                                const thirdNote = chordNotes[0];
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(thirdNote, 0.5);
+                                    updateActiveKeysInternal([thirdNote, ...chordNotes]);
+                                }, beatDuration);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(fifthNote, 0.5);
+                                    updateActiveKeysInternal([fifthNote, ...chordNotes]);
+                                }, beatDuration * 2);
+                                // Approach note to next chord on beat 4
+                                const nextChordIndex = (chordIndex + 1) % chordNotes.length;
+                                const nextRoot = chordNotes[nextChordIndex] ? chordNotes[nextChordIndex][0] : bassNote;
+                                const walkingApproachNote = getWalkingNote(bassNote, nextRoot);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(walkingApproachNote, 0.5);
+                                    updateActiveKeysInternal([walkingApproachNote, ...chordNotes]);
+                                }, beatDuration * 3);
+                            }
+                            break;
+
+                        case 'none':
+                            // No bass line
+                            updateActiveKeysInternal([...chordNotes]);
+                            break;
+
+                        default:
+                            // Default to root-fifth
+                            if (bassNote) {
+                                pianoPlayer.playNote(bassNote, measureDuration / 1000);
+                                updateActiveKeysInternal([bassNote, ...chordNotes]);
+                            }
+                    }
+                };
 
                 switch (rhythm) {
                     case 'alberti':
@@ -603,38 +773,33 @@ document.addEventListener('livewire:initialized', () => {
                             const fifth = chordNotes[1] || chordNotes[0];
                             const third = chordNotes[0];
 
-                            // Beat 1: Play and show bass + first note (fifth)
+                            // Beat 1: Play bass pattern + alberti pattern
                             setTimeout(() => {
-                                pianoPlayer.playNote(bassNote, measureDuration / 1000);
+                                playBassPattern();
                                 pianoPlayer.playNote(fifth, 0.3);
-                                updateActiveKeysInternal([bassNote, fifth]);
                             }, 0);
 
                             // 16th note 2: third
                             setTimeout(() => {
                                 pianoPlayer.playNote(third, 0.3);
-                                updateActiveKeysInternal([bassNote, third]);
                             }, beatDuration / 4);
 
                             // 16th note 3: fifth
                             setTimeout(() => {
                                 pianoPlayer.playNote(fifth, 0.3);
-                                updateActiveKeysInternal([bassNote, fifth]);
                             }, beatDuration / 2);
 
                             // 16th note 4: third
                             setTimeout(() => {
                                 pianoPlayer.playNote(third, 0.3);
-                                updateActiveKeysInternal([bassNote, third]);
                             }, (beatDuration * 3) / 4);
                         }
                         break;
 
                     case 'waltz':
-                        // Waltz: bass on 1, chord on 2 and 3
+                        // Waltz: bass pattern on 1, chord on 2 and 3
                         setTimeout(() => {
-                            pianoPlayer.playNote(bassNote, measureDuration / 1000);
-                            updateActiveKeysInternal([bassNote]);
+                            playBassPattern();
                         }, 0);
 
                         setTimeout(() => {
@@ -649,41 +814,36 @@ document.addEventListener('livewire:initialized', () => {
                         break;
 
                     case 'broken':
-                        // Broken chord: sequential notes
+                        // Broken chord: sequential notes with bass pattern
                         setTimeout(() => {
-                            pianoPlayer.playNote(bassNote, measureDuration / 1000);
-                            updateActiveKeysInternal([bassNote]);
+                            playBassPattern();
                         }, 0);
 
                         chordNotes.forEach((note, i) => {
                             setTimeout(() => {
                                 pianoPlayer.playNote(note, 0.4);
-                                updateActiveKeysInternal([bassNote, note]);
                             }, i * beatDuration);
                         });
                         break;
 
                     case 'arpeggio':
-                        // Arpeggio: fast sequential notes
+                        // Arpeggio: fast sequential notes with bass pattern
                         setTimeout(() => {
-                            pianoPlayer.playNote(bassNote, measureDuration / 1000);
-                            updateActiveKeysInternal([bassNote]);
+                            playBassPattern();
                         }, 0);
 
                         chordNotes.forEach((note, i) => {
                             setTimeout(() => {
                                 pianoPlayer.playNote(note, 0.3);
-                                updateActiveKeysInternal([bassNote, note]);
                             }, i * (beatDuration / 2));
                         });
                         break;
 
                     case 'march':
-                        // March: strong-weak chord pattern
+                        // March: strong-weak chord pattern with bass pattern
                         setTimeout(() => {
-                            pianoPlayer.playNote(bassNote, measureDuration / 1000);
+                            playBassPattern();
                             pianoPlayer.playChord(chordNotes, 0.6);
-                            updateActiveKeysInternal([bassNote, ...chordNotes]);
                         }, 0);
 
                         setTimeout(() => {
@@ -693,19 +853,17 @@ document.addEventListener('livewire:initialized', () => {
                         break;
 
                     case 'ballad':
-                        // Ballad: sustained bass and chord
+                        // Ballad: sustained bass pattern and chord
                         setTimeout(() => {
-                            pianoPlayer.playNote(bassNote, measureDuration / 1000);
+                            playBassPattern();
                             pianoPlayer.playChord(chordNotes, measureDuration / 1000);
-                            updateActiveKeysInternal([bassNote, ...chordNotes]);
                         }, 0);
                         break;
 
                     case 'ragtime':
-                        // Ragtime: syncopated chord pattern
+                        // Ragtime: syncopated chord pattern with bass pattern
                         setTimeout(() => {
-                            pianoPlayer.playNote(bassNote, measureDuration / 1000);
-                            updateActiveKeysInternal([bassNote]);
+                            playBassPattern();
                         }, 0);
 
                         setTimeout(() => {
@@ -721,12 +879,57 @@ document.addEventListener('livewire:initialized', () => {
                 }
             }
 
+            // Helper function to get the fifth note
+            function getFifthNote(rootNote) {
+                const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const noteMatch = rootNote.match(/([A-G]#?)(\d+)/);
+                if (!noteMatch) return rootNote;
+
+                const [, noteName, octave] = noteMatch;
+                const rootIndex = noteOrder.indexOf(noteName);
+                const fifthIndex = (rootIndex + 7) % 12; // Perfect fifth is 7 semitones up
+                const fifthNote = noteOrder[fifthIndex];
+
+                // Adjust octave if we wrapped around
+                let fifthOctave = parseInt(octave);
+                if (fifthIndex < rootIndex) {
+                    fifthOctave++;
+                }
+
+                return fifthNote + fifthOctave;
+            }
+
+            // Helper function to get walking bass note (chromatic approach to next chord)
+            function getWalkingNote(currentRoot, nextRoot) {
+                const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const currentMatch = currentRoot.match(/([A-G]#?)(\d+)/);
+                const nextMatch = nextRoot.match(/([A-G]#?)(\d+)/);
+
+                if (!currentMatch || !nextMatch) return currentRoot;
+
+                const [, currentNote, currentOctave] = currentMatch;
+                const [, nextNote] = nextMatch;
+                const currentIndex = noteOrder.indexOf(currentNote);
+                const nextIndex = noteOrder.indexOf(nextNote);
+
+                // Chromatic approach note (one semitone below target)
+                let approachIndex = (nextIndex - 1 + 12) % 12;
+                let approachOctave = parseInt(currentOctave);
+
+                // If approach note is higher in the scale, might need to adjust octave
+                if (approachIndex === 11 && nextIndex === 0) {
+                    approachOctave++;
+                }
+
+                return noteOrder[approachIndex] + approachOctave;
+            }
+
             function playNextBeat() {
                 const currentChordNotes = chordNotes[chordIndex];
                 const beat = beatCount % beatsPerMeasure;
                 const measureBeat = beat + 1;
 
-                console.log(`Measure ${chordIndex + 1}, Beat ${measureBeat}:`, currentChordNotes, 'Rhythm:', rhythm);
+                console.log(`Measure ${chordIndex + 1}, Beat ${measureBeat}:`, currentChordNotes, 'Rhythm:', rhythm, 'Bass Line:', bassLine);
 
                 // Extract root note name for bass
                 const rootNote = currentChordNotes[0];
@@ -735,28 +938,141 @@ document.addEventListener('livewire:initialized', () => {
                 if (noteMatch) {
                     const [, noteName] = noteMatch;
                     const bassNote = noteName + '2';
+                    const bassOctaveUp = noteName + '3';
+                    const fifthNote = getFifthNote(bassNote);
 
-                    console.log('Playing notes - Bass:', bassNote, 'Chord:', currentChordNotes);
+                    console.log('Playing notes - Bass:', bassNote, 'Fifth:', fifthNote, 'Chord:', currentChordNotes);
+
+                    // Determine which bass notes to play based on bass line pattern
+                    let bassNotesToPlay = [];
+                    let bassNotesToVisualize = [];
 
                     if (beat === 0) {
-                        // Start of new measure - play rhythm pattern for most rhythms
+                        // Start of new measure - determine bass pattern
+                        switch (bassLine) {
+                            case 'root-only':
+                                // Just root on beat 1
+                                bassNotesToPlay = [bassNote];
+                                bassNotesToVisualize = [bassNote];
+                                break;
+
+                            case 'root-octave':
+                                // Root on 1, octave on 3
+                                bassNotesToPlay = [bassNote];
+                                bassNotesToVisualize = [bassNote];
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(bassOctaveUp, 0.5);
+                                    updateActiveKeysInternal([bassOctaveUp, ...currentChordNotes]);
+                                }, beatDuration * 2);
+                                break;
+
+                            case 'root-fifth':
+                                // Root on 1, fifth on 3 (most common)
+                                bassNotesToPlay = [bassNote];
+                                bassNotesToVisualize = [bassNote];
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(fifthNote, 0.5);
+                                    updateActiveKeysInternal([fifthNote, ...currentChordNotes]);
+                                }, beatDuration * 2);
+                                break;
+
+                            case 'root-fifth-alt':
+                                // Root on 1&3, fifth on 2&4 (alternating)
+                                bassNotesToPlay = [bassNote];
+                                bassNotesToVisualize = [bassNote];
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(fifthNote, 0.5);
+                                    updateActiveKeysInternal([fifthNote, ...currentChordNotes]);
+                                }, beatDuration);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(bassNote, 0.5);
+                                    updateActiveKeysInternal([bassNote, ...currentChordNotes]);
+                                }, beatDuration * 2);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(fifthNote, 0.5);
+                                    updateActiveKeysInternal([fifthNote, ...currentChordNotes]);
+                                }, beatDuration * 3);
+                                break;
+
+                            case 'walking':
+                                // Walking bass: root, third, fifth, approach note to next chord
+                                bassNotesToPlay = [bassNote];
+                                bassNotesToVisualize = [bassNote];
+                                const thirdNote = currentChordNotes[0]; // Use chord's actual third
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(thirdNote, 0.5);
+                                    updateActiveKeysInternal([thirdNote, ...currentChordNotes]);
+                                }, beatDuration);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(fifthNote, 0.5);
+                                    updateActiveKeysInternal([fifthNote, ...currentChordNotes]);
+                                }, beatDuration * 2);
+                                // Approach note to next chord on beat 4
+                                const nextChordIndex = (chordIndex + 1) % chordNotes.length;
+                                const nextRoot = chordNotes[nextChordIndex][0];
+                                const walkingApproachNote = getWalkingNote(bassNote, nextRoot);
+                                setTimeout(() => {
+                                    pianoPlayer.playNote(walkingApproachNote, 0.5);
+                                    updateActiveKeysInternal([walkingApproachNote, ...currentChordNotes]);
+                                }, beatDuration * 3);
+                                break;
+
+                            case 'none':
+                                // No bass line
+                                bassNotesToPlay = [];
+                                bassNotesToVisualize = [];
+                                break;
+
+                            default:
+                                bassNotesToPlay = [bassNote];
+                                bassNotesToVisualize = [bassNote];
+                        }
+
+                        // Play rhythm pattern or block chords
                         if (rhythm !== 'block') {
-                            playRhythmPattern(currentChordNotes, bassNote, rhythm);
+                            // For rhythm patterns, pass all needed parameters including bass line info
+                            playRhythmPattern(currentChordNotes, bassNote, rhythm, fifthNote, bassOctaveUp, chordIndex);
                         } else {
-                            // Block chords: bass on beat 1
+                            // Block chords: play bass and chord together
                             setTimeout(() => {
-                                pianoPlayer.playNote(bassNote, beatsPerMeasure * (beatDuration / 1000));
+                                if (bassNotesToPlay.length > 0) {
+                                    bassNotesToPlay.forEach(note => {
+                                        pianoPlayer.playNote(note, beatsPerMeasure * (beatDuration / 1000));
+                                    });
+                                }
                                 pianoPlayer.playChord(currentChordNotes, 0.8);
-                                console.log('Visualizing keys:', [bassNote, ...currentChordNotes]);
-                                updateActiveKeysInternal([bassNote, ...currentChordNotes]);
+                                console.log('Visualizing keys:', [...bassNotesToVisualize, ...currentChordNotes]);
+                                updateActiveKeysInternal([...bassNotesToVisualize, ...currentChordNotes]);
                             }, 0);
                         }
                     } else if (rhythm === 'block') {
-                        // Block chords: chord on beats 2, 3, 4, etc.
+                        // Block chords: chord on beats 2, 3, 4, etc. (bass sustains)
+                        // Need to show all bass notes that are sustaining
+                        let sustainingBassNotes = [];
+
+                        switch (bassLine) {
+                            case 'root-only':
+                                sustainingBassNotes = [bassNote];
+                                break;
+                            case 'root-octave':
+                                sustainingBassNotes = [bassNote, bassOctaveUp];
+                                break;
+                            case 'root-fifth':
+                            case 'root-fifth-alt':
+                            case 'walking':
+                                sustainingBassNotes = [bassNote, fifthNote];
+                                break;
+                            case 'none':
+                                sustainingBassNotes = [];
+                                break;
+                            default:
+                                sustainingBassNotes = [bassNote];
+                        }
+
                         setTimeout(() => {
                             pianoPlayer.playChord(currentChordNotes, 0.8);
-                            console.log('Visualizing keys (beat ' + measureBeat + '):', [bassNote, ...currentChordNotes]);
-                            updateActiveKeysInternal([bassNote, ...currentChordNotes]);
+                            console.log('Visualizing keys (beat ' + measureBeat + '):', [...sustainingBassNotes, ...currentChordNotes]);
+                            updateActiveKeysInternal([...sustainingBassNotes, ...currentChordNotes]);
                         }, 0);
                     }
                 }
@@ -813,43 +1129,32 @@ document.addEventListener('livewire:initialized', () => {
             @this.set('currentTime', 0);
         }
 
-        // Clear all active keys
-        document.querySelectorAll('.piano-key.active').forEach(key => {
-            key.classList.remove('active', 'pressed');
-        });
+        // Clear Canvas piano key highlights
+        console.log('🎹 Clearing Canvas piano on playback stop');
+        Livewire.dispatch('update-active-notes', { notes: [] });
     }
 
     function updateActiveKeysInternal(notes) {
-        // Clear all active keys
-        document.querySelectorAll('.piano-key.active').forEach(key => {
-            key.classList.remove('active', 'pressed');
-        });
-        
-        console.log(`DEBUG updateActiveKeys: Looking for notes:`, notes);
-        
+        console.log(`🎹 updateActiveKeys: Updating Canvas piano with notes:`, notes);
+
         // Convert flat notes to sharp equivalents for piano key lookup
         const flatToSharp = {
             'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'
         };
-        
-        // Highlight the new chord notes
-        notes.forEach(note => {
-            // Convert flats to sharps if needed
+
+        // Convert flats to sharps
+        const pianoNotes = notes.map(note => {
             let pianoNote = note;
             for (const [flat, sharp] of Object.entries(flatToSharp)) {
                 pianoNote = pianoNote.replace(flat, sharp);
             }
-            
-            const keyId = 'key-' + pianoNote;
-            const key = document.getElementById(keyId);
-            console.log(`DEBUG: Looking for key ID '${keyId}' (original: ${note}), found:`, !!key);
-            if (key) {
-                key.classList.add('active', 'pressed');
-                console.log(`DEBUG: Activated key ${pianoNote}`);
-            } else {
-                console.warn(`DEBUG: Key not found for note ${note} (ID: ${keyId})`);
-            }
+            return pianoNote;
         });
+
+        console.log(`🎵 Converted notes for Canvas:`, pianoNotes);
+
+        // Dispatch Livewire event to update Canvas piano
+        Livewire.dispatch('update-active-notes', { notes: pianoNotes });
     }
 
     function getChordNotesInternal(root, type, inversion) {
@@ -1141,6 +1446,15 @@ document.addEventListener('livewire:initialized', () => {
             }
 
             console.log('Chord button mousedown detected!');
+
+            // Stop any previously sustained chord when clicking a new one
+            if (currentlyHeldButton && currentlyHeldButton !== chordButton) {
+                console.log('Stopping previous chord before starting new one');
+                currentlyHeldButton.classList.remove('translate-y-1', 'border-b-2');
+                if (window.stopChordSustain) {
+                    window.stopChordSustain();
+                }
+            }
 
             // Track this button
             currentlyHeldButton = chordButton;
